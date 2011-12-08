@@ -294,26 +294,26 @@ else # fall back on emulated readlink
   _f_readlink() {
     # function that mimics readlink from GNU coreutils
     [ "$1" = "-e" ] && shift && local e=1 # existence option
-    [ "$1" = "/" ] && echo $1 && return
+    [ "$1" = "/" ] && echo / && return
+    [ "$1" = "." ] && echo "$(pwd -P)" && return
     local path
-    if [[ "${1#/}" =~ "/" || "$1" = ".." ]]; then
+    if [ "${1##*/}" = ".." ]; then
+      path="$(cd "$1" &>/dev/null && pwd -P)"
+      [ -z "$path" ] && return 1 # if cd fails
+    elif [[ "${1#/}" =~ "/" ]]; then
       # if target contains "/" (not counting top level) or target is ".."
       local base="$(cd "${1%/*}" &>/dev/null && pwd -P)"
       [ -z "$base" ] && return 1 # if cd fails
       path="${base%/}/${1##*/}"
     elif [ -z "${1##/*}" ]; then # straight top level
       path="$1"
-    elif [ "$1" = "." ]; then
-      path="$(pwd -P)"
     else # anything within where we are
       path="$(pwd -P)"'/'"$1"
     fi
+    [ "$path" = "/" ] && echo / && return
     path=${path%/} # strip off trailing "/"
-    if [ "$e" = "1" ]; then # if test existence
-      [ -e "$path" ] && echo "$path" || return 1
-    else
-      echo "$path"
-    fi
+    [ "$e" = "1" -a ! -e "$path" ] && return
+    echo "$path"
   }
   _F_READLINK=_f_readlink
 fi
