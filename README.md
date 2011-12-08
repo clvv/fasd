@@ -28,15 +28,15 @@ Of course, you should put it into your shell rc once you've decided to use it.
   f foo # list recent files mathcing foo
   f foo bar # list recent files mathcing foo and bar
   f -e vim foo # run vim on the most frecent file matching foo
-  f -e mplayer bar # run mplayer on the most frecent file matching bar
-  f -d -e cd foo # cd into the most frecent directory matching foo
+  f bar -e mplayer # run mplayer on the most frecent file matching bar
+  f -d foo -e cd # cd into the most frecent directory matching foo
 ```
 
 The power of f is that you can add your own useful aliases:
 
 ```sh
   alias v='f -f -e vim' # quick opening files with vim
-  alias m-'f -f -e mplayer' # quick opening files with mplayer
+  alias m='f -f -e mplayer' # quick opening files with mplayer
   alias j='f -d -e cd' # quick cd into directories, mimicing autojump and z
   alias o='f -e xdg-open' # quick opening files with xdg-open
 ```
