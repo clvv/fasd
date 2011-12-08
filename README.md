@@ -4,6 +4,9 @@
 tools like autojump, z and v. `f` keeps track of files you have accessed, so
 that you can quickly reference them in the command line.
 
+`f` ranks file by "frecency." `f` uses the same rank algorithm used by `z`. You
+can read more about it [here](https://github.com/rupa/z/wiki/frecency)
+
 # INSTALL
 
 `f` can work with bash and zsh. You will also need gawk or nawk (original-awk
