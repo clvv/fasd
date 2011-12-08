@@ -338,5 +338,6 @@ elif complete &> /dev/null; then
   complete -C '_f --complete "$COMP_LINE"' $_F_CMD
   # add bash hook
   echo $PROMPT_COMMAND | grep -q "_f --add"
-  [ $? -gt 0 ] && PROMPT_COMMAND='_f --add $(fc -nl -0) 2>/dev/null;'"$PROMPT_COMMAND"
+  [ $? -gt 0 ] && PROMPT_COMMAND='_f --add $(history 1 | \
+    sed -e "s/^[ ]*[0-9]*[ ]*//g") 2>/dev/null;'"$PROMPT_COMMAND"
 fi
