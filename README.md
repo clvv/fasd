@@ -57,6 +57,19 @@ The power of f is that you can add your own useful aliases:
   -t match by recent access only
 ```
 
+# TODO
+
+Here are some features that I have thought of implementing.
+
+1. Tests!
+2. zsh `alias -s` style execution, simply do `f arg`.
+3. Option to just list matches without ranksa (good for "piping").
+4. Multiple searches, parameters delimited by `-` or `--`.
+5. gtk `rencently-used.xbel` backend.
+6. Code refactoring, more modulous setup.
+7. Port `f` "into" other tools like vim (is it possible?).
+8. Standalone version? only depend on busybox for embeded system?
+
 # ACKNOWLEDGEMENTS
 
 `f` is written based on existing code from [z](https://github.com/rupa/z).
