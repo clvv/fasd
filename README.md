@@ -7,7 +7,20 @@ that you can quickly reference them in the command line.
 `f` ranks file by "frecency." `f` uses the same rank algorithm used by `z`. You
 can read more about it [here](https://github.com/rupa/z/wiki/frecency)
 
-# INSTALL
+# Introduction
+
+In short, with `f` you can save yourself so much time typing. Below are some
+hypothetical situations, where you can type in the left command and `f` will
+translate into the right side. Pretty magic, huh?
+
+```
+  v whoa.conf      =>     vim /some/awkward/path/to/type/whoa.conf
+  j awk path       =>     cd /hell/of/a/awkward/path/to/get/to
+  m movie          =>     mplayer /whatever/whatever/whatever/awesome_movie.mp4
+  o english paper  =>     xdg-open /you/dont/remember/where/english_paper.pdf
+```
+
+# Install
 
 `f` can work with bash and zsh. You will also need gawk or nawk (original-awk
 for debian-like). Optionally, readlink from GNU coreutils is also recommended.
@@ -44,7 +57,7 @@ The power of f is that you can add your own useful aliases:
   alias o='f -e xdg-open' # quick opening files with xdg-open
 ```
 
-# OPTIONS
+# Options
 
 ```
   -h show a brief help message
@@ -61,16 +74,17 @@ The power of f is that you can add your own useful aliases:
 
 Here are some features that I have thought of implementing.
 
+0. Fix issue with space in path.
 1. Tests!
 2. zsh `alias -s` style execution, simply do `f arg`.
-3. Option to just list matches without ranksa (good for "piping").
+3. Option to just list matches without ranks (good for "piping").
 4. Multiple searches, parameters delimited by `-` or `--`.
 5. gtk `rencently-used.xbel` backend.
 6. Code refactoring, more modulous setup.
 7. Port `f` "into" other tools like vim (is it possible?).
-8. Standalone version? only depend on busybox for embeded system?
+8. Standalone version?
 
-# ACKNOWLEDGEMENTS
+# Acknowledgements
 
 `f` is written based on existing code from [z](https://github.com/rupa/z).
 
