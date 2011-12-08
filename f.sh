@@ -56,6 +56,9 @@ _f() {
       shift
     done
 
+    # add current pwd if the option set
+    [ "$_F_TRACK_PWD" ] && FILES="$FILES $(pwd -P)"
+
     # bail out if we don't own ~/.f (we're another user but our ENV is still set)
     [ -f "$_F_DATA" -a ! -O "$_F_DATA" ] && return
     [ -z "$FILES" ] && return # stop if we have nothing to add
