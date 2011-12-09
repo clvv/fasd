@@ -4,8 +4,8 @@
 tools like autojump, z and v. `f` keeps track of files you have accessed, so
 that you can quickly reference them in the command line.
 
-`f` ranks file by "frecency." `f` uses the same rank algorithm used by `z`. You
-can read more about it [here](https://github.com/rupa/z/wiki/frecency)
+`f` ranks files by "frecency." `f` uses the same rank algorithm used by `z`.
+You can read more about it [here](https://github.com/rupa/z/wiki/frecency)
 
 # Introduction
 
@@ -28,7 +28,7 @@ for debian-like). Optionally, readlink from GNU coreutils is also recommended.
 `f` should work out of the box on most Linux and BSD distros, including OS X.
 If you're on Debian, Ubuntu or Mint, please make sure that you have some other
 `awk` installed other than the default `mawk` (unfortunately `f` does not work
-with mawk at the moment).
+with `mawk` at the moment).
 
 To use `f`, just source `f.sh` somewhere in your shell with:
 
@@ -38,6 +38,9 @@ To use `f`, just source `f.sh` somewhere in your shell with:
 
 Of course, you should put it into your shell rc once you've decided to use it.
 
+After you first installed `f`, open some files (with any program) and cd around
+in your shell. Then try some examples below.
+
 # Examples
 
 ```sh
@@ -45,10 +48,11 @@ Of course, you should put it into your shell rc once you've decided to use it.
   f foo bar # list recent files mathcing foo and bar
   f -e vim foo # run vim on the most frecent file matching foo
   f bar -e mplayer # run mplayer on the most frecent file matching bar
-  f -d foo -e cd # cd into the most frecent directory matching foo
+  f -d -e cd foo # cd into the most frecent directory matching foo
 ```
 
-The power of f is that you can add your own useful aliases:
+You should add your own aliases to fully utilize the power of `f`. Here are
+some examples to get you started:
 
 ```sh
   alias v='f -f -e vim' # quick opening files with vim
@@ -57,17 +61,45 @@ The power of f is that you can add your own useful aliases:
   alias o='f -e xdg-open' # quick opening files with xdg-open
 ```
 
-# Options
+# Synopsis
 
 ```
-  -h show a brief help message
-  -l list only
-  -e set command to execute on the result file
-  -a match files and directories
-  -d match directories only
-  -f match files only
-  -r match by rank only
-  -t match by recent access only
+f [options] [query ..]
+  options:
+    -l, --list       list only
+    -e, --exec CMD   set command to execute on the result file
+    -a, --any        match files and directories
+    -d, --directory  match directories only
+    -f, --file       match files only
+    -r, --rank       match by rank only
+    -t, --recent     match by recent access only
+    -h, --help       show a brief help message
+```
+
+# Tweaks
+
+Here are some shell variables that you can set before sourcing `f`.
+
+```
+$_F_DATA
+Path to the f data file, default "$HOME/.f".
+
+$_F_CMD
+Command to call f, default "f".
+
+$_F_BLACKLIST
+List of blacklisted strings. Commands matching them will not be processed.
+Default is (--help).
+
+$_F_SHIFT
+List of all commands that needs to be shifted, defaults to (sudo busybox).
+
+$_F_TRACK_PWD
+If set to any non-empty string, f will track "$PWD". This is useful when you
+want to replace autojump or z with f.
+
+$_F_AWK
+Which awk to use. `f` can detact and use a compatible awk.
 ```
 
 # TODO
