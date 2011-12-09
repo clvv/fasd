@@ -3,20 +3,22 @@
 # INSTALL:
 #   Source this file somewhere in your shell rc (.bashrc or .zshrc).
 #
-# USE:
+# SYNOPSIS:
+#   f [options] [query ..]
+#     options:
+#       -l, --list       list only
+#       -e, --exec CMD   set command to execute on the result file
+#       -a, --any        match files and directories
+#       -d, --directory  match directories only
+#       -f, --file       match files only
+#       -r, --rank       match by rank only
+#       -t, --recent     match by recent access only
+#       -h, --help       show a brief help message
+#
+# EXAMPLES:
 #   f foo # list recent files mathcing foo
 #   f foo bar # list recent files mathcing foo and bar
 #   f -e vim foo # run vim on the most frecent file matching foo
-#
-# OPTIONS:
-#   -h show a brief help message
-#   -l list only
-#   -e set command to execute on the result file
-#   -a match files and directories
-#   -d match directories only
-#   -f match files only
-#   -r match by rank only
-#   -t match by recent access only
 #
 # TIPS:
 #   alias z="f -d -e cd"
@@ -147,7 +149,16 @@ _f() {
 
     local fnd; fnd=()
     while [ "$1" ]; do case "$1" in
-      -h|--help) echo "f [-h][-l][-r][-t][-d][-f][-e prg] args" >&2; return;;
+      -h|--help) echo "f [options] [query ..]
+      options:
+        -l, --list       list only
+        -e, --exec CMD   set command to execute on the result file
+        -a, --any        match files and directories
+        -d, --directory  match directories only
+        -f, --file       match files only
+        -r, --rank       match by rank only
+        -t, --recent     match by recent access only
+        -h, --help       show a brief help message" >&2; return;;
       -l|--list) local list=1; shift;;
       -r|--rank) local mode="rank"; shift;;
       -t|--recent) local mode="recent"; shift;;
