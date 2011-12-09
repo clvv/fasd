@@ -51,9 +51,8 @@ _f() {
     local FILES file
     while [ "$1" ]; do
       for file in $(eval echo $1); do # expand
-        $_F_READLINK -e $file &> /dev/null # check if $arg is a valid file
         # add the adsolute path of the file to FILES
-        [ $? -eq 0 ] && FILES="$FILES $($_F_READLINK -e "$file")"
+        FILES="$FILES $($_F_READLINK -e "$file" 2>/dev/null)"
       done
       shift
     done
