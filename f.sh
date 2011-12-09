@@ -37,8 +37,6 @@ _f() {
       [[ "$*" =~ "$each" ]] && return
     done
 
-    set -- $(echo $*)
-
     # shifts
     for each in "${_F_SHIFT[@]}"; do
       while [ "$1" = "$each" ]; do shift; done
@@ -48,31 +46,30 @@ _f() {
     [[ "${_F_IGNORE[@]}" =~ "$1" ]] && return
     shift
 
-    local FILES file
+    local FILES
     while [ "$1" ]; do
-      for file in $(eval echo $1); do # expand
-        # add the adsolute path of the file to FILES
-        FILES="$FILES $($_F_READLINK -e "$file" 2>/dev/null)"
-      done
+      # add the adsolute path of the file to FILES
+      FILES+="$($_F_READLINK -e "$1" 2>/dev/null)"$'\n'
       shift
     done
 
     # add current pwd if the option set
-    [ "$_F_TRACK_PWD" ] && FILES="$FILES $(pwd -P)"
+    [ "$_F_TRACK_PWD" ] && FILES+="$(pwd -P)"
 
     # bail out if we don't own ~/.f (we're another user but our ENV is still set)
     [ -f "$_F_DATA" -a ! -O "$_F_DATA" ] && return
-    [ -z "$FILES" ] && return # stop if we have nothing to add
+    [ -z "${FILES//$'\n'/}" ] && return # stop if we have nothing to add
 
     # maintain the file
     local tempfile
     tempfile="$(mktemp $_F_DATA.XXXXXX)" || return
     $_F_AWK -v list="$FILES" -v now="$(date +%s)" -F"|" '
       BEGIN {
-        split(list, files, " ")
+        split(list, files, "\n")
         for(i in files) {
           path = files[i]
-          paths[path] = path # Array for checking
+          if ( path == "" ) continue
+          paths[path] = path # array for checking
           rank[path] = 1
           time[path] = now
         }
@@ -278,7 +275,7 @@ alias ${_F_CMD:=f}=_f
 [ -z "$_F_DATA" ] && _F_DATA="$HOME/.f"
 [ -z "$_F_BLACKLIST" ] && _F_BLACKLIST=(--help)
 [ -z "$_F_SHIFT" ] && _F_SHIFT=(sudo busybox)
-[ -z "$_F_IGNORE" ] && _F_IGNORE=(ls echo)
+[ -z "$_F_IGNORE" ] && _F_IGNORE=(_f $_F_CMD ls echo)
 
 if [ -z "$_F_AWK" ]; then
   if awk -Wversion |& grep -q mawk; then
@@ -341,13 +338,13 @@ if compctl &> /dev/null; then
   compctl -U -K _f_zsh_tab_completion _f
   # add zsh hook
   autoload -U add-zsh-hook
-  function _f_preexec () { _f --add $2 2>/dev/null; }
+  function _f_preexec () { eval "_f --add $3" &>/dev/null; }
   add-zsh-hook preexec _f_preexec
 elif complete &> /dev/null; then
   # bash tab completion
   complete -C '_f --complete "$COMP_LINE"' $_F_CMD
   # add bash hook
   echo $PROMPT_COMMAND | grep -q "_f --add"
-  [ $? -gt 0 ] && PROMPT_COMMAND='_f --add $(history 1 | \
-    sed -e "s/^[ ]*[0-9]*[ ]*//g") 2>/dev/null;'"$PROMPT_COMMAND"
+  [ $? -gt 0 ] && PROMPT_COMMAND='eval "_f --add $(history 1 | \
+    sed -e "s/^[ ]*[0-9]*[ ]*//g")" &>/dev/null;'"$PROMPT_COMMAND"
 fi
