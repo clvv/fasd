@@ -100,7 +100,7 @@ _f() {
   # tab completion
   elif [ "$1" = "--complete" ]; then
     $_F_AWK -v q="$2" -v knownFile="$_F_DATA" -F"|" '
-      function exists(path, type, knownFile,    tmp, ret) {
+      function exists(path, type,    tmp, ret) {
         ret = 0
         if ( type != "d" ) {
           if ( (getline tmp < path) >= 0 ) {
@@ -113,7 +113,7 @@ _f() {
           }
         }
         n = gsub("/+", "/", path)
-        for ( i = 0; i <= n; i++ )
+        for ( i = 0; i < n; i++ )
           path = path "/.."
         path = path knownFile
         if ( ( getline tmp < path ) >= 0 ) {
@@ -213,7 +213,7 @@ _f() {
         for( i in matches ) if( matches[i] && i !~ short ) return
         return short
       }
-      function exists(path, type, knownFile,    tmp, ret) {
+      function exists(path, type,    tmp, ret) {
         ret = 0
         if ( type != "d" ) {
           if ( (getline tmp < path) >= 0 ) {
@@ -226,7 +226,7 @@ _f() {
           }
         }
         n = gsub("/+", "/", path)
-        for ( i = 0; i <= n; i++ )
+        for ( i = 0; i < n; i++ )
           path = path "/.."
         path = path knownFile
         if ( ( getline tmp < path ) >= 0 ) {
@@ -243,7 +243,7 @@ _f() {
       }
       BEGIN { split(q, a, " ") }
       {
-        if( !exists($1, typ, knownFile) ) next
+        if( !exists($1, typ) ) next
         if( mode == "rank" ) {
           f = $2
         } else if( mode == "recent" ) {
