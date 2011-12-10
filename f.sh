@@ -6,7 +6,8 @@
 # SYNOPSIS:
 #   f [options] [query ..]
 #     options:
-#       -l, --list       list only
+#       -s, --show       show list of files with their ranks
+#       -l, --list       list paths only
 #       -e, --exec CMD   set command to execute on the result file
 #       -a, --any        match files and directories
 #       -d, --directory  match directories only
@@ -147,7 +148,8 @@ _f() {
     while [ "$1" ]; do case "$1" in
       -h|--help) echo "f [options] [query ..]
       options:
-        -l, --list       list only
+        -s, --show       show list of files with their ranks
+        -l, --list       list paths only
         -e, --exec CMD   set command to execute on the result file
         -a, --any        match files and directories
         -d, --directory  match directories only
@@ -155,6 +157,7 @@ _f() {
         -r, --rank       match by rank only
         -t, --recent     match by recent access only
         -h, --help       show a brief help message" >&2; return;;
+      -s|--show) local show=1; shift;;
       -l|--list) local list=1; shift;;
       -r|--rank) local mode="rank"; shift;;
       -t|--recent) local mode="recent"; shift;;
@@ -165,21 +168,22 @@ _f() {
       *) fnd+=("$1"); shift;;
     esac; done
 
-    [ "$fnd" -a "$exec" ] || local list=1
+    [ "$fnd" -a "$exec" ] || { [ -z "$list" ] && local show=1 ; }
     [ "$typ" ] || local typ="e" # default to match file and directory
 
     # if we hit enter on a completion just go there
     [ "$fnd" ] && case "${fnd[-1]}" in
      # completions will always start with /
-     /*) [ -z "$list" -a -${typ} "${fnd[-1]}" ] && "$exec" "${fnd[-1]}" && return;;
+     /*) [ -z "$show$list" -a -${typ} "${fnd[-1]}" ] \
+       && "$exec" "${fnd[-1]}" && return;;
     esac
 
     # no db yet
     [ -f "$_F_DATA" ] || return
 
     local result
-    result="$($_F_AWK -v t="$(date +%s)" -v knownFile="$_F_DATA" -v list="$list" \
-      -v mode="$mode" -v typ="$typ" -v q="$fnd" -F"|" '
+    result="$($_F_AWK -v t="$(date +%s)" -v knownFile="$_F_DATA" -v \
+      list="$show$list" -v mode="$mode" -v typ="$typ" -v q="$fnd" -F"|" '
       function frecent(rank, time) {
         dx = t-time
         if( dx < 3600 ) return rank*4
@@ -265,7 +269,13 @@ _f() {
       }
     ' "$_F_DATA")" 2> /dev/null
     [ $? -gt 0 ] && return
-    [ -e "$result" ] && $exec "$result" || echo "$result"
+    if [ -e "$result" ]; then
+      $exec "$result"
+    elif [ -z "$list" ]; then # show
+      echo "$result"
+    else # list
+      echo "$result" | grep -v -e "^common" | sort -nr | awk '{print $2}'
+    fi
 
   fi
 }

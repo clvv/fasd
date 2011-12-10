@@ -75,7 +75,8 @@ some examples to get you started:
 ```
 f [options] [query ..]
   options:
-    -l, --list       list only
+    -s, --show       show list of files with their ranks
+    -l, --list       list paths only
     -e, --exec CMD   set command to execute on the result file
     -a, --any        match files and directories
     -d, --directory  match directories only
@@ -118,10 +119,9 @@ Which awk to use. f can detect and use a compatible awk.
 
 1. Tests!
 2. Zsh `alias -s` style execution, simply do `f arg`.
-3. Option to just list matches without ranks (good for "piping").
-4. Multiple searches, parameters delimited by `-` or `--`.
-5. More backends: `rencently-used.xbel`, `.viminfo`.
-6. Code refactoring, more modular setup.
+3. Multiple searches, parameters delimited by `-` or `--`.
+4. More backends: `rencently-used.xbel`, `.viminfo`.
+5. Code refactoring, more modular setup.
 
 # Acknowledgements
 
