@@ -1,45 +1,54 @@
-# f
+# F
 
 `f` is a tool for quick access to files in bash and zsh. It is inspired by
-tools like autojump, z and v. `f` keeps track of files you have accessed, so
-that you can quickly reference them in the command line.
+tools like `autojump`, `z` and `v`. `f` keeps track of files you have accessed,
+so that you can quickly reference them in the command line.
 
-`f` ranks files by "frecency." `f` uses the same rank algorithm used by `z`.
-You can read more about it [here](https://github.com/rupa/z/wiki/frecency)
+`f` ranks files by "frecency," that is, by both "frequency" and "recency." The
+term "frecency" was first coined by Mozilla and used in Firefox
+([link](https://developer.mozilla.org/en/The_Places_frecency_algorithm)). `f`
+uses the ranking algorithm used by `z`. You can read more about it
+[here](https://github.com/rupa/z/wiki/frecency).
 
 # Introduction
 
-In short, with `f` you can save yourself so much time typing. Below are some
-hypothetical situations, where you can type in the left command and `f` will
-translate into the right side. Pretty magic, huh?
+If you're like me, you use your shell to navigate and launch applications. `f`
+helps you do that more efficiently. With `f`, you can open files regardless of
+which directory you are in. Just with a few key strings, `f` can find
+a "frecent" file or directory and open it with command you specify. Below are
+some hypothetical situations, where you can type in the command on the left and
+`f` will "expand" your command into the right side. Pretty magic, huh?
 
 ```
-  v whoa.conf      =>     vim /some/awkward/path/to/type/whoa.conf
-  j awk path       =>     cd /hell/of/a/awkward/path/to/get/to
+  v def conf       =>     vim /some/awkward/path/to/type/default.conf
+  j abc            =>     cd /hell/of/a/awkward/path/to/get/to/abcdef
   m movie          =>     mplayer /whatever/whatever/whatever/awesome_movie.mp4
-  o english paper  =>     xdg-open /you/dont/remember/where/english_paper.pdf
+  o eng paper      =>     xdg-open /you/dont/remember/where/english_paper.pdf
 ```
 
 # Install
 
-`f` can work with bash and zsh. You will also need gawk or nawk (original-awk
-for debian-like). Optionally, readlink from GNU coreutils is also recommended.
+`f` can work with both `bash` and `zsh`. You will also need `gawk` or `nawk`
+(`original-awk` for debian-like). Optionally, `readlink` from GNU coreutils is
+also recommended.
 
-`f` should work out of the box on most Linux and BSD distros, including OS X.
-If you're on Debian, Ubuntu or Mint, please make sure that you have some other
-`awk` installed other than the default `mawk` (unfortunately `f` does not work
-with `mawk` at the moment).
+`f` should work out of the box on most Linux and BSD distros, including OS
+X (though I have not actually tested `f` on a BSD. So reports appreciated.) If
+you're on Debian, Ubuntu or Mint Linux, please make sure that you have some
+other `awk` implementation installed other than the default `mawk`
+(unfortunately `f` does not work with `mawk` at the moment).
 
-To use `f`, just source `f.sh` somewhere in your shell with:
+To use `f`, just source `f.sh`:
 
 ```sh
   source f.sh
 ```
 
-Of course, you should put it into your shell rc once you've decided to use it.
+Of course, you should put it into your shell rc file once you've decided to use
+it.
 
-After you first installed `f`, open some files (with any program) and cd around
-in your shell. Then try some examples below.
+After you first installed `f`, open some files (with any program) and `cd`
+around in your shell. Then try some examples below.
 
 # Examples
 
@@ -57,7 +66,7 @@ some examples to get you started:
 ```sh
   alias v='f -f -e vim' # quick opening files with vim
   alias m='f -f -e mplayer' # quick opening files with mplayer
-  alias j='f -d -e cd' # quick cd into directories, mimicing autojump and z
+  alias j='f -d -e cd' # quick cd into directories, mimicking autojump and z
   alias o='f -e xdg-open' # quick opening files with xdg-open
 ```
 
@@ -78,7 +87,7 @@ f [options] [query ..]
 
 # Tweaks
 
-Here are some shell variables that you can set before sourcing `f`.
+Some shell variables that you can set before sourcing `f`.
 
 ```
 $_F_DATA
@@ -94,27 +103,25 @@ Default is (--help).
 $_F_SHIFT
 List of all commands that needs to be shifted, defaults to (sudo busybox).
 
+$_F_IGNORE
+List of all commands that will be ignored, defaults to (_f $_F_CMD ls echo).
+
 $_F_TRACK_PWD
 If set to any non-empty string, f will track "$PWD". This is useful when you
-want to replace autojump or z with f.
+want f to replace autojump or z with f.
 
 $_F_AWK
-Which awk to use. `f` can detact and use a compatible awk.
+Which awk to use. f can detect and use a compatible awk.
 ```
 
 # TODO
 
-Here are some features that I have thought of implementing.
-
-0. Fix issue with space in path.
 1. Tests!
-2. zsh `alias -s` style execution, simply do `f arg`.
+2. Zsh `alias -s` style execution, simply do `f arg`.
 3. Option to just list matches without ranks (good for "piping").
 4. Multiple searches, parameters delimited by `-` or `--`.
-5. gtk `rencently-used.xbel` backend.
-6. Code refactoring, more modulous setup.
-7. Port `f` "into" other tools like vim (is it possible?).
-8. Standalone version?
+5. More backends: `rencently-used.xbel`, `.viminfo`.
+6. Code refactoring, more modular setup.
 
 # Acknowledgements
 

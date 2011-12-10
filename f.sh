@@ -1,4 +1,4 @@
-# This tool gives you quick access to your recent files
+# This tool gives you quick access to your frequent/recent files
 #
 # INSTALL:
 #   Source this file somewhere in your shell rc (.bashrc or .zshrc).
