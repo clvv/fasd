@@ -100,33 +100,27 @@ _f() {
   # tab completion
   elif [ "$1" = "--complete" ]; then
     $_F_AWK -v q="$2" -v knownFile="$_F_DATA" -F"|" '
-      function exists(path, type,    tmp, ret) {
-        ret = 0
-        if ( type != "d" ) {
-          if ( (getline tmp < path) >= 0 ) {
-            # type gawk busybox nawk
-            #   f    1       1    1
-            #   d   -1      -1    0
-            close(path)
-            if ( type == "" || type == "e" ) return 1
-            ret = 1
-          }
-        }
+      function exists(path, type,    orig, tmp) {
         n = gsub("/+", "/", path)
+        orig = path
         for ( i = 0; i < n; i++ )
           path = path "/.."
         path = path knownFile
         if ( ( getline tmp < path ) >= 0 ) {
-          # type gawk busybox nawk
-          # f      0       0    0
-          # d      1       1    1
           close(path)
           if ( type == "f" )
             return 0
           else
             return 1
+        } else if ( (getline tmp < orig) >= 0 ) {
+          close(orig)
+          if ( type == "d" )
+            return 0
+          else
+            return 1
+        } else {
+          return 0
         }
-        return ret
       }
       BEGIN {
         if( q == tolower(q) ) nocase = 1
@@ -214,33 +208,27 @@ _f() {
         for( i in matches ) if( matches[i] && i !~ short ) return
         return short
       }
-      function exists(path, type,    tmp, ret) {
-        ret = 0
-        if ( type != "d" ) {
-          if ( (getline tmp < path) >= 0 ) {
-            # type gawk busybox nawk
-            #   f    1       1    1
-            #   d   -1      -1    0
-            close(path)
-            if ( type == "" || type == "e" ) return 1
-            ret = 1
-          }
-        }
+      function exists(path, type,    orig, tmp) {
         n = gsub("/+", "/", path)
+        orig = path
         for ( i = 0; i < n; i++ )
           path = path "/.."
         path = path knownFile
         if ( ( getline tmp < path ) >= 0 ) {
-          # type gawk busybox nawk
-          # f      0       0    0
-          # d      1       1    1
           close(path)
           if ( type == "f" )
             return 0
           else
             return 1
+        } else if ( (getline tmp < orig) >= 0 ) {
+          close(orig)
+          if ( type == "d" )
+            return 0
+          else
+            return 1
+        } else {
+          return 0
         }
-        return ret
       }
       BEGIN { split(q, a, " ") }
       {
