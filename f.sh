@@ -275,22 +275,18 @@ alias ${_F_CMD:=f}=_f
 [ -z "$_F_BLACKLIST" ] && _F_BLACKLIST=(--help)
 [ -z "$_F_SHIFT" ] && _F_SHIFT=(sudo busybox)
 [ -z "$_F_IGNORE" ] && _F_IGNORE=(_f $_F_CMD ls echo)
-
+#
 if [ -z "$_F_AWK" ]; then
-  if awk -Wversion 2>&1 | grep -q mawk; then
-    # f is not compatible with mawk
-    if gawk &> /dev/null; then
-      _F_AWK=gawk
-    elif nawk &> /dev/null; then
-      _F_AWK=nawk
-    elif original-awk &> /dev/null; then
-      _F_AWK=original-awk
-    else
-      echo "Sorry, but f is not compatible with mawk at the moment."
-      echo "Please install gawk, nawk(orignal-awk for debian-like) or busybox awk"
-      _F_AWK=mawk
-    fi
-  else # trust the default awk
+  # awk preferences
+  if gawk &> /dev/null; then
+    _F_AWK=gawk
+  elif original-awk &> /dev/null; then
+    _F_AWK=original-awk
+  elif nawk &> /dev/null; then
+    _F_AWK=nawk
+  elif mawk &> /dev/null; then
+    _F_AWK=mawk
+  else
     _F_AWK=awk
   fi
 fi
