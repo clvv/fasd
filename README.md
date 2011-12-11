@@ -29,19 +29,19 @@ some hypothetical situations, where you can type in the command on the left and
 # Install
 
 `f` can work with both `bash` and `zsh`. You will also need `gawk` or `nawk`
-(`original-awk` for debian-like). Optionally, `readlink` from GNU coreutils is
-also recommended.
+(`original-awk` for debian-like). Preferably, you should have `gawk` and GNU
+version of `readlink`.
 
-`f` should work out of the box on most Linux and BSD distros, including OS
-X (though I have not actually tested `f` on a BSD. So reports appreciated.) If
-you're on Debian, Ubuntu or Mint Linux, please make sure that you have some
-other `awk` implementation installed other than the default `mawk`
-(unfortunately `f` does not work with `mawk` at the moment).
+`f` should work out of the box on most Linux and BSD distros. OS X users, if
+you want to use `f` in `bash`, you have to upgrade to a more recent version of
+bash, 4.2 preferred. If you're on Debian, Ubuntu or Mint Linux, please make
+sure that you have some other `awk` implementation installed other than the
+default `mawk` (unfortunately `f` does not work with `mawk` at the moment).
 
 To use `f`, just source `f.sh`:
 
 ```sh
-  source f.sh
+source f.sh
 ```
 
 Of course, you should put it into your shell rc file once you've decided to use
@@ -53,21 +53,21 @@ around in your shell. Then try some examples below.
 # Examples
 
 ```sh
-  f foo # list recent files mathcing foo
-  f foo bar # list recent files mathcing foo and bar
-  f -e vim foo # run vim on the most frecent file matching foo
-  f bar -e mplayer # run mplayer on the most frecent file matching bar
-  f -d -e cd foo # cd into the most frecent directory matching foo
+f foo # list recent files mathcing foo
+f foo bar # list recent files mathcing foo and bar
+f -e vim foo # run vim on the most frecent file matching foo
+f bar -e mplayer # run mplayer on the most frecent file matching bar
+f -d -e cd foo # cd into the most frecent directory matching foo
 ```
 
 You should add your own aliases to fully utilize the power of `f`. Here are
 some examples to get you started:
 
 ```sh
-  alias v='f -f -e vim' # quick opening files with vim
-  alias m='f -f -e mplayer' # quick opening files with mplayer
-  alias j='f -d -e cd' # quick cd into directories, mimicking autojump and z
-  alias o='f -e xdg-open' # quick opening files with xdg-open
+alias v='f -f -e vim' # quick opening files with vim
+alias m='f -f -e mplayer' # quick opening files with mplayer
+alias j='f -d -e cd' # quick cd into directories, mimicking autojump and z
+alias o='f -e xdg-open' # quick opening files with xdg-open
 ```
 
 # Synopsis
