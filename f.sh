@@ -171,11 +171,12 @@ _f() {
     [ "$fnd" -a "$exec" ] || { [ -z "$list" ] && local show=1 ; }
     [ "$typ" ] || local typ="e" # default to match file and directory
 
-    # if we hit enter on a completion just go there
-    [ "$fnd" ] && case "${fnd[-1]}" in
+    # if we hit enter on a completion just execute
+    [ "$fnd" ] && case "${fnd[${#fnd[@]}-1]}" in
      # completions will always start with /
-     /*) [ -z "$show$list" -a -${typ} "${fnd[-1]}" ] \
-       && "$exec" "${fnd[-1]}" && return;;
+     # verbose array index for bash < 4.2 support
+     /*) [ -z "$show$list" -a -${typ} "${fnd[${#fnd[@]}-1]}" ] && \
+       "$exec" "${fnd[${#fnd[@]}-1]}" && return;;
     esac
 
     # no db yet
