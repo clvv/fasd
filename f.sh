@@ -50,7 +50,7 @@ _f() {
     local FILES
     while [ "$1" ]; do
       # add the adsolute path of the file to FILES
-      FILES+="$($_F_READLINK -e "$1" 2>/dev/null)"$'\n'
+      FILES+="$($_F_READLINK -e "$1" 2>/dev/null)|"
       shift
     done
 
@@ -59,14 +59,14 @@ _f() {
 
     # bail out if we don't own ~/.f (we're another user but our ENV is still set)
     [ -f "$_F_DATA" -a ! -O "$_F_DATA" ] && return
-    [ -z "${FILES//$'\n'/}" ] && return # stop if we have nothing to add
+    [ -z "${FILES//|/}" ] && return # stop if we have nothing to add
 
     # maintain the file
     local tempfile
     tempfile="$(mktemp $_F_DATA.XXXXXX)" || return
     $_F_AWK -v list="$FILES" -v now="$(date +%s)" -F"|" '
       BEGIN {
-        split(list, files, "\n")
+        split(list, files, "|")
         for(i in files) {
           path = files[i]
           if ( path == "" ) continue
