@@ -289,7 +289,7 @@ alias ${_F_CMD:=f}=_f
 [ -z "$_F_IGNORE" ] && _F_IGNORE=(_f $_F_CMD ls echo)
 
 if [ -z "$_F_AWK" ]; then
-  if awk -Wversion |& grep -q mawk; then
+  if awk -Wversion 2>&1 | grep -q mawk; then
     # f is not compatible with mawk
     if gawk &> /dev/null; then
       _F_AWK=gawk
