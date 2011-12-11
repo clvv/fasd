@@ -278,17 +278,9 @@ alias ${_F_CMD:=f}=_f
 #
 if [ -z "$_F_AWK" ]; then
   # awk preferences
-  if gawk &> /dev/null; then
-    _F_AWK=gawk
-  elif original-awk &> /dev/null; then
-    _F_AWK=original-awk
-  elif nawk &> /dev/null; then
-    _F_AWK=nawk
-  elif mawk &> /dev/null; then
-    _F_AWK=mawk
-  else
-    _F_AWK=awk
-  fi
+  for awk in gawk original-awk nawk mawk awk; do
+    $awk "" &> /dev/null && _F_AWK=$awk && break
+  done
 fi
 
 if readlink -e / &> /dev/null; then
