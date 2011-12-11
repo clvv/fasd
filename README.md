@@ -32,10 +32,9 @@ some hypothetical situations, where you can type in the command on the left and
 (`original-awk` for debian-like). Preferably, you should have `gawk` and GNU
 version of `readlink`.
 
-`f` should work out of the box on most Linux and BSD distros. If you're on
-Debian, Ubuntu or Mint Linux, please make sure that you have some other `awk`
-implementation installed other than the default `mawk` (unfortunately `f` does
-not work with `mawk` at the moment).
+`f` should work out of the box on most Linux and BSD distros. But if `f` does
+not work for you, please try installing `gawk` and updating your shell to
+a newer version.
 
 To use `f`, just source `f.sh`:
 
