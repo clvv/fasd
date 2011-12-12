@@ -186,27 +186,15 @@ _f() {
         if( dx < 604800 ) return rank/2
         return rank/4
       }
-      function output(files, toopen, override) {
+      function output(files, toopen) {
         if( list ) {
           if( mode == "recent" ) {
             cmd = "sort -nr"
           } else cmd = "sort -n"
           for( i in files ) if( files[i] ) printf "%-10s %s\n", files[i], i | cmd
-          if( override ) printf "%-10s %s\n", "common:", override
         } else {
-          if( override ) toopen = override
-            print toopen
+          print toopen
         }
-      }
-      function common(matches) {
-        # shortest match
-        for( i in matches ) {
-          if( matches[i] && (!short || length(i) < length(short)) ) short = i
-        }
-        if( short == "/" ) return
-        # shortest match must be common to each match
-        for( i in matches ) if( matches[i] && i !~ short ) return
-        return short
       }
       function exists(path, type,    orig, tmp) {
         n = gsub("/+", "/", path)
@@ -230,7 +218,28 @@ _f() {
           return 0
         }
       }
-      BEGIN { split(q, a, " ") }
+      function likelihood(pattern, path){
+        m = gsub( "/+", "/", path )
+        r = 1
+        for( i in pattern ) {
+          tmp = path
+          gsub( ".*" pattern[i], "", tmp)
+          n = gsub( "/+", "/", tmp )
+          if( n == m )
+            return 0
+          else if( n == 0 )
+            r *= 20 # F
+          else
+            r *= 1 - ( n / m )
+        }
+        return r
+      }
+      BEGIN {
+        split(q, pattern, " ")
+        for( i in pattern ) {
+          pattern2[i] = tolower(pattern[i]) # nocase
+        }
+      }
       {
         if( !exists($1, typ) ) next
         if( mode == "rank" ) {
@@ -238,11 +247,8 @@ _f() {
         } else if( mode == "recent" ) {
           f = t-$3
         } else f = frecent($2, $3)
-        wcase[$1] = nocase[$1] = f
-        for( i in a ) {
-          if( $1 !~ a[i] ) delete wcase[$1]
-          if( tolower($1) !~ tolower(a[i]) ) delete nocase[$1]
-        }
+        wcase[$1] = f * likelihood( pattern, $1 )
+        nocase[$1] = f * likelihood( pattern2, tolower($1) )
         if( wcase[$1] > oldf ) {
           cx = $1
           oldf = wcase[$1]
@@ -252,9 +258,10 @@ _f() {
         }
       }
       END {
-        if( cx ) {
-          output(wcase, cx, common(wcase))
-        } else if( ncx ) output(nocase, ncx, common(nocase))
+        if( cx )
+          output(wcase, cx)
+        else if( ncx )
+          output(nocase, ncx)
       }
     ' "$_F_DATA")" 2> /dev/null
     [ $? -gt 0 ] && return
@@ -263,7 +270,7 @@ _f() {
     elif [ -z "$list" ]; then # show
       echo "$result"
     else # list
-      echo "$result" | grep -v -e "^common" | sort -nr | awk '{print $2}'
+      echo "$result" | sort -nr | awk '{print $2}'
     fi
 
   fi
@@ -275,7 +282,7 @@ alias ${_F_CMD:=f}=_f
 [ -z "$_F_BLACKLIST" ] && _F_BLACKLIST=(--help)
 [ -z "$_F_SHIFT" ] && _F_SHIFT=(sudo busybox)
 [ -z "$_F_IGNORE" ] && _F_IGNORE=(_f $_F_CMD ls echo)
-#
+
 if [ -z "$_F_AWK" ]; then
   # awk preferences
   for awk in gawk original-awk nawk mawk awk; do
