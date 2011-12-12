@@ -4,11 +4,15 @@
 tools like `autojump`, `z` and `v`. `f` keeps track of files you have accessed,
 so that you can quickly reference them in the command line.
 
-`f` ranks files by "frecency," that is, by both "frequency" and "recency." The
-term "frecency" was first coined by Mozilla and used in Firefox
-([link](https://developer.mozilla.org/en/The_Places_frecency_algorithm)). `f`
-uses the ranking algorithm used by `z`. You can read more about it
-[here](https://github.com/rupa/z/wiki/frecency).
+`f` ranks files and directories by "frecency," that is, by both "frequency" and
+"recency." The term "frecency" was first coined by Mozilla and used in Firefox
+([link](https://developer.mozilla.org/en/The_Places_frecency_algorithm)).
+
+`f` uses [Bayesian Inference](https://en.wikipedia.org/wiki/Bayesian_inference)
+and [Bayesian Ranking](https://github.com/clvv/f/wiki/Bayesian-Ranking) to rank
+files and directories for a set of given matching patterns. "Frecency" is used
+as the prior probability distribution, and an simple algorithm is used to
+calculate the likelihood of the given set of patterns.
 
 # Introduction
 
