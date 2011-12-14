@@ -13,7 +13,6 @@
 #       -d, --directory  match directories only
 #       -f, --file       match files only
 #       -r, --rank       match by rank only
-#       -t, --recent     match by recent access only
 #       -h, --help       show a brief help message
 #
 # EXAMPLES:
@@ -89,57 +88,74 @@ _f() {
         if( count > 1000 ) {
           for( i in rank ) print i "|" 0.9*rank[i] "|" time[i] # aging
         } else for( i in rank ) print i "|" rank[i] "|" time[i]
-      }
-    ' "$_F_DATA" 2>/dev/null >| "$tempfile"
+      }' "$_F_DATA" 2>/dev/null >| "$tempfile"
     if [ $? -ne 0 -a -f "$_F_DATA" ]; then
       env rm -f "$tempfile"
     else
       env mv -f "$tempfile" "$_F_DATA"
     fi
 
-  # tab completion
-  elif [ "$1" = "--complete" ]; then
-    $_F_AWK -v q="$2" -v knownFile="$_F_DATA" -F"|" '
-      function exists(path, type,    orig, tmp) {
-        n = gsub("/+", "/", path)
-        orig = path
-        for ( i = 0; i < n; i++ )
-          path = path "/.."
-        path = path knownFile
-        if ( ( getline tmp < path ) >= 0 ) {
-          close(path)
-          if ( type == "f" )
+  elif [ "$1" = "--query" ]; then
+    # query the database, this need some local variables to be set
+    while read line; do
+      [ -${typ} "${line%%|*}" ] && echo "$line"
+    done < "$_F_DATA" | \
+    $_F_AWK -v t="$(date +%s)" -v mode="$mode" -v q="$fnd" -F"|" '
+      function frecent(rank, time) {
+        dx = t-time
+        if( dx < 3600 ) return rank*4
+        if( dx < 86400 ) return rank*2
+        if( dx < 604800 ) return rank/2
+        return rank/4
+      }
+      function likelihood(pattern, path) {
+        m = gsub( "/+", "/", path )
+        r = 1
+        for( i in pattern ) {
+          tmp = path
+          gsub( ".*" pattern[i], "", tmp)
+          n = gsub( "/+", "/", tmp )
+          if( n == m )
             return 0
+          else if( n == 0 )
+            r *= 20 # F
           else
-            return 1
-        } else if ( (getline tmp < orig) >= 0 ) {
-          close(orig)
-          if ( type == "d" )
-            return 0
-          else
-            return 1
-        } else {
-          return 0
+            r *= 1 - ( n / m )
         }
+        return r
+      }
+      function getRank() {
+        if( mode == "rank" ) {
+          f = $2
+        } else f = frecent($2, $3)
+        wcase[$1] = f * likelihood( pattern, $1 )
+        nocase[$1] = f * likelihood( pattern2, tolower($1) )
       }
       BEGIN {
-        if( q == tolower(q) ) nocase = 1
-        split(substr(q,3),fnd," ")
-      } {
-        if( !exists($1) ) next
-        if( nocase ) {
-          for( i in fnd ) tolower($1) !~ tolower(fnd[i]) && $1 = ""
-        } else {
-          for( i in fnd ) $1 !~ fnd[i] && $1 = ""
-        }
-        if( $1 ) print $1
+        split(q, pattern, " ")
+        for( i in pattern ) pattern2[i] = tolower(pattern[i]) # nocase
       }
-   ' "$_F_DATA" 2>/dev/null
+      {
+        getRank()
+        cx = cx || wcase[$1]
+        ncx = ncx || nocase[$1]
+      }
+      END {
+        if( cx ) {
+          for( i in wcase )
+            if( wcase[i] ) printf "%-10s %s\n", wcase[i], i
+        } else if( ncx ) {
+          for( i in nocase )
+            if( nocase[i] ) printf "%-10s %s\n", nocase[i], i
+        }
+      }' - 2>/dev/null
 
-  else # list/exec
-
+  else
+    # parsing logic and processing
+    [ -f "$_F_DATA" ] || return # no db yet
     local fnd; fnd=()
     while [ "$1" ]; do case "$1" in
+      --complete) set -- $(echo $2); shift; local list=1;;
       -h|--help) echo "f [options] [query ..]
       options:
         -s, --show       show list of files with their ranks
@@ -149,7 +165,6 @@ _f() {
         -d, --directory  match directories only
         -f, --file       match files only
         -r, --rank       match by rank only
-        -t, --recent     match by recent access only
         -h, --help       show a brief help message" >&2; return;;
       -s|--show) local show=1; shift;;
       -l|--list) local list=1; shift;;
@@ -170,107 +185,18 @@ _f() {
      # completions will always start with /
      # verbose array index for bash < 4.2 support
      /*) [ -z "$show$list" -a -${typ} "${fnd[${#fnd[@]}-1]}" ] && \
-       "$exec" "${fnd[${#fnd[@]}-1]}" && return;;
+       $exec "${fnd[${#fnd[@]}-1]}" && return;;
     esac
 
-    # no db yet
-    [ -f "$_F_DATA" ] || return
-
     local result
-    result="$($_F_AWK -v t="$(date +%s)" -v knownFile="$_F_DATA" -v \
-      list="$show$list" -v mode="$mode" -v typ="$typ" -v q="$fnd" -F"|" '
-      function frecent(rank, time) {
-        dx = t-time
-        if( dx < 3600 ) return rank*4
-        if( dx < 86400 ) return rank*2
-        if( dx < 604800 ) return rank/2
-        return rank/4
-      }
-      function output(files, toopen) {
-        if( list ) {
-          if( mode == "recent" ) {
-            cmd = "sort -nr"
-          } else cmd = "sort -n"
-          for( i in files ) if( files[i] ) printf "%-10s %s\n", files[i], i | cmd
-        } else {
-          print toopen
-        }
-      }
-      function exists(path, type,    orig, tmp) {
-        n = gsub("/+", "/", path)
-        orig = path
-        for ( i = 0; i < n; i++ )
-          path = path "/.."
-        path = path knownFile
-        if ( ( getline tmp < path ) >= 0 ) {
-          close(path)
-          if ( type == "f" )
-            return 0
-          else
-            return 1
-        } else if ( (getline tmp < orig) >= 0 ) {
-          close(orig)
-          if ( type == "d" )
-            return 0
-          else
-            return 1
-        } else {
-          return 0
-        }
-      }
-      function likelihood(pattern, path){
-        m = gsub( "/+", "/", path )
-        r = 1
-        for( i in pattern ) {
-          tmp = path
-          gsub( ".*" pattern[i], "", tmp)
-          n = gsub( "/+", "/", tmp )
-          if( n == m )
-            return 0
-          else if( n == 0 )
-            r *= 20 # F
-          else
-            r *= 1 - ( n / m )
-        }
-        return r
-      }
-      BEGIN {
-        split(q, pattern, " ")
-        for( i in pattern ) {
-          pattern2[i] = tolower(pattern[i]) # nocase
-        }
-      }
-      {
-        if( !exists($1, typ) ) next
-        if( mode == "rank" ) {
-          f = $2
-        } else if( mode == "recent" ) {
-          f = t-$3
-        } else f = frecent($2, $3)
-        wcase[$1] = f * likelihood( pattern, $1 )
-        nocase[$1] = f * likelihood( pattern2, tolower($1) )
-        if( wcase[$1] > oldf ) {
-          cx = $1
-          oldf = wcase[$1]
-        } else if( nocase[$1] > noldf ) {
-          ncx = $1
-          noldf = nocase[$1]
-        }
-      }
-      END {
-        if( cx )
-          output(wcase, cx)
-        else if( ncx )
-          output(nocase, ncx)
-      }
-    ' "$_F_DATA")" 2> /dev/null
+    result="$(_f --query 2>/dev/null)" # query the database
     [ $? -gt 0 ] && return
-    if [ -e "$result" ]; then
-      $exec "$result"
+    if [ -z "$show$list" ]; then # exec
+      $exec "$(echo "$result" | sort -n | sed 's/^[0-9.]*[ ]*//' | tail -n1)"
     elif [ -z "$list" ]; then # show
-      echo "$result"
+      echo "$result" | sort -n
     else # list
-      echo "$result" | sort -nr | awk '{print $2}'
+      echo "$result" | sort -n | sed 's/^[0-9.]*[ ]*//'
     fi
 
   fi
@@ -340,5 +266,5 @@ elif complete &> /dev/null; then
   # add bash hook
   echo $PROMPT_COMMAND | grep -q "_f --add"
   [ $? -gt 0 ] && PROMPT_COMMAND='eval "_f --add $(history 1 | \
-    sed -e "s/^[ ]*[0-9]*[ ]*//g")" &>/dev/null;'"$PROMPT_COMMAND"
+    sed -e "s/^[ ]*[0-9]*[ ]*//")" &>/dev/null;'"$PROMPT_COMMAND"
 fi

@@ -84,7 +84,6 @@ f [options] [query ..]
     -d, --directory  match directories only
     -f, --file       match files only
     -r, --rank       match by rank only
-    -t, --recent     match by recent access only
     -h, --help       show a brief help message
 ```
 
