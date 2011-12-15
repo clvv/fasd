@@ -87,6 +87,11 @@ f [options] [query ..]
     -h, --help       show a brief help message
 ```
 
+# Tab Completion
+
+`f` supports tab completion. A tip for using completion: type an extra space
+after your query strings so that the completion won't overwrite your queries.
+
 # Tweaks
 
 Some shell variables that you can set before sourcing `f`.
