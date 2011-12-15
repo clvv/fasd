@@ -31,6 +31,9 @@ _f() {
   if [ "$1" = "--add" ]; then # add entries
     shift
 
+    # bail out if we don't own ~/.f (we're another user but our ENV is still set)
+    [ -f "$_F_DATA" -a ! -O "$_F_DATA" ] && return
+
     # blacklists
     local each
     for each in "${_F_BLACKLIST[@]}"; do
@@ -56,8 +59,6 @@ _f() {
     # add current pwd if the option set
     [ "$_F_TRACK_PWD" -a "$(pwd -P)" != "$HOME" ] && FILES+="$(pwd -P)"
 
-    # bail out if we don't own ~/.f (we're another user but our ENV is still set)
-    [ -f "$_F_DATA" -a ! -O "$_F_DATA" ] && return
     [ -z "${FILES//|/}" ] && return # stop if we have nothing to add
 
     # maintain the file
