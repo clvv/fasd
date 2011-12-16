@@ -130,6 +130,21 @@ want f to replace autojump or z with f.
 
 $_F_AWK
 Which awk to use. f can detect and use a compatible awk.
+
+$_F_SINK
+File to log all STDERR to, defaults to "/dev/null".
+```
+
+# Debugging
+
+If `f` does not work as expected, please file a bug report describing the
+unexpected behavior along with your OS version, bash/zsh version, awk version,
+sed version, and an log file.
+
+You can set `_F_SINK` to obtain a log.
+
+```sh
+export _F_SINK="$HOME/.f.log"
 ```
 
 # TODO

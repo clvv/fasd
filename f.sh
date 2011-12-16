@@ -52,7 +52,7 @@ _f() {
     local FILES
     while [ "$1" ]; do
       # add the adsolute path of the file to FILES
-      FILES+="$($_F_READLINK -e "$1" 2>/dev/null)|"
+      FILES+="$($_F_READLINK -e "$1" 2>> "$_F_SINK")|"
       shift
     done
 
@@ -90,7 +90,7 @@ _f() {
           for( i in rank ) print i "|" 0.9*rank[i] "|" time[i] # aging
         else
           for( i in rank ) print i "|" rank[i] "|" time[i]
-      }' "$_F_DATA" 2>/dev/null >| "$tempfile"
+      }' "$_F_DATA" 2>> "$_F_SINK" >| "$tempfile"
     if [ $? -ne 0 -a -f "$_F_DATA" ]; then
       env rm -f "$tempfile"
     else
@@ -151,7 +151,7 @@ _f() {
           for( i in nocase )
             if( nocase[i] ) printf "%-10s %s\n", nocase[i], i
         }
-      }' - 2>/dev/null
+      }' - 2>> "$_F_SINK"
 
   else
     # parsing logic and processing
@@ -190,7 +190,7 @@ _f() {
     esac
 
     local result
-    result="$(_f --query 2>/dev/null)" # query the database
+    result="$(_f --query 2>> "$_F_SINK")" # query the database
     [ $? -gt 0 ] && return
     if [ -z "$show$list" ]; then # exec
       $exec "$(echo "$result" | sort -n | sed 's/^[0-9.]*[ ]*//' | tail -n1)"
@@ -209,17 +209,18 @@ alias ${_F_CMD:=f}=_f
 [ -z "$_F_BLACKLIST" ] && _F_BLACKLIST=(--help)
 [ -z "$_F_SHIFT" ] && _F_SHIFT=(sudo busybox)
 [ -z "$_F_IGNORE" ] && _F_IGNORE=(_f $_F_CMD ls echo)
+[ -z "$_F_SINK" ] && _F_SINK=/dev/null
 
 if [ -z "$_F_AWK" ]; then
   # awk preferences
   for awk in gawk original-awk nawk mawk awk; do
-    $awk "" &> /dev/null && _F_AWK=$awk && break
+    $awk "" &>> "$_F_SINK" && _F_AWK=$awk && break
   done
 fi
 
-if readlink -e / &> /dev/null; then
+if readlink -e / &>> "$_F_SINK"; then
   _F_READLINK=readlink
-elif greadlink -e / &> /dev/null; then
+elif greadlink -e / &>> "$_F_SINK"; then
   _F_READLINK=greadlink
 else # fall back on emulated readlink
   _f_readlink() {
@@ -229,11 +230,11 @@ else # fall back on emulated readlink
     [ "$1" = "." ] && echo "$(pwd -P)" && return
     local path
     if [ "${1##*/}" = ".." ]; then
-      path="$(cd "$1" &>/dev/null && pwd -P)"
+      path="$(cd "$1" &>> "$_F_SINK" && pwd -P)"
       [ -z "$path" ] && return 1 # if cd fails
     elif [[ "${1#/}" =~ "/" ]]; then
       # if target contains "/" (not counting top level) or target is ".."
-      local base="$(cd "${1%/*}" &>/dev/null && pwd -P)"
+      local base="$(cd "${1%/*}" &>> "$_F_SINK" && pwd -P)"
       [ -z "$base" ] && return 1 # if cd fails
       path="${base%/}/${1##*/}"
     elif [ -z "${1##/*}" ]; then # straight top level
@@ -249,7 +250,7 @@ else # fall back on emulated readlink
   _F_READLINK=_f_readlink
 fi
 
-if compctl &> /dev/null; then
+if compctl &>> "$_F_SINK"; then
   # zsh tab completion
   _f_zsh_tab_completion() {
     local compl
@@ -259,13 +260,13 @@ if compctl &> /dev/null; then
   compctl -U -K _f_zsh_tab_completion _f
   # add zsh hook
   autoload -U add-zsh-hook
-  function _f_preexec () { eval "_f --add $3" &>/dev/null; }
+  function _f_preexec () { eval "_f --add $3" &>> "$_F_SINK"; }
   add-zsh-hook preexec _f_preexec
-elif complete &> /dev/null; then
+elif complete &>> "$_F_SINK"; then
   # bash tab completion
   complete -C '_f --complete "$COMP_LINE"' $_F_CMD
   # add bash hook
   echo $PROMPT_COMMAND | grep -q "_f --add"
   [ $? -gt 0 ] && PROMPT_COMMAND='eval "_f --add $(history 1 | \
-    sed -e "s/^[ ]*[0-9]*[ ]*//")" &>/dev/null;'"$PROMPT_COMMAND"
+    sed -e "s/^[ ]*[0-9]*[ ]*//")" &>> "$_F_SINK";'"$PROMPT_COMMAND"
 fi
