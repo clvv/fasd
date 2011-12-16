@@ -156,7 +156,7 @@ _f() {
     [ -f "$_F_DATA" ] || return # no db yet
     local fnd; fnd=()
     while [ "$1" ]; do case "$1" in
-      --complete) set -- $(echo $2); shift; local list=1;;
+      --complete) set -- $(echo $2); local list=1;;
       -h|--help) echo "f [options] [query ..]
       options:
         -s, --show       show list of files with their ranks
@@ -167,26 +167,24 @@ _f() {
         -f, --file       match files only
         -r, --rank       match by rank only
         -h, --help       show a brief help message" >&2; return;;
-      -s|--show) local show=1; shift;;
-      -l|--list) local list=1; shift;;
-      -r|--rank) local mode="rank"; shift;;
-      -t|--recent) local mode="recent"; shift;;
-      -e|--exec) local exec=${2:?"Argument needed after -e"}; shift 2;;
-      -a|--any) local typ="e"; shift;;
-      -d|--directory) local typ="d"; shift;;
-      -f|--file) local typ="f"; shift;;
-      *) fnd+=("$1"); shift;;
-    esac; done
+      -s|--show) local show=1;;
+      -l|--list) local list=1;;
+      -r|--rank) local mode="rank";;
+      -t|--recent) local mode="recent";;
+      -e|--exec) local exec=${2:?"Argument needed after -e"}; shift;;
+      -a|--any) local typ="e";;
+      -d|--directory) local typ="d";;
+      -f|--file) local typ="f";;
+      *) fnd+="$1 ";;
+    esac; local last="$1"; shift; done
 
     [ "$fnd" -a "$exec" ] || { [ -z "$list" ] && local show=1 ; }
     [ "$typ" ] || local typ="e" # default to match file and directory
 
     # if we hit enter on a completion just execute
-    [ "$fnd" ] && case "${fnd[${#fnd[@]}-1]}" in
+    case "$last" in
      # completions will always start with /
-     # verbose array index for bash < 4.2 support
-     /*) [ -z "$show$list" -a -${typ} "${fnd[${#fnd[@]}-1]}" ] && \
-       $exec "${fnd[${#fnd[@]}-1]}" && return;;
+     /*) [ -z "$show$list" -a -${typ} "$last" ] && $exec "$last" && return;;
     esac
 
     local result
