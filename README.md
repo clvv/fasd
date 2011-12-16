@@ -72,6 +72,17 @@ alias j='f -d -e cd' # quick cd into directories, mimicking autojump and z
 alias o='f -e xdg-open' # quick opening files with xdg-open
 ```
 
+# How It Works
+
+When you source `f.sh`, `f` adds a hook that will executed whenever you execute
+a command. The hook will scan your commands' arguments and determine if any of
+them refer to existing files or directories. If yes, `f` will add them to the
+database.
+
+When you run `f` with search arguments, `f` uses [Bayesian
+Ranking](https://github.com/clvv/f/wiki/Bayesian-Ranking) to find the best
+match.
+
 # Synopsis
 
 ```
