@@ -86,9 +86,10 @@ _f() {
         count += $2
       }
       END {
-        if( count > 1000 ) {
+        if( count > 1000 )
           for( i in rank ) print i "|" 0.9*rank[i] "|" time[i] # aging
-        } else for( i in rank ) print i "|" rank[i] "|" time[i]
+        else
+          for( i in rank ) print i "|" rank[i] "|" time[i]
       }' "$_F_DATA" 2>/dev/null >| "$tempfile"
     if [ $? -ne 0 -a -f "$_F_DATA" ]; then
       env rm -f "$tempfile"
@@ -126,9 +127,10 @@ _f() {
         return r
       }
       function getRank() {
-        if( mode == "rank" ) {
+        if( mode == "rank" )
           f = $2
-        } else f = frecent($2, $3)
+        else
+          f = frecent($2, $3)
         wcase[$1] = f * likelihood( pattern, $1 )
         nocase[$1] = f * likelihood( pattern2, tolower($1) )
       }
