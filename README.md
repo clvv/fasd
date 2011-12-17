@@ -32,7 +32,7 @@ some hypothetical situations, where you can type in the command on the left and
   vim `f rc conf`  =>     vim /etc/rc.conf
 ```
 
-`f`, by default, comes with four useful aliases by default:
+`f` comes with four useful aliases by default:
 
 ```sh
   alias a='_f -a' # any
@@ -76,10 +76,10 @@ around in your shell. Then try some examples below.
 
 ```sh
 f foo # list recent files mathcing foo
-f foo bar # list recent files mathcing foo and bar
+a foo bar # list recent files and directories mathcing foo and bar
 f -e vim foo # run vim on the most frecent file matching foo
 f bar -e mplayer # run mplayer on the most frecent file matching bar
-f -d -e cd foo # cd into the most frecent directory matching foo
+d -e cd foo # cd into the most frecent directory matching foo
 ```
 
 You should add your own aliases to fully utilize the power of `f`. Here are
@@ -138,8 +138,8 @@ Some shell variables that you can set before sourcing `f`.
 $_F_DATA
 Path to the f data file, default "$HOME/.f".
 
-$_F_CMD
-Command to call f, default "f".
+$_F_CMD_{A,S,D,F}
+Commands to call _f.
 
 $_F_BLACKLIST
 List of blacklisted strings. Commands matching them will not be processed.

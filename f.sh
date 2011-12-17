@@ -282,7 +282,7 @@ elif complete 2>1 >> "$_F_SINK"; then
       complete -F _f_bash_completion $cmd
     done
   }
-  _f_bash_hook_completion a s d f
+  _f_bash_hook_completion $_F_CMD_A $_F_CMD_S $_F_CMD_D $_F_CMD_F
   # add bash hook
   echo $PROMPT_COMMAND | grep -q "_f --add"
   [ $? -gt 0 ] && PROMPT_COMMAND='eval "_f --add $(history 1 | \
