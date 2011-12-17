@@ -270,7 +270,19 @@ if compctl &>> "$_ASDF_SINK"; then
   add-zsh-hook preexec _asdf_preexec
 elif complete &>> "$_ASDF_SINK"; then
   # bash tab completion
-  for cmd in a s d f; do complete -C '_asdf --complete "$COMP_LINE"' $cmd; done
+  _asdf_bash_completion() {
+    # get completion result using expanded aliases
+    local RESULT=$( _asdf --complete "$(alias -p ${COMP_WORDS} | \
+      tail -n1 | sed -n "s/^.*'\(.*\)'/\1/p") ${COMP_LINE#* }" )
+    local IFS=$'\n'
+    COMPREPLY=( $RESULT )
+  }
+  _asdf_bash_hook_completion() {
+    for cmd in $*; do
+      complete -F _asdf_bash_completion $cmd
+    done
+  }
+  _asdf_bash_hook_completion a s d f
   # add bash hook
   echo $PROMPT_COMMAND | grep -q "_asdf --add"
   [ $? -gt 0 ] && PROMPT_COMMAND='eval "_asdf --add $(history 1 | \
