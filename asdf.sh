@@ -207,10 +207,10 @@ _asdf() {
 }
 
 # set default options
-alias a=_asdf
-alias s='_asdf -s'
-alias f='_asdf -f'
-alias d='_asdf -d'
+alias ${_ASDF_CMD_A:=a}='_asdf -a'
+alias ${_ASDF_CMD_S:=s}='_asdf -s'
+alias ${_ASDF_CMD_D:=d}='_asdf -d'
+alias ${_ASDF_CMD_F:=f}='_asdf -f'
 [ -z "$_ASDF_DATA" ] && _ASDF_DATA="$HOME/.asdf"
 [ -z "$_ASDF_BLACKLIST" ] && _ASDF_BLACKLIST=(--help)
 [ -z "$_ASDF_SHIFT" ] && _ASDF_SHIFT=(sudo busybox)
