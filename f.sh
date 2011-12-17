@@ -26,45 +26,45 @@
 #   alias m="f -e mplayer"
 #   alias o="f -e xdg-open"
 
-_asdf() {
+_f() {
 
   if [ "$1" = "--add" ]; then # add entries
     shift
 
     # bail out if we don't own ~/.f (we're another user but our ENV is still set)
-    [ -f "$_ASDF_DATA" -a ! -O "$_ASDF_DATA" ] && return
+    [ -f "$_F_DATA" -a ! -O "$_F_DATA" ] && return
 
     # blacklists
     local each
-    for each in "${_ASDF_BLACKLIST[@]}"; do
+    for each in "${_F_BLACKLIST[@]}"; do
       [[ "$*" =~ "$each" ]] && return
     done
 
     # shifts
-    for each in "${_ASDF_SHIFT[@]}"; do
+    for each in "${_F_SHIFT[@]}"; do
       while [ "$1" = "$each" ]; do shift; done
     done
 
     # ignores
-    [[ "${_ASDF_IGNORE[@]}" =~ "$1" ]] && return
+    [[ "${_F_IGNORE[@]}" =~ "$1" ]] && return
     shift
 
     local FILES
     while [ "$1" ]; do
       # add the adsolute path of the file to FILES
-      FILES+="$($_ASDF_READLINK -e "$1" 2>> "$_ASDF_SINK")|"
+      FILES+="$($_F_READLINK -e "$1" 2>> "$_F_SINK")|"
       shift
     done
 
     # add current pwd if the option set
-    [ "$_ASDF_TRACK_PWD" -a "$(pwd -P)" != "$HOME" ] && FILES+="$(pwd -P)"
+    [ "$_F_TRACK_PWD" -a "$(pwd -P)" != "$HOME" ] && FILES+="$(pwd -P)"
 
     [ -z "${FILES//|/}" ] && return # stop if we have nothing to add
 
     # maintain the file
     local tempfile
-    tempfile="$(mktemp $_ASDF_DATA.XXXXXX)" || return
-    $_ASDF_AWK -v list="$FILES" -v now="$(date +%s)" -F"|" '
+    tempfile="$(mktemp $_F_DATA.XXXXXX)" || return
+    $_F_AWK -v list="$FILES" -v now="$(date +%s)" -F"|" '
       BEGIN {
         split(list, files, "|")
         for(i in files) {
@@ -90,19 +90,19 @@ _asdf() {
           for( i in rank ) print i "|" 0.9*rank[i] "|" time[i] # aging
         else
           for( i in rank ) print i "|" rank[i] "|" time[i]
-      }' "$_ASDF_DATA" 2>> "$_ASDF_SINK" >| "$tempfile"
-    if [ $? -ne 0 -a -f "$_ASDF_DATA" ]; then
+      }' "$_F_DATA" 2>> "$_F_SINK" >| "$tempfile"
+    if [ $? -ne 0 -a -f "$_F_DATA" ]; then
       env rm -f "$tempfile"
     else
-      env mv -f "$tempfile" "$_ASDF_DATA"
+      env mv -f "$tempfile" "$_F_DATA"
     fi
 
   elif [ "$1" = "--query" ]; then
     # query the database, this need some local variables to be set
     while read line; do
       [ -${typ} "${line%%|*}" ] && echo "$line"
-    done < "$_ASDF_DATA" | \
-    $_ASDF_AWK -v t="$(date +%s)" -v mode="$mode" -v q="$fnd" -F"|" '
+    done < "$_F_DATA" | \
+    $_F_AWK -v t="$(date +%s)" -v mode="$mode" -v q="$fnd" -F"|" '
       function frecent(rank, time) {
         dx = t-time
         if( dx < 3600 ) return rank*4
@@ -151,11 +151,11 @@ _asdf() {
           for( i in nocase )
             if( nocase[i] ) printf "%-10s %s\n", nocase[i], i
         }
-      }' - 2>> "$_ASDF_SINK"
+      }' - 2>> "$_F_SINK"
 
   else
     # parsing logic and processing
-    [ -f "$_ASDF_DATA" ] || return # no db yet
+    [ -f "$_F_DATA" ] || return # no db yet
     local fnd; fnd=()
     while [ "$1" ]; do case "$1" in
       --complete) set -- $(echo $2); local list=1;;
@@ -189,7 +189,7 @@ _asdf() {
     esac
 
     local result
-    result="$(_asdf --query 2>> "$_ASDF_SINK")" # query the database
+    result="$(_f --query 2>> "$_F_SINK")" # query the database
     [ $? -gt 0 ] && return
     if [ "$list" ]; then
       echo "$result" | sort -n | sed 's/^[0-9.]*[ ]*//'
@@ -207,40 +207,40 @@ _asdf() {
 }
 
 # set default options
-alias ${_ASDF_CMD_A:=a}='_asdf -a'
-alias ${_ASDF_CMD_S:=s}='_asdf -s'
-alias ${_ASDF_CMD_D:=d}='_asdf -d'
-alias ${_ASDF_CMD_F:=f}='_asdf -f'
-[ -z "$_ASDF_DATA" ] && _ASDF_DATA="$HOME/.asdf"
-[ -z "$_ASDF_BLACKLIST" ] && _ASDF_BLACKLIST=(--help)
-[ -z "$_ASDF_SHIFT" ] && _ASDF_SHIFT=(sudo busybox)
-[ -z "$_ASDF_IGNORE" ] && _ASDF_IGNORE=(_asdf ls echo)
-[ -z "$_ASDF_SINK" ] && _ASDF_SINK=/dev/null
+alias ${_F_CMD_A:=a}='_f -a'
+alias ${_F_CMD_S:=s}='_f -s'
+alias ${_F_CMD_D:=d}='_f -d'
+alias ${_F_CMD_F:=f}='_f -f'
+[ -z "$_F_DATA" ] && _F_DATA="$HOME/.f"
+[ -z "$_F_BLACKLIST" ] && _F_BLACKLIST=(--help)
+[ -z "$_F_SHIFT" ] && _F_SHIFT=(sudo busybox)
+[ -z "$_F_IGNORE" ] && _F_IGNORE=(_f ls echo)
+[ -z "$_F_SINK" ] && _F_SINK=/dev/null
 
-if [ -z "$_ASDF_AWK" ]; then
+if [ -z "$_F_AWK" ]; then
   # awk preferences
   for awk in gawk original-awk nawk mawk awk; do
-    $awk "" 2>1 >> "$_ASDF_SINK" && _ASDF_AWK=$awk && break
+    $awk "" 2>1 >> "$_F_SINK" && _F_AWK=$awk && break
   done
 fi
 
-if readlink -e / 2>1 >> "$_ASDF_SINK"; then
-  _ASDF_READLINK=readlink
-elif greadlink -e / 2>1 >> "$_ASDF_SINK"; then
-  _ASDF_READLINK=greadlink
+if readlink -e / 2>1 >> "$_F_SINK"; then
+  _F_READLINK=readlink
+elif greadlink -e / 2>1 >> "$_F_SINK"; then
+  _F_READLINK=greadlink
 else # fall back on emulated readlink
-  _asdf_readlink() {
+  _f_readlink() {
     # function that mimics readlink from GNU coreutils
     [ "$1" = "-e" ] && shift && local e=1 # existence option
     [ "$1" = "/" ] && echo / && return
     [ "$1" = "." ] && echo "$(pwd -P)" && return
     local path
     if [ "${1##*/}" = ".." ]; then
-      path="$(cd "$1" 2>1 >> "$_ASDF_SINK" && pwd -P)"
+      path="$(cd "$1" 2>1 >> "$_F_SINK" && pwd -P)"
       [ -z "$path" ] && return 1 # if cd fails
     elif [[ "${1#/}" =~ "/" ]]; then
       # if target contains "/" (not counting top level) or target is ".."
-      local base="$(cd "${1%/*}" 2>1 >> "$_ASDF_SINK" && pwd -P)"
+      local base="$(cd "${1%/*}" 2>1 >> "$_F_SINK" && pwd -P)"
       [ -z "$base" ] && return 1 # if cd fails
       path="${base%/}/${1##*/}"
     elif [ -z "${1##/*}" ]; then # straight top level
@@ -253,38 +253,38 @@ else # fall back on emulated readlink
     [ "$e" = "1" -a ! -e "$path" ] && return
     echo "$path"
   }
-  _ASDF_READLINK=_asdf_readlink
+  _F_READLINK=_f_readlink
 fi
 
-if compctl 2>1 >> "$_ASDF_SINK"; then
+if compctl 2>1 >> "$_F_SINK"; then
   # zsh tab completion
-  _asdf_zsh_tab_completion() {
+  _f_zsh_tab_completion() {
     local compl
     read -c compl
-    reply=(${(f)"$(_asdf --complete "$compl")"})
+    reply=(${(f)"$(_f --complete "$compl")"})
   }
-  compctl -U -K _asdf_zsh_tab_completion _asdf
+  compctl -U -K _f_zsh_tab_completion _f
   # add zsh hook
   autoload -U add-zsh-hook
-  function _asdf_preexec () { eval "_asdf --add $3" 2>1 >> "$_ASDF_SINK"; }
-  add-zsh-hook preexec _asdf_preexec
-elif complete 2>1 >> "$_ASDF_SINK"; then
+  function _f_preexec () { eval "_f --add $3" 2>1 >> "$_F_SINK"; }
+  add-zsh-hook preexec _f_preexec
+elif complete 2>1 >> "$_F_SINK"; then
   # bash tab completion
-  _asdf_bash_completion() {
+  _f_bash_completion() {
     # get completion results using expanded aliases
-    local RESULT=$( _asdf --complete "$(alias -p ${COMP_WORDS} | \
+    local RESULT=$( _f --complete "$(alias -p ${COMP_WORDS} | \
       tail -n1 | sed -n "s/^.*'\(.*\)'/\1/p") ${COMP_LINE#* }" )
     local IFS=$'\n'
     COMPREPLY=( $RESULT )
   }
-  _asdf_bash_hook_completion() {
+  _f_bash_hook_completion() {
     for cmd in $*; do
-      complete -F _asdf_bash_completion $cmd
+      complete -F _f_bash_completion $cmd
     done
   }
-  _asdf_bash_hook_completion a s d f
+  _f_bash_hook_completion a s d f
   # add bash hook
-  echo $PROMPT_COMMAND | grep -q "_asdf --add"
-  [ $? -gt 0 ] && PROMPT_COMMAND='eval "_asdf --add $(history 1 | \
-    sed -e "s/^[ ]*[0-9]*[ ]*//")" 2>1 >> "$_ASDF_SINK";'"$PROMPT_COMMAND"
+  echo $PROMPT_COMMAND | grep -q "_f --add"
+  [ $? -gt 0 ] && PROMPT_COMMAND='eval "_f --add $(history 1 | \
+    sed -e "s/^[ ]*[0-9]*[ ]*//")" 2>1 >> "$_F_SINK";'"$PROMPT_COMMAND"
 fi
