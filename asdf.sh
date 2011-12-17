@@ -158,7 +158,7 @@ _asdf() {
     [ -f "$_ASDF_DATA" ] || return # no db yet
     local fnd; fnd=()
     while [ "$1" ]; do case "$1" in
-      --complete) set -- $(echo asdf -${2}); local list=1;;
+      --complete) set -- $(echo $2); local list=1;;
       -h|--help) echo "f [options] [query ..]
       options:
         -s, --show       show list of files with their ranks
@@ -180,8 +180,6 @@ _asdf() {
       *) fnd+="$1 ";;
     esac; local last="$1"; shift; done
 
-    [ "$fnd" ] || { [ -z "$list" ] && local show=1 ; }
-    [ "$exec" ] || local exec="$_ASDF_EXEC"
     [ "$typ" ] || local typ="e" # default to match file and directory
 
     # if we hit enter on a completion just execute
@@ -193,12 +191,16 @@ _asdf() {
     local result
     result="$(_asdf --query 2>> "$_ASDF_SINK")" # query the database
     [ $? -gt 0 ] && return
-    if [ -z "$show$list" ]; then # exec
-      $exec "$(echo "$result" | sort -n | sed 's/^[0-9.]*[ ]*//' | tail -n1)"
-    elif [ -z "$list" ]; then # show
-      echo "$result" | sort -n
-    else # list
+    if [ "$list" ]; then
       echo "$result" | sort -n | sed 's/^[0-9.]*[ ]*//'
+    elif [ "$show" ]; then
+      echo "$result" | sort -n
+    elif [ "$fnd" -a "$exec" ]; then
+      $exec "$(echo "$result" | sort -n | sed 's/^[0-9.]*[ ]*//' | tail -n1)"
+    elif [ "$fnd" ] && [ "$ZSH_SUBSHELL$BASH_SUBSHELL" -eq 1 ]; then # echo
+      echo "$(echo "$result" | sort -n | sed 's/^[0-9.]*[ ]*//' | tail -n1)"
+    else # no args, show
+      echo "$result" | sort -n
     fi
 
   fi
@@ -214,7 +216,6 @@ alias d='_asdf -d'
 [ -z "$_ASDF_SHIFT" ] && _ASDF_SHIFT=(sudo busybox)
 [ -z "$_ASDF_IGNORE" ] && _ASDF_IGNORE=(_asdf ls echo)
 [ -z "$_ASDF_SINK" ] && _ASDF_SINK=/dev/null
-[ -z "$_ASDF_EXEC" ] && _ASDF_EXEC=echo
 
 if [ -z "$_ASDF_AWK" ]; then
   # awk preferences
@@ -259,7 +260,7 @@ if compctl &>> "$_ASDF_SINK"; then
   # zsh tab completion
   _asdf_zsh_tab_completion() {
     local compl
-    read -l compl
+    read -c compl
     reply=(${(f)"$(_asdf --complete "$compl")"})
   }
   compctl -U -K _asdf_zsh_tab_completion _asdf
