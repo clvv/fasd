@@ -220,13 +220,13 @@ alias d='_asdf -d'
 if [ -z "$_ASDF_AWK" ]; then
   # awk preferences
   for awk in gawk original-awk nawk mawk awk; do
-    $awk "" &>> "$_ASDF_SINK" && _ASDF_AWK=$awk && break
+    $awk "" 2>1 >> "$_ASDF_SINK" && _ASDF_AWK=$awk && break
   done
 fi
 
-if readlink -e / &>> "$_ASDF_SINK"; then
+if readlink -e / 2>1 >> "$_ASDF_SINK"; then
   _ASDF_READLINK=readlink
-elif greadlink -e / &>> "$_ASDF_SINK"; then
+elif greadlink -e / 2>1 >> "$_ASDF_SINK"; then
   _ASDF_READLINK=greadlink
 else # fall back on emulated readlink
   _asdf_readlink() {
@@ -236,11 +236,11 @@ else # fall back on emulated readlink
     [ "$1" = "." ] && echo "$(pwd -P)" && return
     local path
     if [ "${1##*/}" = ".." ]; then
-      path="$(cd "$1" &>> "$_ASDF_SINK" && pwd -P)"
+      path="$(cd "$1" 2>1 >> "$_ASDF_SINK" && pwd -P)"
       [ -z "$path" ] && return 1 # if cd fails
     elif [[ "${1#/}" =~ "/" ]]; then
       # if target contains "/" (not counting top level) or target is ".."
-      local base="$(cd "${1%/*}" &>> "$_ASDF_SINK" && pwd -P)"
+      local base="$(cd "${1%/*}" 2>1 >> "$_ASDF_SINK" && pwd -P)"
       [ -z "$base" ] && return 1 # if cd fails
       path="${base%/}/${1##*/}"
     elif [ -z "${1##/*}" ]; then # straight top level
@@ -256,7 +256,7 @@ else # fall back on emulated readlink
   _ASDF_READLINK=_asdf_readlink
 fi
 
-if compctl &>> "$_ASDF_SINK"; then
+if compctl 2>1 >> "$_ASDF_SINK"; then
   # zsh tab completion
   _asdf_zsh_tab_completion() {
     local compl
@@ -266,12 +266,12 @@ if compctl &>> "$_ASDF_SINK"; then
   compctl -U -K _asdf_zsh_tab_completion _asdf
   # add zsh hook
   autoload -U add-zsh-hook
-  function _asdf_preexec () { eval "_asdf --add $3" &>> "$_ASDF_SINK"; }
+  function _asdf_preexec () { eval "_asdf --add $3" 2>1 >> "$_ASDF_SINK"; }
   add-zsh-hook preexec _asdf_preexec
-elif complete &>> "$_ASDF_SINK"; then
+elif complete 2>1 >> "$_ASDF_SINK"; then
   # bash tab completion
   _asdf_bash_completion() {
-    # get completion result using expanded aliases
+    # get completion results using expanded aliases
     local RESULT=$( _asdf --complete "$(alias -p ${COMP_WORDS} | \
       tail -n1 | sed -n "s/^.*'\(.*\)'/\1/p") ${COMP_LINE#* }" )
     local IFS=$'\n'
@@ -286,5 +286,5 @@ elif complete &>> "$_ASDF_SINK"; then
   # add bash hook
   echo $PROMPT_COMMAND | grep -q "_asdf --add"
   [ $? -gt 0 ] && PROMPT_COMMAND='eval "_asdf --add $(history 1 | \
-    sed -e "s/^[ ]*[0-9]*[ ]*//")" &>> "$_ASDF_SINK";'"$PROMPT_COMMAND"
+    sed -e "s/^[ ]*[0-9]*[ ]*//")" 2>1 >> "$_ASDF_SINK";'"$PROMPT_COMMAND"
 fi
