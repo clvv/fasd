@@ -28,6 +28,26 @@ some hypothetical situations, where you can type in the command on the left and
   j abc            =>     cd /hell/of/a/awkward/path/to/get/to/abcdef
   m movie          =>     mplayer /whatever/whatever/whatever/awesome_movie.mp4
   o eng paper      =>     xdg-open /you/dont/remember/where/english_paper.pdf
+  vim `f rc lo`    =>     vim /etc/rc.local
+  vim `f rc conf`  =>     vim /etc/rc.conf
+```
+
+`f`, by default, comes with four useful aliases by default:
+
+```sh
+  alias a='_f -a' # any
+  alias s='_f -s' # show / search
+  alias d='_f -d' # directory
+  alias f='_f -f' # file
+```
+
+`f` will smartly detect when to display a list of files or just the best match.
+For instance, when you call `f` in a subshell with some search parameters, `f`
+will only return the best match. This enables you to do:
+
+```sh
+mv update.html `d www`
+cp `f mov` .
 ```
 
 # Install
@@ -66,10 +86,17 @@ You should add your own aliases to fully utilize the power of `f`. Here are
 some examples to get you started:
 
 ```sh
-alias v='f -f -e vim' # quick opening files with vim
-alias m='f -f -e mplayer' # quick opening files with mplayer
-alias j='f -d -e cd' # quick cd into directories, mimicking autojump and z
-alias o='f -e xdg-open' # quick opening files with xdg-open
+alias v='f -e vim' # quick opening files with vim
+alias m='f -e mplayer' # quick opening files with mplayer
+alias j='d -e cd' # quick cd into directories, mimicking autojump and z
+alias o='a -e xdg-open' # quick opening files with xdg-open
+```
+
+If you're using bash, you have to call `_f_bash_hook_completion` to make
+completion work. For instance:
+
+```bash
+_f_bash_hook_completion v m j o
 ```
 
 # How It Works
