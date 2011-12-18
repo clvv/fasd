@@ -179,9 +179,9 @@ export _F_SINK="$HOME/.f.log"
 # TODO
 
 1. Tests!
-2. Zsh `alias -s` style execution, simply do `f arg`.
-3. Multiple searches, parameters delimited by `-` or `--`.
-4. More backends: `rencently-used.xbel`, `.viminfo`.
+2. More versatile option parsing.
+3. Multiple searches, parameters delimited by `-`.
+4. More backends: `rencently-used.xbel`, `.viminfo`, etc.
 5. Code refactoring, more modular setup.
 
 # Acknowledgements
