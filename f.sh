@@ -212,6 +212,7 @@ alias ${_F_CMD_A:=a}='_f -a'
 alias ${_F_CMD_S:=s}='_f -s'
 alias ${_F_CMD_D:=d}='_f -d'
 alias ${_F_CMD_F:=f}='_f -f'
+
 [ -z "$_F_DATA" ] && _F_DATA="$HOME/.f"
 [ -z "$_F_BLACKLIST" ] && _F_BLACKLIST=(--help)
 [ -z "$_F_SHIFT" ] && _F_SHIFT=(sudo busybox)
