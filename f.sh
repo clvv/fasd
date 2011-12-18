@@ -51,13 +51,13 @@ _f() {
 
     local FILES
     while [ "$1" ]; do
-      # add the adsolute path of the file to FILES
+      # add the adsolute path of the file to FILES, and a delimiter "|"
       FILES+="$($_F_READLINK -e "$1" 2>> "$_F_SINK")|"
       shift
     done
 
     # add current pwd if the option set
-    [ "$_F_TRACK_PWD" -eq 1 -a "$(pwd -P)" != "$HOME" ] && FILES+="$(pwd -P)"
+    [ "$_F_TRACK_PWD" = "1" -a "$(pwd -P)" != "$HOME" ] && FILES+="$(pwd -P)"
 
     [ -z "${FILES//|/}" ] && return # stop if we have nothing to add
 
@@ -196,9 +196,9 @@ _f() {
       echo "$result" | sort -n | sed 's/^[0-9.]*[ ]*//'
     elif [ "$show" ]; then
       echo "$result" | sort -n
-    elif [ "$fnd" -a "$exec" ]; then
+    elif [ "$fnd" -a "$exec" ]; then # exec
       $exec "$(echo "$result" | sort -n | sed 's/^[0-9.]*[ ]*//' | tail -n1)"
-    elif [ "$fnd" ] && [ "$ZSH_SUBSHELL$BASH_SUBSHELL" -eq 1 ]; then # echo
+    elif [ "$fnd" ] && [ "$ZSH_SUBSHELL$BASH_SUBSHELL" != "0" ]; then # echo
       echo "$(echo "$result" | sort -n | sed 's/^[0-9.]*[ ]*//' | tail -n1)"
     else # no args, show
       echo "$result" | sort -n
@@ -259,8 +259,7 @@ else # fall back on emulated readlink
   _F_READLINK=_f_readlink
 fi
 
-if compctl >> "$_F_SINK" 2>&1; then
-  # zsh tab completion
+if compctl >> "$_F_SINK" 2>&1; then # zsh
   _f_zsh_tab_completion() {
     local compl
     read -c compl
@@ -271,8 +270,7 @@ if compctl >> "$_F_SINK" 2>&1; then
   autoload -U add-zsh-hook
   function _f_preexec () { eval "_f --add $3" >> "$_F_SINK" 2>&1; }
   add-zsh-hook preexec _f_preexec
-elif complete >> "$_F_SINK" 2>&1; then
-  # bash tab completion
+elif complete >> "$_F_SINK" 2>&1; then # bash
   _f_bash_completion() {
     # get completion results using expanded aliases
     local RESULT=$( _f --complete "$(alias -p ${COMP_WORDS} | \
@@ -287,7 +285,7 @@ elif complete >> "$_F_SINK" 2>&1; then
   }
   _f_bash_hook_completion $_F_CMD_A $_F_CMD_S $_F_CMD_D $_F_CMD_F
   # add bash hook
-  echo $PROMPT_COMMAND | grep -q "_f --add"
-  [ $? -gt 0 ] && PROMPT_COMMAND='eval "_f --add $(history 1 | \
+  echo $PROMPT_COMMAND | grep -v -q "_f --add" && \
+    PROMPT_COMMAND='eval "_f --add $(history 1 | \
     sed -e "s/^[ ]*[0-9]*[ ]*//")" >> "$_F_SINK" 2>&1;'"$PROMPT_COMMAND"
 fi
