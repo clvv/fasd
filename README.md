@@ -159,6 +159,9 @@ Which awk to use. f can detect and use a compatible awk.
 
 $_F_SINK
 File to log all STDERR to, defaults to "/dev/null".
+
+$_F_MAX
+Max total score / weight, defaults to 2000.
 ```
 
 # Debugging

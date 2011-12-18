@@ -64,7 +64,7 @@ _f() {
     # maintain the file
     local tempfile
     tempfile="$(mktemp $_F_DATA.XXXXXX)" || return
-    $_F_AWK -v list="$FILES" -v now="$(date +%s)" -F"|" '
+    $_F_AWK -v list="$FILES" -v now="$(date +%s)" -v max="$_F_MAX" -F"|" '
       BEGIN {
         split(list, files, "|")
         for(i in files) {
@@ -86,7 +86,7 @@ _f() {
         count += $2
       }
       END {
-        if( count > 1000 )
+        if( count > max )
           for( i in rank ) print i "|" 0.9*rank[i] "|" time[i] # aging
         else
           for( i in rank ) print i "|" rank[i] "|" time[i]
@@ -218,6 +218,7 @@ alias ${_F_CMD_F:=f}='_f -f'
 [ -z "$_F_IGNORE" ] && _F_IGNORE=(_f cd ls echo)
 [ -z "$_F_SINK" ] && _F_SINK=/dev/null
 [ -z "$_F_TRACK_PWD" ] && _F_TRACK_PWD=1
+[ -z "$_F_MAX" ] && _F_MAX=2000
 
 if [ -z "$_F_AWK" ]; then
   # awk preferences
