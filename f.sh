@@ -185,7 +185,8 @@ _f() {
     # if we hit enter on a completion just execute
     case "$last" in
      # completions will always start with /
-     /*) [ -z "$show$list" -a -${typ} "$last" ] && $exec "$last" && return;;
+     /*) [ -z "$show$list" -a -${typ} "$last" -a "$exec" ] \
+       && $exec "$last" && return;;
     esac
 
     local result
