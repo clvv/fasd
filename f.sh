@@ -220,13 +220,13 @@ alias ${_F_CMD_F:=f}='_f -f'
 if [ -z "$_F_AWK" ]; then
   # awk preferences
   for awk in gawk original-awk nawk mawk awk; do
-    $awk "" 2>&1 >> "$_F_SINK" && _F_AWK=$awk && break
+    $awk "" >> "$_F_SINK" 2>&1 && _F_AWK=$awk && break
   done
 fi
 
-if readlink -e / 2>&1 >> "$_F_SINK"; then
+if readlink -e / >> "$_F_SINK" 2>&1; then
   _F_READLINK=readlink
-elif greadlink -e / 2>&1 >> "$_F_SINK"; then
+elif greadlink -e / >> "$_F_SINK" 2>&1; then
   _F_READLINK=greadlink
 else # fall back on emulated readlink
   _f_readlink() {
@@ -236,11 +236,11 @@ else # fall back on emulated readlink
     [ "$1" = "." ] && echo "$(pwd -P)" && return
     local path
     if [ "${1##*/}" = ".." ]; then
-      path="$(cd "$1" 2>&1 >> "$_F_SINK" && pwd -P)"
+      path="$(cd "$1" >> "$_F_SINK" 2>&1 && pwd -P)"
       [ -z "$path" ] && return 1 # if cd fails
     elif [[ "${1#/}" =~ "/" ]]; then
       # if target contains "/" (not counting top level) or target is ".."
-      local base="$(cd "${1%/*}" 2>&1 >> "$_F_SINK" && pwd -P)"
+      local base="$(cd "${1%/*}" >> "$_F_SINK" 2>&1 && pwd -P)"
       [ -z "$base" ] && return 1 # if cd fails
       path="${base%/}/${1##*/}"
     elif [ -z "${1##/*}" ]; then # straight top level
@@ -256,7 +256,7 @@ else # fall back on emulated readlink
   _F_READLINK=_f_readlink
 fi
 
-if compctl 2>&1 >> "$_F_SINK"; then
+if compctl >> "$_F_SINK" 2>&1; then
   # zsh tab completion
   _f_zsh_tab_completion() {
     local compl
@@ -266,9 +266,9 @@ if compctl 2>&1 >> "$_F_SINK"; then
   compctl -U -K _f_zsh_tab_completion _f
   # add zsh hook
   autoload -U add-zsh-hook
-  function _f_preexec () { eval "_f --add $3" 2>&1 >> "$_F_SINK"; }
+  function _f_preexec () { eval "_f --add $3" >> "$_F_SINK" 2>&1; }
   add-zsh-hook preexec _f_preexec
-elif complete 2>&1 >> "$_F_SINK"; then
+elif complete >> "$_F_SINK" 2>&1; then
   # bash tab completion
   _f_bash_completion() {
     # get completion results using expanded aliases
@@ -286,5 +286,5 @@ elif complete 2>&1 >> "$_F_SINK"; then
   # add bash hook
   echo $PROMPT_COMMAND | grep -q "_f --add"
   [ $? -gt 0 ] && PROMPT_COMMAND='eval "_f --add $(history 1 | \
-    sed -e "s/^[ ]*[0-9]*[ ]*//")" 2>&1 >> "$_F_SINK";'"$PROMPT_COMMAND"
+    sed -e "s/^[ ]*[0-9]*[ ]*//")" >> "$_F_SINK" 2>&1;'"$PROMPT_COMMAND"
 fi
