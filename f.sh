@@ -153,6 +153,17 @@ _f() {
         }
       }' - 2>> "$_F_SINK"
 
+  elif [ "$1" = "--backend" ]; then
+    if [ "$2" = "viminfo" ]; then
+      data+="$(while IFS=" " read line; do
+        [ "${line:0:1}" = ">" ] || continue
+        local fl=${line:2}
+        fl="${fl/\~/$HOME/}"
+        fl="${fl/\/\///}"
+        echo "${fl}|1|$(( $(date +%s) - 3500 ))"
+      done < "$HOME/.viminfo")"
+    fi
+
   else
     # parsing logic and processing
     [ -f "$_F_DATA" ] || return # no db yet
@@ -177,8 +188,18 @@ _f() {
       -a|--any) local typ="e";;
       -d|--directory) local typ="d";;
       -f|--file) local typ="f";;
+      #-b|--backend) local backend+=(${2:?"Argument needed after -b"}); shift;;
       *) fnd+="$1 ";;
     esac; local last="$1"; shift; done
+
+    local data
+
+    #local each
+    #for each in ${backend[@]}; do
+      #_f --backend $each 2>> "$_F_SINK"
+    #done
+
+    _f --backend viminfo
 
     [ "$typ" ] || local typ="e" # default to match file and directory
 
@@ -187,6 +208,12 @@ _f() {
      # completions will always start with /
      /*) [ -z "$show$list" -a -${typ} "$last" ] && $exec "$last" && return;;
     esac
+
+    data+="$(cat "$_F_DATA")"
+
+    echo $data
+
+    return
 
     local result
     result="$(_f --query 2>> "$_F_SINK")" # query the database
