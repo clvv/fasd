@@ -152,8 +152,7 @@ $_F_IGNORE
 List of all commands that will be ignored, defaults to (_f $_F_CMD ls echo).
 
 $_F_TRACK_PWD
-If set to any non-empty string, f will track "$PWD". This is useful when you
-want f to replace autojump or z with f.
+f defaults to track your "$PWD". Set this to 0 to disable this behavior.
 
 $_F_AWK
 Which awk to use. f can detect and use a compatible awk.

@@ -57,7 +57,7 @@ _f() {
     done
 
     # add current pwd if the option set
-    [ "$_F_TRACK_PWD" -a "$(pwd -P)" != "$HOME" ] && FILES+="$(pwd -P)"
+    [ "$_F_TRACK_PWD" -eq 1 -a "$(pwd -P)" != "$HOME" ] && FILES+="$(pwd -P)"
 
     [ -z "${FILES//|/}" ] && return # stop if we have nothing to add
 
@@ -214,8 +214,9 @@ alias ${_F_CMD_F:=f}='_f -f'
 [ -z "$_F_DATA" ] && _F_DATA="$HOME/.f"
 [ -z "$_F_BLACKLIST" ] && _F_BLACKLIST=(--help)
 [ -z "$_F_SHIFT" ] && _F_SHIFT=(sudo busybox)
-[ -z "$_F_IGNORE" ] && _F_IGNORE=(_f ls echo)
+[ -z "$_F_IGNORE" ] && _F_IGNORE=(_f cd ls echo)
 [ -z "$_F_SINK" ] && _F_SINK=/dev/null
+[ -z "$_F_TRACK_PWD" ] && _F_TRACK_PWD=1
 
 if [ -z "$_F_AWK" ]; then
   # awk preferences
