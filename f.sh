@@ -274,7 +274,7 @@ elif complete >> "$_F_SINK" 2>&1; then # bash
   _f_bash_completion() {
     # get completion results using expanded aliases
     local RESULT=$( _f --complete "$(alias -p ${COMP_WORDS} | \
-      tail -n1 | sed -n "s/^.*'\(.*\)'/\1/p") ${COMP_LINE#* }" )
+      sed -n "\$s/^.*'\(.*\)'/\1/p") ${COMP_LINE#* }" )
     local IFS=$'\n'
     COMPREPLY=( $RESULT )
   }
