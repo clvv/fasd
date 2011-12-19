@@ -156,36 +156,40 @@ _f() {
   else
     # parsing logic and processing
     [ -f "$_F_DATA" ] || return # no db yet
-    env getopt -T >> "$_F_SINK" 2>&1
-    [ $? -eq 4 ] && eval "set -- $(env getopt -osle:adfrh \
-      -lcomplete,show,list,rank,recent,exec:,any,directory,file \
-      -- "$@" 2>> "$_F_SINK")"
-    local fnd last; fnd=()
+    local fnd last
     while [ "$1" ]; do case "$1" in
       --complete) [ "$2" = "--" ] && shift; set -- $(echo $2); local list=1;;
-      -h|--help) echo "f [options] [query...]
-      options:
-        -s, --show       show list of files with their ranks
-        -l, --list       list paths only
-        -e, --exec CMD   set command to execute on the result file
-        -a, --any        match files and directories
-        -d, --directory  match directories only
-        -f, --file       match files only
-        -r, --rank       match by rank only
-        -h, --help       show a brief help message" >&2; return;;
-      -s|--show) local show=1;;
-      -l|--list) local list=1;;
-      -r|--rank) local mode="rank";;
-      -t|--recent) local mode="recent";;
-      -e|--exec) local exec=${2:?"Argument needed after -e"}; shift;;
-      -a|--any) local typ="e";;
-      -d|--directory) local typ="d";;
-      -f|--file) local typ="f";;
       --) while [ "$2" ]; do shift; fnd+="$1 "; last="$1"; done;;
+      -*) local opt=${1:1}; while [ "$opt" ]; do case ${opt:0:1} in
+          s) local show=1;;
+          l) local list=1;;
+          r) local mode=rank;;
+          t) local mode=recent;;
+          e) if [ "${opt:1}" ]; then # there are characters after "-e"
+               local exec=${opt:1} # anything after "-e"
+             else # use the next argument
+               local exec=${2:?"Argument needed after -e"}
+               shift
+             fi; break;;
+          a) local typ=e;;
+          d) local typ=d;;
+          f) local typ=f;;
+          h) echo "_f [options] [query ...]
+  options:
+    -s        show list of files with their ranks
+    -l        list paths only
+    -e <cmd>  set command to execute on the result file
+    -a        match files and directories
+    -d        match directories only
+    -f        match files only
+    -r        match by rank only
+    -h        show a brief help message" >&2; return;;
+          #*) fnd+="$1 "; last="$1"; break;; # unknown option detected
+        esac; opt="${opt:1}"; done;;
       *) fnd+="$1 "; last="$1";;
     esac; shift; done
 
-    [ "$typ" ] || local typ="e" # default to match file and directory
+    [ "$typ" ] || local typ=e # default to match file and directory
 
     # if we hit enter on a completion just execute
     case "$last" in
