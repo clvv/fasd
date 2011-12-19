@@ -52,7 +52,7 @@ _f() {
     local FILES
     while [ "$1" ]; do
       # add the adsolute path of the file to FILES, and a delimiter "|"
-      FILES+="$($_F_READLINK -e "$1" 2>> "$_F_SINK")|"
+      FILES+="$($_F_READLINK -e -- "$1" 2>> "$_F_SINK")|"
       shift
     done
 
@@ -156,10 +156,14 @@ _f() {
   else
     # parsing logic and processing
     [ -f "$_F_DATA" ] || return # no db yet
-    local fnd; fnd=()
+    env getopt -T >> "$_F_SINK" 2>&1
+    [ $? -eq 4 ] && eval "set -- $(env getopt -osle:adfrh \
+      -lcomplete,show,list,rank,recent,exec:,any,directory,file \
+      -- "$@" 2>> "$_F_SINK")"
+    local fnd last; fnd=()
     while [ "$1" ]; do case "$1" in
-      --complete) set -- $(echo $2); local list=1;;
-      -h|--help) echo "f [options] [query ..]
+      --complete) [ "$2" = "--" ] && shift; set -- $(echo $2); local list=1;;
+      -h|--help) echo "f [options] [query...]
       options:
         -s, --show       show list of files with their ranks
         -l, --list       list paths only
@@ -177,8 +181,9 @@ _f() {
       -a|--any) local typ="e";;
       -d|--directory) local typ="d";;
       -f|--file) local typ="f";;
-      *) fnd+="$1 ";;
-    esac; local last="$1"; shift; done
+      --) while [ "$2" ]; do shift; fnd+="$1 "; last="$1"; done;;
+      *) fnd+="$1 "; last="$1";;
+    esac; shift; done
 
     [ "$typ" ] || local typ="e" # default to match file and directory
 
@@ -236,6 +241,7 @@ else # fall back on emulated readlink
   _f_readlink() {
     # function that mimics readlink from GNU coreutils
     [ "$1" = "-e" ] && shift && local e=1 # existence option
+    [ "$1" = "--" ] && shift
     [ "$1" = "/" ] && echo / && return
     [ "$1" = "." ] && echo "$(pwd -P)" && return
     local path
