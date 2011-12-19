@@ -4,16 +4,16 @@
 #   Source this file somewhere in your shell rc (.bashrc or .zshrc).
 #
 # SYNOPSIS:
-#   f [options] [query ..]
+#   _f [options] [query ...]
 #     options:
-#       -s, --show       show list of files with their ranks
-#       -l, --list       list paths only
-#       -e, --exec CMD   set command to execute on the result file
-#       -a, --any        match files and directories
-#       -d, --directory  match directories only
-#       -f, --file       match files only
-#       -r, --rank       match by rank only
-#       -h, --help       show a brief help message
+#       -s        show list of files with their ranks
+#       -l        list paths only
+#       -e <cmd>  set command to execute on the result file
+#       -a        match files and directories
+#       -d        match directories only
+#       -f        match files only
+#       -r        match by rank only
+#       -h        show a brief help message
 #
 # EXAMPLES:
 #   f foo # list recent files mathcing foo
