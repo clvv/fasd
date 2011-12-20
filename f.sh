@@ -330,30 +330,23 @@ elif complete >> "$_F_SINK" 2>&1; then # bash
       COMPREPLY=( $RESULT )
     fi
   }
-  _f_bash_hook_word_complete() {
-    for cmd in $*; do
-      local comp
-      comp="$(complete -p "$cmd" 2>> "$_F_SINK")"
-      if [ $? -eq 0 ]; then
-        if echo "$comp" | grep -- -F >> "$_F_SINK" 2>&1; then
-          local func=$( echo "$comp" | sed -n 's/.*-F \(.*\) .*/\1/p' )
-          # meta-programming, creat our completion func
-          eval "_f_bash_word_complete_${func}() {
-            _f_bash_word_complete
-            [ \"\$COMPREPLY\" ] || $func
-          }"
-          eval "$(echo "$comp" | \
-            sed 's/'"$func"'/_f_bash_word_complete_'"$func"'/')" # replace
-        fi
-      else # no completion for $cmd yet
-        complete -o default -o bashdefault -F _f_bash_word_complete $cmd
-      fi
+  _f_bash_word_complete_wrap() {
+    _f_bash_word_complete
+    # try original comp func
+    [ "$COMPREPLY" ] || eval "$( echo "$_F_BASH_COMPLETE_P" | \
+      grep -e "${COMP_WORDS[0]}$" | sed -n 's/.*-F \(.*\) .*/\1/p' )"
+    # fall back on original complete options
+    [ "$COMPREPLY" ] || COMPREPLY=( $(eval "$(echo "$_F_BASH_COMPLETE_P" | \
+      grep -e "${COMP_WORDS[0]}$" | sed 's/complete/compgen/') \
+      ${COMP_WORDS[COMP_CWORD]}" 2>> "$_F_SINK") )
+  }
+  _f_bash_hook_word_complete_wrap_all() {
+    export _F_BASH_COMPLETE_P="$(complete -p)"
+    for cmd in $(complete -p | awk '{print $NF}' | tr '\n' ' '); do
+      complete -F _f_bash_word_complete_wrap $cmd
     done
   }
-  _f_bash_hook_word_complete_all() {
-    _f_bash_hook_word_complete $(complete -p | awk '{print $NF}' | tr '\n' ' ')
-  }
-  _f_bash_hook_word_complete -D >> "$_F_SINK" 2>&1
+  complete -D -F _f_bash_word_complete >> "$_F_SINK" 2>&1
   # add bash hook
   echo $PROMPT_COMMAND | grep -v -q "_f --add" && \
     PROMPT_COMMAND='eval "_f --add $(history 1 | \
