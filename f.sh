@@ -276,7 +276,7 @@ if compctl >> "$_F_SINK" 2>&1; then # zsh
     read -c compl
     reply=(${(f)"$(_f --complete "$compl")"})
   }
-  compctl -U -K _f_zsh_tab_completion -x 'C[-1,-*e]' -c -- _f
+  compctl -U -K _f_zsh_tab_completion -x 'C[-1,-*e],s[-]n[1,e]' -c -- _f
   # add zsh hook
   autoload -U add-zsh-hook
   function _f_preexec () { eval "_f --add $3" >> "$_F_SINK" 2>&1; }
