@@ -276,13 +276,17 @@ if compctl >> "$_F_SINK" 2>&1; then # zsh
     read -c compl
     reply=(${(f)"$(_f --complete "$compl")"})
   }
-  compctl -U -K _f_zsh_tab_completion _f
+  compctl -U -K _f_zsh_tab_completion -x 'C[-1,-*e]' -c -- _f
   # add zsh hook
   autoload -U add-zsh-hook
   function _f_preexec () { eval "_f --add $3" >> "$_F_SINK" 2>&1; }
   add-zsh-hook preexec _f_preexec
 elif complete >> "$_F_SINK" 2>&1; then # bash
   _f_bash_completion() {
+    # complete command after "-e"
+    local cur=${COMP_WORDS[COMP_CWORD]}
+    [[ ${COMP_WORDS[COMP_CWORD-1]} == -*e ]] && \
+      COMPREPLY=( $(compgen -A command $cur) ) && return
     # get completion results using expanded aliases
     local RESULT=$( _f --complete "$(alias -p ${COMP_WORDS} | \
       sed -n "\$s/^.*'\(.*\)'/\1/p") ${COMP_LINE#* }" )
