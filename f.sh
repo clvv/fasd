@@ -272,30 +272,30 @@ else # fall back on emulated readlink
 fi
 
 if compctl >> "$_F_SINK" 2>&1; then # zsh
-  _f_zsh_cmd_completion() {
+  _f_zsh_cmd_complete() {
     local compl
     read -c compl
-    compstate[insert]=menu
+    compstate[insert]=menu # no expand
     reply=(${(f)"$(_f --complete "$compl")"})
   }
-  compctl -U -K _f_zsh_cmd_completion -x 'C[-1,-*e],s[-]n[1,e]' -c -- _f
-  _f_zsh_completion() {
+  compctl -U -K _f_zsh_cmd_complete -x 'C[-1,-*e],s[-]n[1,e]' -c -- _f
+  _f_zsh_word_complete() {
     local fnd="$(echo "${words[CURRENT]}" | sed 's/'"$_F_QUERY_SEPARATOR"'/ /g')"
     local typ=${1:-e}
     _f --query 2>> "$_F_SINK" | sed 's/^[0-9.]*[ ]*//' | while read line; do
       compadd -U "$line"
     done
-    compstate[insert]=menu
+    compstate[insert]=menu # no expand
   }
-  _f_zsh_completion_triger() {
-    [[ ${words[CURRENT]} == "$_F_QUERY_SEPARATOR"* ]] && _f_zsh_completion
+  _f_zsh_word_complete_trigger() {
+    [[ ${words[CURRENT]} == "$_F_QUERY_SEPARATOR"* ]] && _f_zsh_word_complete
   }
-  _f_zsh_completion_f() { _f_zsh_completion f ; }
-  _f_zsh_completion_d() { _f_zsh_completion d ; }
-  zstyle ':completion:*' completer _complete _ignored _f_zsh_completion_triger
-  zle -C f-complete menu-select _f_zsh_completion
-  zle -C f-complete-f menu-select _f_zsh_completion_f
-  zle -C f-complete-d menu-select _f_zsh_completion_d
+  _f_zsh_word_complete_f() { _f_zsh_word_complete f ; }
+  _f_zsh_word_complete_d() { _f_zsh_word_complete d ; }
+  zstyle ':completion:*' completer _complete _ignored _f_zsh_word_complete_triger
+  zle -C f-complete menu-select _f_zsh_word_complete
+  zle -C f-complete-f menu-select _f_zsh_word_complete_f
+  zle -C f-complete-d menu-select _f_zsh_word_complete_d
   # add zsh hook
   autoload -U add-zsh-hook
   function _f_preexec () { eval "_f --add $3" >> "$_F_SINK" 2>&1; }
