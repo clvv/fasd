@@ -229,7 +229,7 @@ alias ${_F_CMD_F:=f}='_f -f'
 [ -z "$_F_SINK" ] && _F_SINK=/dev/null
 [ -z "$_F_TRACK_PWD" ] && _F_TRACK_PWD=1
 [ -z "$_F_MAX" ] && _F_MAX=2000
-[ -z "$_F_QUERY_SEPARATOR" ] && _F_QUERY_SEPARATOR="__"
+[ -z "$_F_QUERY_SEPARATOR" ] && _F_QUERY_SEPARATOR=@
 
 if [ -z "$_F_AWK" ]; then
   # awk preferences
@@ -272,23 +272,30 @@ else # fall back on emulated readlink
 fi
 
 if compctl >> "$_F_SINK" 2>&1; then # zsh
-  _f_zsh_tab_completion() {
+  _f_zsh_cmd_completion() {
     local compl
     read -c compl
+    compstate[insert]=menu
     reply=(${(f)"$(_f --complete "$compl")"})
   }
-  compctl -U -K _f_zsh_tab_completion -x 'C[-1,-*e],s[-]n[1,e]' -c -- _f
-  _f_zsh_magic_completion() {
-    # magic completion
-    if [[ ${words[CURRENT]} =~ "$_F_QUERY_SEPARATOR" ]]; then
-      local fnd="$(echo "${words[CURRENT]}" | sed 's/'"$_F_QUERY_SEPARATOR"'/ /g')"
-      local typ=e
-      _f --query 2>> "$_F_SINK" | sed 's/^[0-9.]*[ ]*//' | while read line; do
-        compadd -U $line
-      done
-    fi
+  compctl -U -K _f_zsh_cmd_completion -x 'C[-1,-*e],s[-]n[1,e]' -c -- _f
+  _f_zsh_completion() {
+    local fnd="$(echo "${words[CURRENT]}" | sed 's/'"$_F_QUERY_SEPARATOR"'/ /g')"
+    local typ=${1:-e}
+    _f --query 2>> "$_F_SINK" | sed 's/^[0-9.]*[ ]*//' | while read line; do
+      compadd -U "$line"
+    done
+    compstate[insert]=menu
   }
-  compdef _f_zsh_magic_completion -first- >> "$_F_SINK" 2>&1
+  _f_zsh_completion_triger() {
+    [[ ${words[CURRENT]} == "$_F_QUERY_SEPARATOR"* ]] && _f_zsh_completion
+  }
+  _f_zsh_completion_f() { _f_zsh_completion f ; }
+  _f_zsh_completion_d() { _f_zsh_completion d ; }
+  zstyle ':completion:*' completer _complete _ignored _f_zsh_completion_triger
+  zle -C f-complete menu-select _f_zsh_completion
+  zle -C f-complete-f menu-select _f_zsh_completion_f
+  zle -C f-complete-d menu-select _f_zsh_completion_d
   # add zsh hook
   autoload -U add-zsh-hook
   function _f_preexec () { eval "_f --add $3" >> "$_F_SINK" 2>&1; }
