@@ -301,7 +301,7 @@ if compctl >> "$_F_SINK" 2>&1; then # zsh
   function _f_preexec () { eval "_f --add $3" >> "$_F_SINK" 2>&1; }
   add-zsh-hook preexec _f_preexec
 elif complete >> "$_F_SINK" 2>&1; then # bash
-  _f_bash_completion() {
+  _f_bash_cmd_complete() {
     # complete command after "-e"
     local cur=${COMP_WORDS[COMP_CWORD]}
     [[ ${COMP_WORDS[COMP_CWORD-1]} == -*e ]] && \
@@ -312,13 +312,13 @@ elif complete >> "$_F_SINK" 2>&1; then # bash
     local IFS=$'\n'
     COMPREPLY=( $RESULT )
   }
-  _f_bash_hook_completion() {
+  _f_bash_hook_cmd_complete() {
     for cmd in $*; do
-      complete -F _f_bash_completion $cmd
+      complete -F _f_bash_cmd_complete $cmd
     done
   }
-  _f_bash_hook_completion $_F_CMD_A $_F_CMD_S $_F_CMD_D $_F_CMD_F
-  _f_bash_magic_completion() {
+  _f_bash_hook_cmd_complete $_F_CMD_A $_F_CMD_S $_F_CMD_D $_F_CMD_F
+  _f_bash_word_complete() {
     local cur=${COMP_WORDS[COMP_CWORD]}
     if [[ $cur =~ "$_F_QUERY_SEPARATOR" ]]; then
       local fnd="$(echo "$cur" | sed 's/'"$_F_QUERY_SEPARATOR"'/ /g')"
@@ -328,7 +328,7 @@ elif complete >> "$_F_SINK" 2>&1; then # bash
       COMPREPLY=( $RESULT )
     fi
   }
-  _f_bash_hook_magic_completion() {
+  _f_bash_hook_word_complete() {
     for cmd in $*; do
       local comp
       comp="$(complete -p "$cmd" 2>> "$_F_SINK")"
@@ -336,22 +336,22 @@ elif complete >> "$_F_SINK" 2>&1; then # bash
         if echo "$comp" | grep -- -F >> "$_F_SINK" 2>&1; then
           local func=$( echo "$comp" | sed -n 's/.*-F \(.*\) .*/\1/p' )
           # meta-programming, creat our completion func
-          eval "_f_bash_magic_completion_${func}() {
-            _f_bash_magic_completion
+          eval "_f_bash_word_complete_${func}() {
+            _f_bash_word_complete
             [ \"\$COMPREPLY\" ] || $func
           }"
           eval "$(echo "$comp" | \
-            sed 's/'"$func"'/_f_bash_magic_completion_'"$func"'/')" # replace
+            sed 's/'"$func"'/_f_bash_word_complete_'"$func"'/')" # replace
         fi
       else # no completion for $cmd yet
-        complete -o default -o bashdefault -F _f_bash_magic_completion $cmd
+        complete -o default -o bashdefault -F _f_bash_word_complete $cmd
       fi
     done
   }
-  _f_bash_hook_magic_completion_all() {
-    _f_bash_hook_magic_completion $(complete -p | awk '{print $NF}' | tr '\n' ' ')
+  _f_bash_hook_word_complete_all() {
+    _f_bash_hook_word_complete $(complete -p | awk '{print $NF}' | tr '\n' ' ')
   }
-  _f_bash_hook_magic_completion -D >> "$_F_SINK" 2>&1
+  _f_bash_hook_word_complete -D >> "$_F_SINK" 2>&1
   # add bash hook
   echo $PROMPT_COMMAND | grep -v -q "_f --add" && \
     PROMPT_COMMAND='eval "_f --add $(history 1 | \

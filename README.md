@@ -92,11 +92,11 @@ alias j='d -e cd' # quick cd into directories, mimicking autojump and z
 alias o='a -e xdg-open' # quick opening files with xdg-open
 ```
 
-If you're using bash, you have to call `_f_bash_hook_completion` to make
+If you're using bash, you have to call `_f_bash_hook_cmd_complete` to make
 completion work. For instance:
 
 ```bash
-_f_bash_hook_completion v m j o
+_f_bash_hook_cmd_complete v m j o
 ```
 
 # How It Works
