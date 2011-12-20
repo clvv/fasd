@@ -337,13 +337,14 @@ elif complete >> "$_F_SINK" 2>&1; then # bash
             sed 's/'"$func"'/_f_bash_magic_completion_'"$func"'/')" # replace
         fi
       else # no completion for $cmd yet
-        complete -o default -p bashdefault -F _f_bash_magic_completion $cmd
+        complete -o default -o bashdefault -F _f_bash_magic_completion $cmd
       fi
     done
   }
   _f_bash_hook_magic_completion_all() {
     _f_bash_hook_magic_completion $(complete -p | awk '{print $NF}' | tr '\n' ' ')
   }
+  _f_bash_hook_magic_completion -D >> "$_F_SINK" 2>&1
   # add bash hook
   echo $PROMPT_COMMAND | grep -v -q "_f --add" && \
     PROMPT_COMMAND='eval "_f --add $(history 1 | \
