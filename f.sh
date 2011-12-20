@@ -292,10 +292,12 @@ if compctl >> "$_F_SINK" 2>&1; then # zsh
   }
   _f_zsh_word_complete_f() { _f_zsh_word_complete f ; }
   _f_zsh_word_complete_d() { _f_zsh_word_complete d ; }
-  zstyle ':completion:*' completer _complete _ignored _f_zsh_word_complete_triger
-  zle -C f-complete menu-select _f_zsh_word_complete
-  zle -C f-complete-f menu-select _f_zsh_word_complete_f
-  zle -C f-complete-d menu-select _f_zsh_word_complete_d
+  { zstyle ':completion:*' completer _complete _ignored \
+    _f_zsh_word_complete_triger
+    zle -C f-complete menu-select _f_zsh_word_complete
+    zle -C f-complete-f menu-select _f_zsh_word_complete_f
+    zle -C f-complete-d menu-select _f_zsh_word_complete_d
+  } >> "$_F_SINK" 2>&1
   # add zsh hook
   autoload -U add-zsh-hook
   function _f_preexec () { eval "_f --add $3" >> "$_F_SINK" 2>&1; }
