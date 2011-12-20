@@ -229,7 +229,7 @@ alias ${_F_CMD_F:=f}='_f -f'
 [ -z "$_F_SINK" ] && _F_SINK=/dev/null
 [ -z "$_F_TRACK_PWD" ] && _F_TRACK_PWD=1
 [ -z "$_F_MAX" ] && _F_MAX=2000
-[ -z "$_F_QUERY_SEPARATOR" ] && _F_QUERY_SEPARATOR=@
+[ -z "$_F_QUERY_SEPARATOR" ] && _F_QUERY_SEPARATOR=,
 
 if [ -z "$_F_AWK" ]; then
   # awk preferences
@@ -293,7 +293,7 @@ if compctl >> "$_F_SINK" 2>&1; then # zsh
   _f_zsh_word_complete_f() { _f_zsh_word_complete f ; }
   _f_zsh_word_complete_d() { _f_zsh_word_complete d ; }
   { zstyle ':completion:*' completer _complete _ignored \
-    _f_zsh_word_complete_triger
+    _f_zsh_word_complete_trigger
     zle -C f-complete menu-select _f_zsh_word_complete
     zle -C f-complete-f menu-select _f_zsh_word_complete_f
     zle -C f-complete-d menu-select _f_zsh_word_complete_d
@@ -322,7 +322,7 @@ elif complete >> "$_F_SINK" 2>&1; then # bash
   _f_bash_hook_cmd_complete $_F_CMD_A $_F_CMD_S $_F_CMD_D $_F_CMD_F
   _f_bash_word_complete() {
     local cur=${COMP_WORDS[COMP_CWORD]}
-    if [[ $cur =~ "$_F_QUERY_SEPARATOR" ]]; then
+    if [[ $cur == "$_F_QUERY_SEPARATOR"* ]]; then
       local fnd="$(echo "$cur" | sed 's/'"$_F_QUERY_SEPARATOR"'/ /g')"
       local typ=e
       local RESULT=$(_f --query 2>> "$_F_SINK" | sed 's/^[0-9.]*[ ]*//')
