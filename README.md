@@ -127,8 +127,35 @@ _f [options] [query ...]
 
 # Tab Completion
 
-`f` supports tab completion. A tip for using completion: type an extra space
-after your query strings so that the completion won't overwrite your queries.
+`f` offers two completion modes, command completion and word completion.
+
+Command mode completion is just like completion for any other commands. It is
+triggered when you hit tab on a `f` command or its aliases. Under this mode
+your queries can be separated by a space. Tip: if you find that the completion
+result overwrites your queries, type an extra space before you hit tab.
+
+Word mode completion can be triggered on *any* command. This can be a powerful
+feature if you make good use of it. Word completion is triggered by any command
+line argument that starts with `,`(a comma). Example:
+
+```sh
+$ vim ,f,sh<Tab>
+$ vim /usr/lib/f.sh
+```
+
+If you use zsh, word completion is enabled by default. There're also three zle
+widgets: `f-complete`, `f-complete-f`, `f-complete-d`. You can bind them to
+keybindings you like:
+
+```sh
+bindkey '^X^A' f-complete    # C-x C-A to  f-complete
+bindkey '^X^F' f-complete-f  # C-x C-f to do f-cmplete-f (only files)
+bindkey '^X^D' f-complete-d  # C-x C-d to do f-complete-d (only directories)
+```
+
+If you use bash, you have to call `_f_bash_hook_word_complete_wrap_all` after
+sourcing `f` *and* after any bash completion set up. Note that this will alter
+your existing completion setup, but in most cases it should work.
 
 # Tweaks
 
