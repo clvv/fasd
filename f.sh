@@ -207,7 +207,7 @@ _f() {
     elif [ "$fnd" -a "$exec" ]; then # exec
       $exec "$(echo "$result" | sort -n | sed -n '$s/^[0-9.]*[ ]*//p')"
     elif [ "$fnd" ] && [ "$ZSH_SUBSHELL$BASH_SUBSHELL" != "0" ]; then # echo
-      echo "$(echo "$result" | sort -n | sed -n '$s/^[0-9.]*[ ]*//p')"
+      echo "$result" | sort -n | sed -n '$s/^[0-9.]*[ ]*//p'
     else # no args, show
       echo "$result" | sort -n${r}
     fi
@@ -323,7 +323,6 @@ elif complete >> "$_F_SINK" 2>&1; then # bash
     local cur=${COMP_WORDS[COMP_CWORD]}
     if [[ $cur == "$_F_QUERY_SEPARATOR"* ]]; then
       local fnd="$(echo "$cur" | sed 's/'"$_F_QUERY_SEPARATOR"'/ /g')"
-      local typ=e
       local RESULT=$(_f --query 2>> "$_F_SINK" | sed 's/^[0-9.]*[ ]*//')
       local IFS=$'\n'
       COMPREPLY=( $RESULT )
