@@ -154,9 +154,11 @@ bindkey '^X^F' f-complete-f  # C-x C-f to do f-cmplete-f (only files)
 bindkey '^X^D' f-complete-d  # C-x C-d to do f-complete-d (only directories)
 ```
 
-If you use bash, you have to call `_f_bash_hook_word_complete_wrap_all` after
-sourcing `f` *and* after any bash completion set up. Note that this will alter
-your existing completion setup, but in most cases it should work.
+If you use bash, you can turn on this *experimental feature* by calling
+`_f_bash_hook_word_complete_wrap_all` after sourcing `f` *and* after any bash
+completion setup. This will alter your existing completion setup, so you might
+get a *broken* completion system.
+
 
 # Tweaks
 
