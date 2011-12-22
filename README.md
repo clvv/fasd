@@ -196,7 +196,7 @@ Max total score / weight, defaults to 2000.
 
 If `f` does not work as expected, please file a bug report describing the
 unexpected behavior along with your OS version, bash/zsh version, awk version,
-sed version, and an log file.
+sed version, and a log file.
 
 You can set `_F_SINK` to obtain a log.
 
@@ -207,10 +207,9 @@ export _F_SINK="$HOME/.f.log"
 # TODO
 
 1. Tests!
-2. More versatile option parsing.
-3. Multiple searches, parameters delimited by `-`.
-4. More backends: `rencently-used.xbel`, `.viminfo`, etc.
-5. Code refactoring, more modular setup.
+2. Multiple searches, parameters separated by `-`.
+3. More backends: `rencently-used.xbel`, `.viminfo`, etc.
+4. Code refactoring, more modular setup.
 
 # Acknowledgements
 
