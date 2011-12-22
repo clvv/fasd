@@ -332,10 +332,10 @@ elif complete >> "$_F_SINK" 2>&1; then # bash
     _f_bash_word_complete
     # try original comp func
     [ "$COMPREPLY" ] || eval "$( echo "$_F_BASH_COMPLETE_P" | \
-      grep -e "${COMP_WORDS[0]}$" | sed -n 's/.*-F \(.*\) .*/\1/p' )"
+      sed -n "/ ${COMP_WORDS[0]}$/"'s/.*-F \(.*\) .*/\1/p' )"
     # fall back on original complete options
     [ "$COMPREPLY" ] || COMPREPLY=( $(eval "$(echo "$_F_BASH_COMPLETE_P" | \
-      grep -e "${COMP_WORDS[0]}$" | sed 's/complete/compgen/') \
+      sed -n "/ ${COMP_WORDS[0]}$/"'s/complete/compgen/') \
       ${COMP_WORDS[COMP_CWORD]}" 2>> "$_F_SINK") )
   }
   _f_bash_hook_word_complete_wrap_all() {
