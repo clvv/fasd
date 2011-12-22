@@ -279,7 +279,7 @@ if compctl >> "$_F_SINK" 2>&1; then # zsh
   }
   compctl -U -K _f_zsh_cmd_complete -V f -x 'C[-1,-*e],s[-]n[1,e]' -c -- _f
   _f_zsh_word_complete() {
-    local fnd="$(echo "${words[CURRENT]}" | sed 's/'"$_F_QUERY_SEPARATOR"'/ /g')"
+    local fnd="${words[CURRENT]//$_F_QUERY_SEPARATOR/ }"
     local typ=${1:-e}
     _f --query 2>> "$_F_SINK" | sort -nr | sed 's/^[0-9.]*[ ]*//' | while read line; do
       compadd -U -V f "$line"
@@ -322,7 +322,7 @@ elif complete >> "$_F_SINK" 2>&1; then # bash
   _f_bash_word_complete() {
     local cur=${COMP_WORDS[COMP_CWORD]}
     if [[ $cur == "$_F_QUERY_SEPARATOR"* ]]; then
-      local fnd="$(echo "$cur" | sed 's/'"$_F_QUERY_SEPARATOR"'/ /g')"
+      local fnd="${cur//$_F_QUERY_SEPARATOR/ }"
       local RESULT=$(_f --query 2>> "$_F_SINK" | sed 's/^[0-9.]*[ ]*//')
       local IFS=$'\n'
       COMPREPLY=( $RESULT )
