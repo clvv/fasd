@@ -179,7 +179,7 @@ $_F_SHIFT
 List of all commands that needs to be shifted, defaults to (sudo busybox).
 
 $_F_IGNORE
-List of all commands that will be ignored, defaults to (_f $_F_CMD ls echo).
+List of all commands that will be ignored, defaults to (_f cd ls echo).
 
 $_F_TRACK_PWD
 f defaults to track your "$PWD". Set this to 0 to disable this behavior.

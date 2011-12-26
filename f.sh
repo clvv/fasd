@@ -31,7 +31,7 @@ _f() {
   if [ "$1" = "--add" ]; then # add entries
     shift
 
-    # bail out if we don't own ~/.f (we're another user but our ENV is still set)
+    # stop if we don't own ~/.f (we're another user but our ENV is still set)
     [ -f "$_F_DATA" -a ! -O "$_F_DATA" ] && return
 
     # blacklists
@@ -46,8 +46,11 @@ _f() {
     done
 
     # ignores
-    [[ "${_F_IGNORE[@]}" =~ "$1" ]] && return
-    shift
+    for each in "$_F_IGNORE[@]"; do
+      [ "$1" = "$each" ] && return
+    done
+
+    shift # shift out the command itself
 
     local FILES
     while [ "$1" ]; do
