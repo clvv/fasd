@@ -52,13 +52,9 @@ cp `f mov` .
 
 # Install
 
-`f` can work with both `bash` and `zsh`. You will also need `gawk` or `nawk`
-(`original-awk` for debian-like). Preferably, you should have `gawk` and GNU
-version of `readlink`.
-
-`f` should work out of the box on most Linux and BSD distros. But if `f` does
-not work for you, please try installing `gawk` and updating your shell to
-a newer version.
+`f` can work with both `bash` and `zsh`. `f` should work out of the box on most
+Linux and BSD distros. But if `f` does not work for you, please try updating
+your shell to a newer version.
 
 To use `f`, just source `f.sh`:
 
@@ -66,8 +62,8 @@ To use `f`, just source `f.sh`:
 source f.sh
 ```
 
-Of course, you should put it into your shell rc file once you've decided to use
-it.
+Of course, you should put the above line into your shell rc file once you've
+decided to use it.
 
 After you first installed `f`, open some files (with any program) and `cd`
 around in your shell. Then try some examples below.
