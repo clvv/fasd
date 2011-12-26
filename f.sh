@@ -52,22 +52,22 @@ _f() {
 
     shift # shift out the command itself
 
-    local FILES
+    local paths
     while [ "$1" ]; do
-      # add the adsolute path of the file to FILES, and a delimiter "|"
-      FILES+="$($_F_READLINK -e -- "$1" 2>> "$_F_SINK")|"
+      # add the adsolute path to "paths", and a separator "|"
+      paths+="$($_F_READLINK -e -- "$1" 2>> "$_F_SINK")|"
       shift
     done
 
-    # add current pwd if the option set
-    [ "$_F_TRACK_PWD" = "1" -a "$(pwd -P)" != "$HOME" ] && FILES+="$(pwd -P)"
+    # add current pwd if the option is set
+    [ "$_F_TRACK_PWD" = "1" -a "$(pwd -P)" != "$HOME" ] && paths+="$(pwd -P)"
 
-    [ -z "${FILES//|/}" ] && return # stop if we have nothing to add
+    [ -z "${paths//|/}" ] && return # stop if we have nothing to add
 
     # maintain the file
     local tempfile
     tempfile="$(mktemp $_F_DATA.XXXXXX)" || return
-    $_F_AWK -v list="$FILES" -v now="$(date +%s)" -v max="$_F_MAX" -F"|" '
+    $_F_AWK -v list="$paths" -v now="$(date +%s)" -v max="$_F_MAX" -F"|" '
       BEGIN {
         split(list, files, "|")
         for(i in files) {
