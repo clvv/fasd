@@ -308,9 +308,9 @@ fi
       _f_zsh_word_complete_trigger
 
     # define zle widgets
-    zle -C f-complete menu-select _f_zsh_word_complete
-    zle -C f-complete-f menu-select _f_zsh_word_complete_f
-    zle -C f-complete-d menu-select _f_zsh_word_complete_d
+    zle -C f-complete 'menu-select' _f_zsh_word_complete
+    zle -C f-complete-f 'menu-select' _f_zsh_word_complete_f
+    zle -C f-complete-d 'menu-select' _f_zsh_word_complete_d
 
     # add zsh hook
     function _f_preexec () { eval "_f --add $3" 2>&1; }
