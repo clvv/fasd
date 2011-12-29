@@ -1,6 +1,6 @@
 # F
 
-`f` is a tool for quick access to files in bash and zsh. It is inspired by
+`f` is a tool for quick access to files for POSIX shells. It is inspired by
 tools like `autojump`, `z` and `v`. `f` keeps track of files you have accessed,
 so that you can quickly reference them in the command line.
 
@@ -11,7 +11,7 @@ so that you can quickly reference them in the command line.
 `f` uses [Bayesian Inference](https://en.wikipedia.org/wiki/Bayesian_inference)
 and [Bayesian Ranking](https://github.com/clvv/f/wiki/Bayesian-Ranking) to rank
 files and directories for a set of given matching patterns. "Frecency" is used
-as the prior probability distribution, and an simple algorithm is used to
+as the prior probability distribution, and a simple algorithm is used to
 calculate the likelihood of the given set of patterns.
 
 # Introduction
@@ -50,11 +50,15 @@ mv update.html `d www`
 cp `f mov` .
 ```
 
-# Install
+# Compatibility
 
-`f` can work with both `bash` and `zsh`. `f` should work out of the box on most
-Linux and BSD distros. But if `f` does not work for you, please try updating
-your shell to a newer version.
+`f`'s basic functionalities are POSIX compliant, meaning that you should be
+able to use `f` in all POSIX compliant shells. But `f` works the best with
+`bash` and `zsh`, since these are the only two shells that provide
+`$PROMPT_COMMAND` or `precmd` functionality for `f` to automatically track your
+commands.
+
+# Install
 
 To use `f`, just source `f.sh`:
 
@@ -193,8 +197,8 @@ Max total score / weight, defaults to 2000.
 # Debugging
 
 If `f` does not work as expected, please file a bug report describing the
-unexpected behavior along with your OS version, bash/zsh version, awk version,
-sed version, and a log file.
+unexpected behavior along with your OS version, shell version, awk version, sed
+version, and a log file.
 
 You can set `_F_SINK` to obtain a log.
 
