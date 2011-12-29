@@ -351,7 +351,7 @@ _f() {
     _f_bash_word_complete() {
       eval 'local cur=${COMP_WORDS[COMP_CWORD]}'
       if [[ $cur == "$_F_QUERY_SEPARATOR"* ]]; then
-        local fnd="${cur//$_F_QUERY_SEPARATOR/ }"
+        eval 'local fnd="${cur//$_F_QUERY_SEPARATOR/ }"'
         local RESULT=$(_f --query | sed 's/^[0-9.]*[ ]*//')
         local IFS=$'\n'
         eval 'COMPREPLY=( $RESULT )'
