@@ -55,12 +55,13 @@ _f() {
     local paths
     while [ "$1" ]; do
       # add the adsolute path to "paths", and a separator "|"
-      paths+="$($_F_READLINK -e -- "$1" 2>> "$_F_SINK")|"
+      paths="$paths$($_F_READLINK -e -- "$1" 2>> "$_F_SINK")|"
       shift
     done
 
     # add current pwd if the option is set
-    [ "$_F_TRACK_PWD" = "1" -a "$(pwd -P)" != "$HOME" ] && paths+="$(pwd -P)"
+    [ "$_F_TRACK_PWD" = "1" -a "$(pwd -P)" != "$HOME" ] && \
+      paths="$paths$(pwd -P)"
 
     [ -z "${paths##|}" ] && return # stop if we have nothing to add
 
@@ -187,7 +188,6 @@ _f() {
     -f        match files only
     -r        match by rank only
     -h        show a brief help message" >&2; return;;
-          #*) fnd+="$1 "; last="$1"; break;; # unknown option detected
         esac; o="${o#?}"; done;;
       *) fnd="$fnd$1 "; last="$1";;
     esac; shift; done
@@ -372,6 +372,16 @@ _f() {
     echo $PROMPT_COMMAND | grep -v -q "_f --add" && \
       PROMPT_COMMAND='eval "_f --add $(history 1 | \
       sed -e "s/^[ ]*[0-9]*[ ]*//")" >> "$_F_SINK" 2>&1;'"$PROMPT_COMMAND"
+
+  else # posix shell
+    _f_ps1_func() {
+      eval "_f --add $( fc -nl -0 | sed -n '$s/\s*\(.*\)/\1/p' )"
+    }
+    _f_ps1_install() {
+      echo "$PS1" | grep -v -q "_f_ps1_func" && \
+      export PS1="$PS1\$(_f_ps1_func >> "$_F_SINK" 2>&1)"
+    }
+    [ "$KSH_VERSION" ] && _f_ps1_install # ksh has the compatibility
 
   fi
 } >> "$_F_SINK" 2>&1
