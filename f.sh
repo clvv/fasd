@@ -292,15 +292,15 @@ _f() {
       eval 'local fnd="${words[CURRENT]//$_F_QUERY_SEPARATOR/ }"'
       local typ=${1:-e}
       _f --query | sort -nr | sed 's/^[0-9.]*[ ]*//' | while read line; do
-          compadd -U -V f "$line"
-        done
-        compstate[insert]=menu # no expand
+        compadd -U -V f "$line"
+      done
+      compstate[insert]=menu # no expand
     }
     _f_zsh_word_complete_f() { _f_zsh_word_complete f ; }
     _f_zsh_word_complete_d() { _f_zsh_word_complete d ; }
-    _f_zsh_word_complete_trigger() {
-      eval '[[ ${words[CURRENT]} == "$_F_QUERY_SEPARATOR"* ]] && _f_zsh_word_complete'
-    }
+    eval '_f_zsh_word_complete_trigger() {
+      [[ ${words[CURRENT]} == "$_F_QUERY_SEPARATOR"* ]] && _f_zsh_word_complete
+    }'
 
     # enable word mode completion
     zstyle ':completion:*' completer _complete _ignored \
@@ -350,13 +350,14 @@ _f() {
     }
     _f_bash_word_complete_wrap() {
       _f_bash_word_complete
+      eval 'local z=${COMP_WORDS[0]} c=${COMP_WORDS[COMP_CWORD]}'
       # try original comp func
-      eval '[ "$COMPREPLY" ] || eval "$( echo "$_F_BASH_COMPLETE_P" | \
-        sed -n "/ ${COMP_WORDS[0]}$/"''s/.*-F \(.*\) .*/\1/p'' )"'
+      [ "$COMPREPLY" ] || eval "$( echo "$_F_BASH_COMPLETE_P" | \
+        sed -n "/ $z$/"'s/.*-F \(.*\) .*/\1/p' )"
       # fall back on original complete options
-      eval '[ "$COMPREPLY" ] || COMPREPLY=( $(eval "$(echo "$_F_BASH_COMPLETE_P" | \
-        sed -n "/ ${COMP_WORDS[0]}$/"''s/complete/compgen/'') \
-        ${COMP_WORDS[COMP_CWORD]}" ) )'
+      local cmd="$(echo "$_F_BASH_COMPLETE_P" | \
+        sed -n "/ $z$/"'s/complete/compgen/') $c"
+      [ "$COMPREPLY" ] || eval 'COMPREPLY=( $(eval $cmd) )'
     }
     _f_bash_hook_word_complete_wrap_all() {
       export _F_BASH_COMPLETE_P="$(complete -p)"
