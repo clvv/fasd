@@ -236,15 +236,24 @@ _f() {
   if [ -z "$_F_AWK" ]; then
     # awk preferences
     for awk in gawk original-awk nawk mawk awk; do
-      $awk "" >> "$_F_SINK" 2>&1 && _F_AWK=$awk && break
+      $awk "" && _F_AWK=$awk && break
     done
   fi
 
   # readlink setup
-  if readlink -e / >> "$_F_SINK" 2>&1; then
+  if readlink -e / ; then
     _F_READLINK=readlink
-  elif greadlink -e / >> "$_F_SINK" 2>&1; then
+  elif greadlink -e / ; then
     _F_READLINK=greadlink
+  elif readlink -f /; then # somewhat compatible readlink
+    _f_readlink() {
+      [ "$1" = "-e" ] && shift && local e=1 # existence option
+      local path; path="$(readlink -f $1 2>> "$_F_SINK")"
+      [ $? -gt 0 ] && return 1
+      [ "$e" = "1" -a ! -e "$path" ] && return 1
+      echo "$path"
+    }
+    _F_READLINK=_f_readlink
   else # fall back on emulated readlink
     _f_readlink() {
       # function that mimics readlink from GNU coreutils
@@ -382,6 +391,7 @@ _f() {
       echo "$PS1" | grep -v -q "_f_ps1_func" && \
       export PS1="$PS1\$(_f_ps1_func >> "$_F_SINK" 2>&1)"
     }
+    echo "$PS1" | grep -q '\\' && _f_ps1_install
     [ "$KSH_VERSION" ] && _f_ps1_install # ksh has the compatibility
 
   fi
