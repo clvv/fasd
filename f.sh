@@ -220,19 +220,22 @@ _f() {
     # stop if we don't own ~/.f (we're another user but our ENV is still set)
     [ -f "$_F_DATA" -a ! -O "$_F_DATA" ] && return
 
+    # make zsh do word splitting here
+    [ "$ZSH_VERSION" ] && emulate sh && setopt localoptions
+
     # blacklists
     local each
-    for each in "$_F_BLACKLIST"; do
+    for each in $_F_BLACKLIST; do
       case "$*" in *$each*) return;; esac
     done
 
     # shifts
-    for each in "$_F_SHIFT"; do
+    for each in $_F_SHIFT; do
       while [ "$1" = "$each" ]; do shift; done
     done
 
     # ignores
-    for each in "$_F_IGNORE"; do
+    for each in $_F_IGNORE; do
       [ "$1" = "$each" ] && return
     done
 
