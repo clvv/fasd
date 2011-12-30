@@ -50,14 +50,6 @@ mv update.html `d www`
 cp `f mov` .
 ```
 
-# Compatibility
-
-`f`'s basic functionalities are POSIX compliant, meaning that you should be
-able to use `f` in all POSIX compliant shells. But `f` works the best with
-`bash` and `zsh`, since these are the only two shells that provide
-`$PROMPT_COMMAND` or `precmd` functionality for `f` to automatically track your
-commands.
-
 # Install
 
 To use `f`, just source `f.sh`:
@@ -109,6 +101,17 @@ to the database.
 When you run `f` with search arguments, `f` uses [Bayesian
 Ranking](https://github.com/clvv/f/wiki/Bayesian-Ranking) to find the best
 match.
+
+# Compatibility
+
+`f`'s basic functionalities are POSIX compliant, meaning that you should be
+able to use `f` in all POSIX compliant shells. Your shell need to support
+command substitution in `$PS1` in order for `f` to automatically track your
+commands and files. This feature is not specified by the POSIX standard, but
+it's nonetheless present in many POSIX compliant shells. If you use some shell
+other than `bash`, `zsh` or `ksh` and `f` does not work out of the box for you,
+you can try calling `_f_ps1_install` to manually install the hook to your
+`$PS1`.
 
 # Synopsis
 
