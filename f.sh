@@ -56,7 +56,7 @@ _f() {
       elif readlink -f /; then # somewhat compatible readlink
         _f_readlink() {
           [ "$1" = "-e" ] && shift && local e=1 # existence option
-          local path; path="$(readlink -f $1 2>> "$_F_SINK")"
+          local path; path="$(readlink -f -- $1 2>> "$_F_SINK")"
           [ $? -gt 0 ] && return 1
           [ "$e" = "1" -a ! -e "$path" ] && return 1
           echo "$path"
