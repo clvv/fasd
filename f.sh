@@ -395,7 +395,7 @@ _f() {
       echo "$result" | sort -n${r}
     elif [ "$fnd" -a "$exec" ]; then # exec
       $exec "$(echo "$result" | sort -n | sed -n '$s/^[0-9.]*[ ]*//p')"
-    elif [ "$fnd" ] && [ "$ZSH_SUBSHELL$BASH_SUBSHELL" != "0" ]; then # echo
+    elif [ "$fnd" -a ! -t 1 ]; then # echo if output is not terminal
       echo "$result" | sort -n | sed -n '$s/^[0-9.]*[ ]*//p'
     else # no args, show
       echo "$result" | sort -n${r}
