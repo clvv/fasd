@@ -1,3 +1,4 @@
+#!/usr/bin/env sh
 # This tool gives you quick access to your frequent/recent files
 #
 # INSTALL:
@@ -404,5 +405,9 @@ _f() {
 }
 
 _f --init
-[ "$_F_RUN" ] && _f "$@" || _f --init-interactive
+
+case "$-" in
+  *i*) _f --init-interactive;; # assume being sourced
+  **) _f "$@" # assume being executed as an executable
+esac
 
