@@ -226,18 +226,21 @@ _f() {
     # blacklists
     local each
     for each in $_F_BLACKLIST; do
-      case "$*" in *$each*) return;; esac
+      case " $* " in *\ $each\ *) return;; esac
     done
 
     # shifts
-    for each in $_F_SHIFT; do
-      while [ "$1" = "$each" ]; do shift; done
+    while true; do
+      case " $_F_SHIFT " in
+        *\ $1\ *) shift;;
+        *) break
+      esac
     done
 
     # ignores
-    for each in $_F_IGNORE; do
-      [ "$1" = "$each" ] && return
-    done
+    case " $_F_IGNORE " in
+      *\ $1\ *) return
+    esac
 
     shift # shift out the command itself
 
