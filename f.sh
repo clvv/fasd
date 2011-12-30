@@ -223,7 +223,7 @@ _f() {
     # blacklists
     local each
     for each in "$_F_BLACKLIST"; do
-      echo "$@" | grep -q -- "$each" && return
+      case "$*" in *$each*) return;; esac
     done
 
     # shifts
@@ -408,6 +408,6 @@ _f --init
 
 case "$-" in
   *i*) _f --init-interactive;; # assume being sourced
-  **) _f "$@" # assume being executed as an executable
+  *) _f "$@" # assume being executed as an executable
 esac
 
