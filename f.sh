@@ -142,7 +142,7 @@ _f() {
     zle -C f-complete-f 'menu-select' _f_zsh_word_complete_f
     zle -C f-complete-d 'menu-select' _f_zsh_word_complete_d
     # add zsh hook
-    _f_preexec () { eval "_f --add $3" 2>&1; }
+    _f_preexec() { { eval "_f --add $3"; } >> "$_F_SINK" 2>&1; }
     autoload -U add-zsh-hook
     add-zsh-hook preexec _f_preexec
     ;;
