@@ -172,15 +172,13 @@ _f() {
     ;;
 
   --readlink)
-    shift; local p np e
-    [ "$1" = "-e" ] && shift && e=1
-    [ "$1" = "--" ] && shift
+    shift; local p np
     case "$1" in
       /*) p="$1";;
       *) p="$PWD/$1";;
     esac
     np="$(echo "$p" | sed 's@[^/]*/*\.\.\(/\|$\)@@g;s@\./@@g;s@/\+@/@g;s@[./]*$@@')"
-    [ "$e" = "1" -a ! -e "${np:=/}" ] && return 1
+    [ -e "${np:=/}" ] || return 1
     echo "$np"
     ;;
 
@@ -217,7 +215,7 @@ _f() {
     local paths
     while [ "$1" ]; do
       # add the adsolute path to "paths", and a separator "|"
-      paths="$paths$(_f --readlink -e -- "$1" 2>> "$_F_SINK")|"
+      paths="$paths$(_f --readlink "$1" 2>> "$_F_SINK")|"
       shift
     done
 
