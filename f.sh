@@ -215,12 +215,12 @@ _f() {
     local paths
     while [ "$1" ]; do
       # add the adsolute path to "paths", and a separator "|"
-      paths="$paths$(_f --readlink "$1" 2>> "$_F_SINK")|"
+      paths="$paths|$(_f --readlink "$1" 2>> "$_F_SINK")"
       shift
     done
 
     # add current pwd if the option is set
-    [ "$_F_TRACK_PWD" = "1" -a "$PWD" != "$HOME" ] && paths="$paths$PWD"
+    [ "$_F_TRACK_PWD" = "1" -a "$PWD" != "$HOME" ] && paths="$paths|$PWD"
 
     [ -z "${paths##|}" ] && return # stop if we have nothing to add
 
@@ -349,7 +349,7 @@ _f() {
     -r        match by rank only
     -h        show a brief help message" >&2; return;;
         esac; o="${o#?}"; done;;
-      *) fnd="$fnd$1 "; last="$1";;
+      *) fnd="$fnd $1"; last="$1";;
     esac; shift; done
 
     # if we hit enter on a completion just execute
