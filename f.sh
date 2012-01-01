@@ -47,49 +47,6 @@ _f() {
           $awk "" && _F_AWK=$awk && break
         done
       fi
-
-      # readlink setup
-      if readlink -e / ; then
-        _F_READLINK=readlink
-      elif greadlink -e / ; then
-        _F_READLINK=greadlink
-      elif readlink -f /; then # somewhat compatible readlink
-        _f_readlink() {
-          [ "$1" = "-e" ] && shift && local e=1 # existence option
-          local path; path="$(readlink -f -- $1 2>> "$_F_SINK")"
-          [ $? -gt 0 ] && return 1
-          [ "$e" = "1" -a ! -e "$path" ] && return 1
-          echo "$path"
-        }
-        _F_READLINK=_f_readlink
-      else # fall back on emulated readlink
-        _f_readlink() {
-          # function that mimics readlink from GNU coreutils
-          [ "$1" = "-e" ] && shift && local e=1 # existence option
-          [ "$1" = "--" ] && shift
-          [ "$1" = "/" ] && echo / && return
-          [ "$1" = "." ] && echo "$(pwd -P)" && return
-          local path
-          if [ "${1##*/}" = ".." ]; then
-            path="$(cd "$1" >> "$_F_SINK" 2>&1 && pwd -P)"
-            [ -z "$path" ] && return 1 # if cd fails
-          elif [ -z "${1##/*/*}" -o -z "${1##?*/*}" ]; then
-            # if target contains "/" (not counting top level) or target is ".."
-            local base="$(cd "${1%/*}" >> "$_F_SINK" 2>&1 && pwd -P)"
-            [ -z "$base" ] && return 1 # if cd fails
-            path="${base%/}/${1##*/}"
-          elif [ -z "${1##/*}" ]; then # straight top level
-            path="$1"
-          else # anything within where we are
-            path="$(pwd -P)"'/'"$1"
-          fi
-          [ "$path" = "/" ] && echo / && return
-          path=${path%/} # strip off trailing "/"
-          [ "$e" = "1" -a ! -e "$path" ] && return
-          echo "$path"
-        }
-        _F_READLINK=_f_readlink
-      fi
     } >> "$_F_SINK" 2>&1
     ;;
 
@@ -214,6 +171,19 @@ _f() {
     [ "$KSH_VERSION" ] && _f_ps1_install # ksh has the compatibility
     ;;
 
+  --readlink)
+    shift; local p np e
+    [ "$1" = "-e" ] && shift && e=1
+    [ "$1" = "--" ] && shift
+    case "$1" in
+      /*) p="$1";;
+      *) p="$PWD/$1";;
+    esac
+    np="$(echo "$p" | sed 's@[^/]*/*\.\.\(/\|$\)@@g;s@\./@@g;s@/\+@/@g;s@[./]*$@@')"
+    [ "$e" = "1" -a ! -e "${np:='/'}" ] && return 1
+    echo "$np"
+    ;;
+
   --add) # add entries
     shift
 
@@ -247,13 +217,12 @@ _f() {
     local paths
     while [ "$1" ]; do
       # add the adsolute path to "paths", and a separator "|"
-      paths="$paths$($_F_READLINK -e -- "$1" 2>> "$_F_SINK")|"
+      paths="$paths$(_f --readlink -e -- "$1" 2>> "$_F_SINK")|"
       shift
     done
 
     # add current pwd if the option is set
-    [ "$_F_TRACK_PWD" = "1" -a "$(pwd -P)" != "$HOME" ] && \
-      paths="$paths$(pwd -P)"
+    [ "$_F_TRACK_PWD" = "1" -a "$PWD" != "$HOME" ] && paths="$paths$PWD"
 
     [ -z "${paths##|}" ] && return # stop if we have nothing to add
 
