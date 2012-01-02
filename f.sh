@@ -79,7 +79,8 @@ _f() {
     compctl -U -K _f_zsh_cmd_complete -V f -x 'C[-1,-*e],s[-]n[1,e]' -c -- _f
     # zsh word mode completion
     _f_zsh_word_complete() {
-      eval 'local fnd="${words[CURRENT]//$_F_QUERY_SEPARATOR/ }"'
+      [ -z "$_f_cur" ] && eval 'local _f_cur="${words[CURRENT]}"'
+      eval 'local fnd="${_f_cur//$_F_QUERY_SEPARATOR/ }"'
       local typ=${1:-e}
       _f --query | sort -nr | sed 's/^[0-9.]*[ ]*//' | while read line; do
         compadd -U -V f "$line"
@@ -88,9 +89,10 @@ _f() {
     }
     _f_zsh_word_complete_f() { _f_zsh_word_complete f ; }
     _f_zsh_word_complete_d() { _f_zsh_word_complete d ; }
-    eval '_f_zsh_word_complete_trigger() {
-      [[ ${words[CURRENT]} == "$_F_QUERY_SEPARATOR"* ]] && _f_zsh_word_complete
-    }'
+    _f_zsh_word_complete_trigger() {
+      eval 'local _f_cur="${words[CURRENT]}"'
+      _f --word-complete-trigger _f_zsh_word_complete
+    }
     # enable word mode completion
     zstyle ':completion:*' completer _complete _ignored \
       _f_zsh_word_complete_trigger
@@ -126,23 +128,23 @@ _f() {
     _f_bash_hook_cmd_complete $_F_CMD_A $_F_CMD_S $_F_CMD_D $_F_CMD_F
     # bash word mode completion
     _f_bash_word_complete() {
-      eval 'local cur=${COMP_WORDS[COMP_CWORD]}'
-      if [[ $cur == "$_F_QUERY_SEPARATOR"* ]]; then
-        eval 'local fnd="${cur//$_F_QUERY_SEPARATOR/ }"'
-        local RESULT=$(_f --query | sed 's/^[0-9.]*[ ]*//')
-        local IFS=$'\n'
-        eval 'COMPREPLY=( $RESULT )'
-      fi
+      [ -z "$_f_cur" ] && eval 'local _f_cur="${COMP_WORDS[COMP_CWORD]}"'
+      local typ=${1:-e}
+      eval 'local fnd="${_f_cur//$_F_QUERY_SEPARATOR/ }"'
+      local RESULT=$(_f --query | sed 's/^[0-9.]*[ ]*//')
+      local IFS=$'\n'
+      eval 'COMPREPLY=( $RESULT )'
     }
     _f_bash_word_complete_wrap() {
-      _f_bash_word_complete
-      eval 'local z=${COMP_WORDS[0]} c=${COMP_WORDS[COMP_CWORD]}'
+      eval 'local _f_cur="${COMP_WORDS[COMP_CWORD]}"'
+      _f --word-complete-trigger _f_bash_word_complete
+      eval 'local z=${COMP_WORDS[0]}'
       # try original comp func
       [ "$COMPREPLY" ] || eval "$( echo "$_F_BASH_COMPLETE_P" | \
         sed -n "/ $z$/"'s/.*-F \(.*\) .*/\1/p' )"
       # fall back on original complete options
       local cmd="$(echo "$_F_BASH_COMPLETE_P" | \
-        sed -n "/ $z$/"'s/complete/compgen/') $c"
+        sed -n "/ $z$/"'s/complete/compgen/') $_f_cur"
       [ "$COMPREPLY" ] || eval 'COMPREPLY=( $(eval $cmd) )'
     }
     _f_bash_hook_word_complete_wrap_all() {
@@ -180,6 +182,29 @@ _f() {
     np="$(echo "$p" | sed 's@[^/]*/*\.\.\(/\|$\)@@g;s@\./@@g;s@/\+@/@g;s@[./]*$@@')"
     [ -e "${np:=/}" ] || return 1
     echo "$np"
+    ;;
+
+  # if "$_f_cur" is a query, then eval all the arguments
+  --word-complete-trigger)
+    shift
+    case "$_f_cur" in
+      $_F_QUERY_SEPARATOR*)
+        eval "$@";;
+      f$_F_QUERY_SEPARATOR*)
+        _f_cur=${_f_cur#?}
+        eval "$@" f;;
+      d$_F_QUERY_SEPARATOR*)
+        _f_cur=${_f_cur#?}
+        eval "$@" d;;
+      *$_F_QUERY_SEPARATOR$_F_QUERY_SEPARATOR)
+        eval "$@";;
+      *$_F_QUERY_SEPARATOR${_F_QUERY_SEPARATOR}f)
+        _f_cur=${_f_cur%?}
+        eval "$@" f;;
+      *$_F_QUERY_SEPARATOR${_F_QUERY_SEPARATOR}d)
+        _f_cur=${_f_cur%?}
+        eval "$@" d;;
+    esac
     ;;
 
   --add) # add entries
