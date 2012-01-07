@@ -129,16 +129,20 @@ _f() {
     _f_bash_hook_cmd_complete $_F_CMD_A $_F_CMD_S $_F_CMD_D $_F_CMD_F
     # bash word mode completion
     _f_bash_word_complete() {
-      [ -z "$_f_cur" ] && eval 'local _f_cur="${COMP_WORDS[COMP_CWORD]}"'
+      [ "$_f_cur" ] || eval 'local _f_cur="${COMP_WORDS[COMP_CWORD]}"'
       local typ=${1:-e}
       eval 'local fnd="${_f_cur//$_F_QUERY_SEPARATOR/ }"'
       local RESULT=$(_f --query | sed 's/^[0-9.]*[ ]*//')
       local IFS=$'\n'
       eval 'COMPREPLY=( $RESULT )'
     }
+    _f_bash_word_complete_trigger() {
+      [ "$_f_cur" ] || eval 'local _f_cur="${COMP_WORDS[COMP_CWORD]}"'
+      _f --word-complete-trigger _f_bash_word_complete
+    }
     _f_bash_word_complete_wrap() {
       eval 'local _f_cur="${COMP_WORDS[COMP_CWORD]}"'
-      _f --word-complete-trigger _f_bash_word_complete
+      _f_bash_word_complete_trigger
       eval 'local z=${COMP_WORDS[0]}'
       # try original comp func
       [ "$COMPREPLY" ] || eval "$( echo "$_F_BASH_COMPLETE_P" | \
@@ -151,11 +155,11 @@ _f() {
     _f_bash_hook_word_complete_wrap_all() {
       export _F_BASH_COMPLETE_P="$(complete -p)"
       for cmd in $(complete -p | awk '{print $NF}' | tr '\n' ' '); do
-        complete -F _f_bash_word_complete_wrap $cmd
+        complete -o default -o bashdefault -F _f_bash_word_complete_wrap $cmd
       done
     }
     # enable word mode completion as default completion
-    complete -D -F _f_bash_word_complete
+    complete -o default -o bashdefault -D -F _f_bash_word_complete_trigger
     # add bash hook
     echo $PROMPT_COMMAND | grep -v -q "_f --add" && \
       PROMPT_COMMAND='eval "_f --add $(history 1 | \
