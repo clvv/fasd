@@ -9,6 +9,7 @@
 #     options:
 #       -s        show list of files with their ranks
 #       -l        list paths only
+#       -i        interactive mode
 #       -e <cmd>  set command to execute on the result file
 #       -a        match files and directories
 #       -d        match directories only
@@ -352,6 +353,7 @@ _f() {
       -*) local o="${1#-}"; while [ "$o" ]; do case $o in
           s*) local show=1;;
           l*) local list=1;;
+          i*) local interactive=1 show=1;;
           r*) local mode=rank;;
           t*) local mode=recent;;
           e*) o="${o#?}"; if [ "$o" ]; then # there are characters after "-e"
@@ -367,6 +369,7 @@ _f() {
   options:
     -s        show list of files with their ranks
     -l        list paths only
+    -i        interactive mode
     -e <cmd>  set command to execute on the result file
     -a        match files and directories
     -d        match directories only
@@ -387,7 +390,11 @@ _f() {
     local result
     result="$(_f --query 2>> "$_F_SINK")" # query the database
     [ $? -gt 0 ] && return
-    if [ "$list" ]; then
+    if [ "$interactive" ]; then
+      echo "$result" | sort -nr | sed = | sed 'N;s/\n/\t/' | sort -nr
+      local i; printf "> "; read i; : ${i:=1}; : ${exec:=echo}
+      $exec "$(echo "$result" | sort -nr | sed -n "$i"'s/^[0-9.]*[ ]*//p')"
+    elif [ "$list" ]; then
       echo "$result" | sort -n${r} | sed 's/^[0-9.]*[ ]*//'
     elif [ "$show" ]; then
       echo "$result" | sort -n${r}
