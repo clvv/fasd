@@ -391,9 +391,10 @@ _f() {
     result="$(_f --query 2>> "$_F_SINK")" # query the database
     [ $? -gt 0 ] && return
     if [ "$interactive" ]; then
-      echo "$result" | sort -nr | sed = | sed 'N;s/\n/\t/' | sort -nr
-      local i; printf "> "; read i; : ${i:=1}; : ${exec:=echo}
-      $exec "$(echo "$result" | sort -nr | sed -n "$i"'s/^[0-9.]*[ ]*//p')"
+      result="$(echo "$result" | sort -nr)"
+      echo "$result" | sed = | sed 'N;s/\n/\t/' | sort -nr
+      local i; printf "> "; read i
+      ${exec:=echo} "$(echo "$result" | sed -n "${i:=1}"'s/^[0-9.]*[ ]*//p')"
     elif [ "$list" ]; then
       echo "$result" | sort -n${r} | sed 's/^[0-9.]*[ ]*//'
     elif [ "$show" ]; then
