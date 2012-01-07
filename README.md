@@ -35,10 +35,10 @@ some hypothetical situations, where you can type in the command on the left and
 `f` comes with four useful aliases by default:
 
 ```sh
-  alias a='_f -a' # any
-  alias s='_f -s' # show / search
-  alias d='_f -d' # directory
-  alias f='_f -f' # file
+alias a='_f -a' # any
+alias s='_f -s' # show / search
+alias d='_f -d' # directory
+alias f='_f -f' # file
 ```
 
 `f` will smartly detect when to display a list of files or just the best match.
@@ -206,7 +206,7 @@ version, and a log file.
 You can set `_F_SINK` to obtain a log.
 
 ```sh
-export _F_SINK="$HOME/.f.log"
+_F_SINK="$HOME/.f.log"
 ```
 
 # TODO
