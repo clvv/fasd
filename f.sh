@@ -349,15 +349,31 @@ _f() {
     ;;
 
   --backend)
-    if [ "$2" = "viminfo" ]; then
-      _f_data+="$(while IFS=" " read line; do
-        [ "${line:0:1}" = ">" ] || continue
-        local fl=${line:2}
-        fl="${fl/\~/$HOME/}"
-        fl="${fl/\/\///}"
-        echo "${fl}|1|$(( $(date +%s) - 3500 ))"
-      done < "$HOME/.viminfo")"
-    fi
+    local stamp=$(( $(date +%s) - 3500 ))
+    case $2 in
+      viminfo)
+        _f_data+="$(while IFS=" " read line; do
+          [ "${line:0:1}" = ">" ] || continue
+          local fl=${line:2}
+          fl="${fl/\~/$HOME/}"
+          fl="${fl/\/\///}"
+          echo "${fl}|1|$stamp"
+        done < "$HOME/.viminfo")"
+        ;;
+      recently-used)
+        _f_data+="$(tr -d '\n' \
+          < "$HOME/.local/share/recently-used.xbel" | \
+          sed 's@\(file:/\|count="\)@\n@g' | \
+          sed '1d;s/".*$//' | \
+          tr '\n' '|' | \
+          sed 's@|/@\n@g' | \
+          awk -F'|' -v stamp=$stamp '{
+            sum = 0
+            for( i=2; i<=NF; i++ ) sum += $i
+            print $1 "|" sum "|" stamp
+          }')"
+        ;;
+    esac
     ;;
 
   *) # parsing logic and processing
