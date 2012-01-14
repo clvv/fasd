@@ -1,6 +1,6 @@
 # F
 
-`f` is a tool for quick access to files in bash and zsh. It is inspired by
+`f` is a tool for quick access to files for POSIX shells. It is inspired by
 tools like `autojump`, `z` and `v`. `f` keeps track of files you have accessed,
 so that you can quickly reference them in the command line.
 
@@ -11,7 +11,7 @@ so that you can quickly reference them in the command line.
 `f` uses [Bayesian Inference](https://en.wikipedia.org/wiki/Bayesian_inference)
 and [Bayesian Ranking](https://github.com/clvv/f/wiki/Bayesian-Ranking) to rank
 files and directories for a set of given matching patterns. "Frecency" is used
-as the prior probability distribution, and an simple algorithm is used to
+as the prior probability distribution, and a simple algorithm is used to
 calculate the likelihood of the given set of patterns.
 
 # Introduction
@@ -35,10 +35,10 @@ some hypothetical situations, where you can type in the command on the left and
 `f` comes with four useful aliases by default:
 
 ```sh
-  alias a='_f -a' # any
-  alias s='_f -s' # show / search
-  alias d='_f -d' # directory
-  alias f='_f -f' # file
+alias a='_f -a' # any
+alias s='_f -s' # show / search
+alias d='_f -d' # directory
+alias f='_f -f' # file
 ```
 
 `f` will smartly detect when to display a list of files or just the best match.
@@ -52,22 +52,14 @@ cp `f mov` .
 
 # Install
 
-`f` can work with both `bash` and `zsh`. You will also need `gawk` or `nawk`
-(`original-awk` for debian-like). Preferably, you should have `gawk` and GNU
-version of `readlink`.
-
-`f` should work out of the box on most Linux and BSD distros. But if `f` does
-not work for you, please try installing `gawk` and updating your shell to
-a newer version.
-
 To use `f`, just source `f.sh`:
 
 ```sh
 source f.sh
 ```
 
-Of course, you should put it into your shell rc file once you've decided to use
-it.
+Of course, you should put the above line into your shell rc file once you've
+decided to use it.
 
 After you first installed `f`, open some files (with any program) and `cd`
 around in your shell. Then try some examples below.
@@ -92,11 +84,11 @@ alias j='d -e cd' # quick cd into directories, mimicking autojump and z
 alias o='a -e xdg-open' # quick opening files with xdg-open
 ```
 
-If you're using bash, you have to call `_f_bash_hook_completion` to make
+If you're using bash, you have to call `_f_bash_hook_cmd_complete` to make
 completion work. For instance:
 
 ```bash
-_f_bash_hook_completion v m j o
+_f_bash_hook_cmd_complete v m j o
 ```
 
 # How It Works
@@ -110,25 +102,66 @@ When you run `f` with search arguments, `f` uses [Bayesian
 Ranking](https://github.com/clvv/f/wiki/Bayesian-Ranking) to find the best
 match.
 
+# Compatibility
+
+`f`'s basic functionalities are POSIX compliant, meaning that you should be
+able to use `f` in all POSIX compliant shells. Your shell need to support
+command substitution in `$PS1` in order for `f` to automatically track your
+commands and files. This feature is not specified by the POSIX standard, but
+it's nonetheless present in many POSIX compliant shells. If you use some shell
+other than `bash`, `zsh` or `ksh` and `f` does not work out of the box for you,
+you can try calling `_f_ps1_install` to manually install the hook to your
+`$PS1`.
+
 # Synopsis
 
 ```
-f [options] [query ..]
+_f [options] [query ...]
   options:
-    -s, --show       show list of files with their ranks
-    -l, --list       list paths only
-    -e, --exec CMD   set command to execute on the result file
-    -a, --any        match files and directories
-    -d, --directory  match directories only
-    -f, --file       match files only
-    -r, --rank       match by rank only
-    -h, --help       show a brief help message
+    -s        show list of files with their ranks
+    -l        list paths only
+    -e <cmd>  set command to execute on the result file
+    -a        match files and directories
+    -d        match directories only
+    -f        match files only
+    -r        match by rank only
+    -h        show a brief help message
 ```
 
 # Tab Completion
 
-`f` supports tab completion. A tip for using completion: type an extra space
-after your query strings so that the completion won't overwrite your queries.
+`f` offers two completion modes, command mode completion and word mode
+completion.
+
+Command mode completion is just like completion for any other commands. It is
+triggered when you hit tab on a `f` command or its aliases. Under this mode
+your queries can be separated by a space. Tip: if you find that the completion
+result overwrites your queries, type an extra space before you hit tab.
+
+Word mode completion can be triggered on *any* command. This can be a powerful
+feature if you make good use of it. Word completion is triggered by any command
+line argument that starts with `,`(a comma). Example:
+
+```sh
+$ vim ,rc,lo<Tab>
+$ vim /etc/rc.local
+```
+
+If you use zsh, word completion is enabled by default. There're also three zle
+widgets: `f-complete`, `f-complete-f`, `f-complete-d`. You can bind them to
+keybindings you like:
+
+```sh
+bindkey '^X^A' f-complete    # C-x C-a to do f-complete (fils and directories)
+bindkey '^X^F' f-complete-f  # C-x C-f to do f-cmplete-f (only files)
+bindkey '^X^D' f-complete-d  # C-x C-d to do f-complete-d (only directories)
+```
+
+If you use bash, you can turn on this *experimental feature* by calling
+`_f_bash_hook_word_complete_wrap_all` after sourcing `f` *and* after any bash
+completion setup. This will alter your existing completion setup, so you might
+get a *broken* completion system.
+
 
 # Tweaks
 
@@ -143,44 +176,45 @@ Commands to call _f.
 
 $_F_BLACKLIST
 List of blacklisted strings. Commands matching them will not be processed.
-Default is (--help).
+Default is "--help".
 
 $_F_SHIFT
-List of all commands that needs to be shifted, defaults to (sudo busybox).
+List of all commands that needs to be shifted, defaults to "sudo busybox".
 
 $_F_IGNORE
-List of all commands that will be ignored, defaults to (_f $_F_CMD ls echo).
+List of all commands that will be ignored, defaults to "_f cd ls echo".
 
 $_F_TRACK_PWD
-If set to any non-empty string, f will track "$PWD". This is useful when you
-want f to replace autojump or z with f.
+f defaults to track your "$PWD". Set this to 0 to disable this behavior.
 
 $_F_AWK
 Which awk to use. f can detect and use a compatible awk.
 
 $_F_SINK
 File to log all STDERR to, defaults to "/dev/null".
+
+$_F_MAX
+Max total score / weight, defaults to 2000.
 ```
 
 # Debugging
 
 If `f` does not work as expected, please file a bug report describing the
-unexpected behavior along with your OS version, bash/zsh version, awk version,
-sed version, and an log file.
+unexpected behavior along with your OS version, shell version, awk version, sed
+version, and a log file.
 
 You can set `_F_SINK` to obtain a log.
 
 ```sh
-export _F_SINK="$HOME/.f.log"
+_F_SINK="$HOME/.f.log"
 ```
 
 # TODO
 
 1. Tests!
-2. Zsh `alias -s` style execution, simply do `f arg`.
-3. Multiple searches, parameters delimited by `-` or `--`.
-4. More backends: `rencently-used.xbel`, `.viminfo`.
-5. Code refactoring, more modular setup.
+2. Multiple searches, parameters separated by `-`.
+3. More backends: `rencently-used.xbel`, `.viminfo`, etc.
+4. Code refactoring, more modular setup.
 
 # Acknowledgements
 
