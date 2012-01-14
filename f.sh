@@ -293,10 +293,10 @@ _f() {
 
   --query)
     # query the database, this need some local variables to be set
-    while read line; do
+    [ "$_f_data" ] || local _f_data="$(cat "$_F_DATA")"
+    echo "$_f_data" | while read line; do
       [ -${typ:-e} "${line%%\|*}" ] && echo "$line"
-    done < "$_F_DATA" | \
-    $_F_AWK -v t="$(date +%s)" -v mode="$mode" -v q="$fnd" -F"|" '
+    done | $_F_AWK -v t="$(date +%s)" -v mode="$mode" -v q="$fnd" -F"|" '
       function frecent(rank, time) {
         dx = t-time
         if( dx < 3600 ) return rank*4
@@ -350,7 +350,7 @@ _f() {
 
   --backend)
     if [ "$2" = "viminfo" ]; then
-      data+="$(while IFS=" " read line; do
+      _f_data+="$(while IFS=" " read line; do
         [ "${line:0:1}" = ">" ] || continue
         local fl=${line:2}
         fl="${fl/\~/$HOME/}"
@@ -362,7 +362,7 @@ _f() {
 
   *) # parsing logic and processing
     [ -f "$_F_DATA" ] || return # no db yet
-    local fnd last
+    local fnd last _f_data=
     while [ "$1" ]; do case "$1" in
       --complete) [ "$2" = "--" ] && shift; set -- $(echo $2); local list=1 r=r;;
       --) while [ "$2" ]; do shift; fnd="$fnd$1 "; last="$1"; done;;
@@ -373,9 +373,15 @@ _f() {
           r*) local mode=rank;;
           t*) local mode=recent;;
           e*) o="${o#?}"; if [ "$o" ]; then # there are characters after "-e"
-                local exec=$o # anything after "-e"
+                local exec="$o" # anything after "-e"
               else # use the next argument
                 local exec=${2:?"Argument needed after -e"}
+                shift
+              fi; break;;
+          b*) o="${o#?}"; if [ "$o" ]; then
+                _f --backend "$o"
+              else
+                _f --backend "${2:?"Argument needed after -b"}"
                 shift
               fi; break;;
           a*) local typ=e;;
