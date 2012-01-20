@@ -102,7 +102,7 @@ _f() {
     zle -C f-complete-f 'menu-select' _f_zsh_word_complete_f
     zle -C f-complete-d 'menu-select' _f_zsh_word_complete_d
     # add zsh hook
-    _f_preexec() { { eval "_f --add ${3%&}"; } >> "$_F_SINK" 2>&1; }
+    _f_preexec() { { eval "_f --add $(_f --sanitize $3)"; } >> "$_F_SINK" 2>&1; }
     autoload -U add-zsh-hook
     add-zsh-hook preexec _f_preexec
     ;;
@@ -162,13 +162,13 @@ _f() {
     complete -o default -o bashdefault -D -F _f_bash_word_complete_trigger
     # add bash hook
     echo $PROMPT_COMMAND | grep -v -q "_f --add" && \
-      PROMPT_COMMAND='eval "_f --add $(history 1 | \
-      sed -e "s/^[ ]*[0-9]*[ ]*//")" >> "$_F_SINK" 2>&1;'"$PROMPT_COMMAND"
+      PROMPT_COMMAND='eval "_f --add $(_f --sanitize $(history 1 | \
+      sed -e "s/^[ ]*[0-9]*[ ]*//"))" >> "$_F_SINK" 2>&1;'"$PROMPT_COMMAND"
     ;;
 
   --init-posix)
     _f_ps1_func() {
-      eval "_f --add $( fc -nl -0 | sed -n '$s/\s*\(.*\)/\1/p' )"
+      eval "_f --add $(_f --sanitize $(fc -nl -0 | sed -n '$s/\s*\(.*\)/\1/p'))"
     }
     _f_ps1_install() {
       echo "$PS1" | grep -v -q "_f_ps1_func" && \
@@ -210,6 +210,11 @@ _f() {
         _f_cur=${_f_cur%?}
         eval "$@" d;;
     esac
+    ;;
+
+  --sanitize)
+    shift
+    echo "$@" | sed 's/\(^\| \).\?[<>|]\+/ /g;s/&$//'
     ;;
 
   --add) # add entries
