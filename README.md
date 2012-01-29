@@ -120,6 +120,7 @@ _f [options] [query ...]
   options:
     -s        show list of files with their ranks
     -l        list paths only
+    -i        interactive mode
     -e <cmd>  set command to execute on the result file
     -a        match files and directories
     -d        match directories only
