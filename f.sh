@@ -81,8 +81,8 @@ _f() {
     # zsh word mode completion
     _f_zsh_word_complete() {
       [ -z "$_f_cur" ] && eval 'local _f_cur="${words[CURRENT]}"'
-      eval 'local fnd="${_f_cur//$_F_QUERY_SEPARATOR/ }"'
-      local typ=${1:-e}
+      eval 'local _f_fnd="${_f_cur//$_F_QUERY_SEPARATOR/ }"'
+      local _f_typ=${1:-e}
       _f --query | sort -nr | sed 's/^[0-9.]*[ ]*//' | while read line; do
         compadd -U -V f "$line"
       done
@@ -130,8 +130,8 @@ _f() {
     # bash word mode completion
     _f_bash_word_complete() {
       [ "$_f_cur" ] || eval 'local _f_cur="${COMP_WORDS[COMP_CWORD]}"'
-      local typ=${1:-e}
-      eval 'local fnd="${_f_cur//$_F_QUERY_SEPARATOR/ }"'
+      local _f_typ=${1:-e}
+      eval 'local _f_fnd="${_f_cur//$_F_QUERY_SEPARATOR/ }"'
       local RESULT=$(_f --query | sed 's/^[0-9.]*[ ]*//')
       local IFS=$'\n'
       eval 'COMPREPLY=( $RESULT )'
@@ -179,20 +179,19 @@ _f() {
     ;;
 
   --readlink)
-    shift; local p np
+    shift
     case "$1" in
-      /*) p="$1";;
-      *) p="$PWD/$1";;
+      /*) _f_p="$1";;
+      *) _f_p="$PWD/$1";;
     esac
-    np="$(echo "$p" | sed 's@[^/]*/*\.\.\(/\|$\)@@g;s@\./@@g;s@/\+@/@g;s@[./]*$@@')"
-    [ -e "${np:=/}" ] || return 1
-    echo "$np"
+    _f_np="$(echo "$_f_p" | sed 's@[^/]*/*\.\.\(/\|$\)@@g;s@\./@@g;s@/\+@/@g;s@[./]*$@@')"
+    [ -e "${_f_np:=/}" ] || return 1
+    echo "$_f_np"
     ;;
 
   # if "$_f_cur" is a query, then eval all the arguments
   --word-complete-trigger)
-    shift
-    case "$_f_cur" in
+    shift; case "$_f_cur" in
       $_F_QUERY_SEPARATOR*)
         eval "$@";;
       f$_F_QUERY_SEPARATOR*)
@@ -227,10 +226,9 @@ _f() {
     [ "$ZSH_VERSION" ] && emulate sh && setopt localoptions
 
     # blacklists
-    local each
-    for each in $_F_BLACKLIST; do
-      case " $* " in *\ $each\ *) return;; esac
-    done
+    for _f_each in $_F_BLACKLIST; do
+      case " $* " in *\ $_f_each\ *) return;; esac
+    done; unset _f_each
 
     # shifts
     while true; do
@@ -247,22 +245,20 @@ _f() {
 
     shift # shift out the command itself
 
-    local paths
     while [ "$1" ]; do
       # add the adsolute path to "paths", and a separator "|"
-      paths="$paths|$(_f --readlink "$1" 2>> "$_F_SINK")"
+      _f_paths="$_f_paths|$(_f --readlink "$1" 2>> "$_F_SINK")"
       shift
     done
 
     # add current pwd if the option is set
-    [ "$_F_TRACK_PWD" = "1" -a "$PWD" != "$HOME" ] && paths="$paths|$PWD"
+    [ "$_F_TRACK_PWD" = "1" -a "$PWD" != "$HOME" ] && _f_paths="$_f_paths|$PWD"
 
-    [ -z "${paths##|}" ] && return # stop if we have nothing to add
+    [ -z "${_f_paths##|}" ] && return # stop if we have nothing to add
 
     # maintain the file
-    local tempfile
-    tempfile="$(mktemp $_F_DATA.XXXXXX)" || return
-    $_F_AWK -v list="$paths" -v now="$(date +%s)" -v max="$_F_MAX" -F"|" '
+    _f_tempfile="$(mktemp $_F_DATA.XXXXXX)" || return
+    $_F_AWK -v list="$_f_paths" -v now="$(date +%s)" -v max="$_F_MAX" -F"|" '
       BEGIN {
         split(list, files, "|")
         for(i in files) {
@@ -288,20 +284,21 @@ _f() {
           for( i in rank ) print i "|" 0.9*rank[i] "|" time[i] # aging
         else
           for( i in rank ) print i "|" rank[i] "|" time[i]
-      }' "$_F_DATA" 2>> "$_F_SINK" >| "$tempfile"
+      }' "$_F_DATA" 2>> "$_F_SINK" >| "$_f_tempfile"
     if [ $? -ne 0 -a -f "$_F_DATA" ]; then
-      env rm -f "$tempfile"
+      env rm -f "$_f_tempfile"
     else
-      env mv -f "$tempfile" "$_F_DATA"
+      env mv -f "$_f_tempfile" "$_F_DATA"
     fi
+    unset _f_paths _f_tempfile
     ;;
 
   --query)
     # query the database, this need some local variables to be set
-    while read line; do
-      [ -${typ:-e} "${line%%\|*}" ] && echo "$line"
+    while read _f_line; do
+      [ -${_f_typ:-e} "${_f_line%%\|*}" ] && echo "$_f_line"
     done < "$_F_DATA" | \
-    $_F_AWK -v t="$(date +%s)" -v mode="$mode" -v q="$fnd" -F"|" '
+    $_F_AWK -v t="$(date +%s)" -v mode="$_f_mode" -v q="$_f_fnd" -F"|" '
       function frecent(rank, time) {
         dx = t-time
         if( dx < 3600 ) return rank*4
@@ -351,29 +348,29 @@ _f() {
             if( nocase[i] ) printf "%-10s %s\n", nocase[i], i
         }
       }' - 2>> "$_F_SINK"
+      unset _f_line
     ;;
 
   *) # parsing logic and processing
     [ -f "$_F_DATA" ] || return # no db yet
-    local fnd last
     while [ "$1" ]; do case "$1" in
-      --complete) [ "$2" = "--" ] && shift; set -- $(echo $2); local list=1 r=r;;
-      --) while [ "$2" ]; do shift; fnd="$fnd$1 "; last="$1"; done;;
-      -*) local o="${1#-}"; while [ "$o" ]; do case $o in
-          s*) local show=1;;
-          l*) local list=1;;
-          i*) local interactive=1 show=1;;
-          r*) local mode=rank;;
-          t*) local mode=recent;;
-          e*) o="${o#?}"; if [ "$o" ]; then # there are characters after "-e"
-                local exec=$o # anything after "-e"
+      --complete) [ "$2" = "--" ] && shift; set -- $(echo $2); _f_list=1 _f_r=r;;
+      --) while [ "$2" ]; do shift; _f_fnd="$fnd$1 "; _f_last="$1"; done;;
+      -*) _f_o="${1#-}"; while [ "$_f_o" ]; do case $_f_o in
+          s*) _f_show=1;;
+          l*) _f_list=1;;
+          i*) _f_interactive=1; _f_show=1;;
+          r*) _f_mode=rank;;
+          t*) _f_mode=recent;;
+          e*) _f_o="${_f_o#?}"; if [ "$_f_o" ]; then # there are characters after "-e"
+                _f_exec=$o # anything after "-e"
               else # use the next argument
-                local exec=${2:?"Argument needed after -e"}
+                _f_exec=${2:?"Argument needed after -e"}
                 shift
               fi; break;;
-          a*) local typ=e;;
-          d*) local typ=d;;
-          f*) local typ=f;;
+          a*) _f_typ=e;;
+          d*) _f_typ=d;;
+          f*) _f_typ=f;;
           h*) echo "_f [options] [query ...]
   options:
     -s        show list of files with their ranks
@@ -385,36 +382,38 @@ _f() {
     -f        match files only
     -r        match by rank only
     -h        show a brief help message" >&2; return;;
-        esac; o="${o#?}"; done;;
-      *) fnd="$fnd $1"; last="$1";;
-    esac; shift; done
+        esac; _f_o="${_f_o#?}"; done;;
+      *) _f_fnd="$fnd $1"; _f_last="$1";;
+    esac; shift; done; unset _f_o
 
     # if we hit enter on a completion just execute
-    case "$last" in
+    case "$_f_last" in
      # completions will always start with /
-     /*) [ -z "$show$list" -a -${typ:-e} "$last" -a "$exec" ] \
-       && $exec "$last" && return;;
+     /*) [ -z "$_f_show$_f_list" -a -${_f_typ:-e} "$_f_last" -a "$_f_exec" ] \
+       && $_f_exec "$_f_last" && return;;
     esac
 
-    local result
-    result="$(_f --query 2>> "$_F_SINK")" # query the database
+    _f_result="$(_f --query 2>> "$_F_SINK")" # query the database
     [ $? -gt 0 ] && return
-    if [ "$interactive" ]; then
-      result="$(echo "$result" | sort -nr)"
-      echo "$result" | sed = | sed 'N;s/\n/\t/' | sort -nr
-      local i; printf "> "; read i
-      ${exec:=echo} "$(echo "$result" | sed -n "${i:=1}"'s/^[0-9.]*[ ]*//p')"
-    elif [ "$list" ]; then
-      echo "$result" | sort -n${r} | sed 's/^[0-9.]*[ ]*//'
-    elif [ "$show" ]; then
-      echo "$result" | sort -n${r}
-    elif [ "$fnd" -a "$exec" ]; then # exec
-      $exec "$(echo "$result" | sort -n | sed -n '$s/^[0-9.]*[ ]*//p')"
-    elif [ "$fnd" -a ! -t 1 ]; then # echo if output is not terminal
-      echo "$result" | sort -n | sed -n '$s/^[0-9.]*[ ]*//p'
+    if [ "$_f_interactive" ]; then
+      _f_result="$(echo "$_f_result" | sort -nr)"
+      echo "$_f_result" | sed = | sed 'N;s/\n/\t/' | sort -nr
+      printf "> "; read _f_i
+      ${_f_exec:=echo} "$(echo "$_f_result" | sed -n "${_f_i:=1}"'s/^[0-9.]*[ ]*//p')"
+    elif [ "$_f_list" ]; then
+      echo "$_f_result" | sort -n${_f_r} | sed 's/^[0-9.]*[ ]*//'
+    elif [ "$_f_show" ]; then
+      echo "$_f_result" | sort -n${_f_r}
+    elif [ "$_f_fnd" -a "$_f_exec" ]; then # exec
+      $_f_exec "$(echo "$_f_result" | sort -n | sed -n '$s/^[0-9.]*[ ]*//p')"
+    elif [ "$_f_fnd" -a ! -t 1 ]; then # echo if output is not terminal
+      echo "$_f_result" | sort -n | sed -n '$s/^[0-9.]*[ ]*//p'
     else # no args, show
-      echo "$result" | sort -n${r}
+      echo "$_f_result" | sort -n${_f_r}
     fi
+
+    unset _f_fnd _f_last _f_list _f_show _f_interactive _f_mode _f_typ \
+      _f_result _f_r _f_exec
 
   esac
 }
