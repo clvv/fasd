@@ -401,7 +401,7 @@ _f() {
     [ $? -gt 0 ] && return
     if [ "$interactive" ]; then
       result="$(echo "$result" | sort -nr)"
-      echo "$result" | sed = | sed 'N;s/\n/\t/' | sort -nr
+      echo "$result" | sed = | sed 'N;s/\n/	/' | sort -nr
       local i; printf "> "; read i
       ${exec:=echo} "$(echo "$result" | sed -n "${i:=1}"'s/^[0-9.]*[ ]*//p')"
     elif [ "$list" ]; then
