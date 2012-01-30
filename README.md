@@ -58,10 +58,10 @@ cp `f mov` .
 
 There are two ways to get `fasd` working your shell.
 
-1. You can directly source `fasd.sh` in your POSIX complaint shell.
+1. You can directly source `fasd` in your POSIX complaint shell.
 
 ```sh
-source fasd.sh
+source fasd
 ```
 
 This will set some variable options and add default aliases to your shell. It
@@ -69,10 +69,10 @@ will also set up advanced tab completion if you're using zsh or bash.
 
 2. You can use `fasd` as an external executable.
 
-Put `fasd.sh` in your PATH and rename it to `fasd`.
+Put fasd in you `bin`:
 
-```sh
-ln -s /path/to/fasd.sh ~/bin/fasd
+```
+ln -s /path/to/fasd ~/bin/fasd
 ```
 
 Then put lines below in your shell rc depending on which shell you're using.
@@ -99,7 +99,7 @@ eval "$(fasd --init-alias)"
 These will setup advanced tab completion and a command hook that will be
 executed on every command.
 
-After you first installed `fasd`, open some files (with any program) and `cd`
+After you first installed `fasd`, open some files (with any program) or `cd`
 around in your shell. Then try some examples below.
 
 # Examples
@@ -130,7 +130,7 @@ _f_bash_hook_cmd_complete v m j o
 
 # How It Works
 
-When you source `fasd.sh`, `fasd` adds a hook which will be executed whenever
+When you source `fasd`, `fasd` adds a hook which will be executed whenever
 you execute a command. The hook will scan your commands' arguments and
 determine if any of them refer to existing files or directories. If yes, `fasd`
 will add them to the database.
@@ -236,7 +236,7 @@ $_F_MAX
 Max total score / weight, defaults to 2000.
 
 $_F_SHELL
-Which shell to execute fasd.sh. Some shells will run faster than others. fasd
+Which shell to execute. Some shells will run faster than others. fasd
 is faster with ksh variants.
 ```
 
