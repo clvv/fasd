@@ -1,14 +1,17 @@
-# F
+# Fasd
 
-`f` is a tool for quick access to files for POSIX shells. It is inspired by
-tools like `autojump`, `z` and `v`. `f` keeps track of files you have accessed,
+`fasd` is a tool for quick access to files for POSIX shells. It is inspired by
+tools like `autojump`, `z` and `v`. `fasd` keeps track of files you have accessed,
 so that you can quickly reference them in the command line.
 
-`f` ranks files and directories by "frecency," that is, by both "frequency" and
+The name `fasd` comes from the defualt suggested aliases `fasd`(files),
+`a`(files/directories), `s`(show/search), `d`(directories).
+
+`fasd` ranks files and directories by "frecency," that is, by both "frequency" and
 "recency." The term "frecency" was first coined by Mozilla and used in Firefox
 ([link](https://developer.mozilla.org/en/The_Places_frecency_algorithm)).
 
-`f` uses [Bayesian Inference](https://en.wikipedia.org/wiki/Bayesian_inference)
+`fasd` uses [Bayesian Inference](https://en.wikipedia.org/wiki/Bayesian_inference)
 and [Bayesian Ranking](https://github.com/clvv/f/wiki/Bayesian-Ranking) to rank
 files and directories for a set of given matching patterns. "Frecency" is used
 as the prior probability distribution, and a simple algorithm is used to
@@ -16,12 +19,13 @@ calculate the likelihood of the given set of patterns.
 
 # Introduction
 
-If you're like me, you use your shell to navigate and launch applications. `f`
-helps you do that more efficiently. With `f`, you can open files regardless of
-which directory you are in. Just with a few key strings, `f` can find
-a "frecent" file or directory and open it with command you specify. Below are
-some hypothetical situations, where you can type in the command on the left and
-`f` will "expand" your command into the right side. Pretty magic, huh?
+If you're like me, you use your shell to navigate and launch applications.
+`fasd` helps you do that more efficiently. With `fasd`, you can open files
+regardless of which directory you are in. Just with a few key strings, `fasd`
+can find a "frecent" file or directory and open it with command you specify.
+Below are some hypothetical situations, where you can type in the command on
+the left and `fasd` will "expand" your command into the right side. Pretty
+magic, huh?
 
 ```
   v def conf       =>     vim /some/awkward/path/to/type/default.conf
@@ -32,18 +36,18 @@ some hypothetical situations, where you can type in the command on the left and
   vim `f rc conf`  =>     vim /etc/rc.conf
 ```
 
-`f` comes with four useful aliases by default:
+`fasd` comes with four useful aliases by default:
 
 ```sh
-alias a='_f -a' # any
-alias s='_f -s' # show / search
-alias d='_f -d' # directory
-alias f='_f -f' # file
+alias a='fasd -a' # any
+alias s='fasd -s' # show / search
+alias d='fasd -d' # directory
+alias f='fasd -f' # file
 ```
 
-`f` will smartly detect when to display a list of files or just the best match.
-For instance, when you call `f` in a subshell with some search parameters, `f`
-will only return the best match. This enables you to do:
+`fasd` will smartly detect when to display a list of files or just the best
+match. For instance, when you call `fasd` in a subshell with some search
+parameters, `fasd` will only return the best match. This enables you to do:
 
 ```sh
 mv update.html `d www`
@@ -52,16 +56,50 @@ cp `f mov` .
 
 # Install
 
-To use `f`, just source `f.sh`:
+There are two ways to get `fasd` working your shell.
+
+1. You can directly source `fasd.sh` in your POSIX complaint shell.
 
 ```sh
-source f.sh
+source fasd.sh
 ```
 
-Of course, you should put the above line into your shell rc file once you've
-decided to use it.
+This will set some variable options and add default aliases to your shell. It
+will also set up advanced tab completion if you're using zsh or bash.
 
-After you first installed `f`, open some files (with any program) and `cd`
+2. You can use `fasd` as an external executable.
+
+Put `fasd.sh` in your PATH and rename it to `fasd`.
+
+```sh
+ln -s /path/to/fasd.sh ~/bin/fasd
+```
+
+Then put lines below in your shell rc depending on which shell you're using.
+
+```sh
+# .bashrc
+eval "$(fasd --init-bash)"
+eval "$(fasd --init-alias)"
+```
+
+```sh
+# .zshrc
+eval "$(fasd --init-zsh)"
+eval "$(fasd --init-alias)"
+```
+
+```sh
+# .profile
+# for other posix compliant shells
+eval "$(fasd --init-posix)"
+eval "$(fasd --init-alias)"
+```
+
+These will setup advanced tab completion and a command hook that will be
+executed on every command.
+
+After you first installed `fasd`, open some files (with any program) and `cd`
 around in your shell. Then try some examples below.
 
 # Examples
@@ -74,13 +112,12 @@ f bar -e mplayer # run mplayer on the most frecent file matching bar
 d -e cd foo # cd into the most frecent directory matching foo
 ```
 
-You should add your own aliases to fully utilize the power of `f`. Here are
+You should add your own aliases to fully utilize the power of `fasd`. Here are
 some examples to get you started:
 
 ```sh
 alias v='f -e vim' # quick opening files with vim
 alias m='f -e mplayer' # quick opening files with mplayer
-alias j='d -e cd' # quick cd into directories, mimicking autojump and z
 alias o='a -e xdg-open' # quick opening files with xdg-open
 ```
 
@@ -93,30 +130,30 @@ _f_bash_hook_cmd_complete v m j o
 
 # How It Works
 
-When you source `f.sh`, `f` adds a hook which will be executed whenever you
-execute a command. The hook will scan your commands' arguments and determine if
-any of them refer to existing files or directories. If yes, `f` will add them
-to the database.
+When you source `fasd.sh`, `fasd` adds a hook which will be executed whenever
+you execute a command. The hook will scan your commands' arguments and
+determine if any of them refer to existing files or directories. If yes, `fasd`
+will add them to the database.
 
-When you run `f` with search arguments, `f` uses [Bayesian
+When you run `fasd` with search arguments, `fasd` uses [Bayesian
 Ranking](https://github.com/clvv/f/wiki/Bayesian-Ranking) to find the best
 match.
 
 # Compatibility
 
-`f`'s basic functionalities are POSIX compliant, meaning that you should be
-able to use `f` in all POSIX compliant shells. Your shell need to support
-command substitution in `$PS1` in order for `f` to automatically track your
+`fasd`'s basic functionalities are POSIX compliant, meaning that you should be
+able to use `fasd` in all POSIX compliant shells. Your shell need to support
+command substitution in `$PS1` in order for `fasd` to automatically track your
 commands and files. This feature is not specified by the POSIX standard, but
 it's nonetheless present in many POSIX compliant shells. If you use some shell
-other than `bash`, `zsh` or `ksh` and `f` does not work out of the box for you,
-you can try calling `_f_ps1_install` to manually install the hook to your
+other than `bash`, `zsh` or `ksh` and `fasd` does not work out of the box for
+you, you can try calling `_f_ps1_install` to manually install the hook to your
 `$PS1`.
 
 # Synopsis
 
 ```
-_f [options] [query ...]
+fasd [options] [query ...]
   options:
     -s        show list of files with their ranks
     -l        list paths only
@@ -131,11 +168,11 @@ _f [options] [query ...]
 
 # Tab Completion
 
-`f` offers two completion modes, command mode completion and word mode
+`fasd` offers two completion modes, command mode completion and word mode
 completion.
 
 Command mode completion is just like completion for any other commands. It is
-triggered when you hit tab on a `f` command or its aliases. Under this mode
+triggered when you hit tab on a `fasd` command or its aliases. Under this mode
 your queries can be separated by a space. Tip: if you find that the completion
 result overwrites your queries, type an extra space before you hit tab.
 
@@ -159,14 +196,15 @@ bindkey '^X^D' f-complete-d  # C-x C-d to do f-complete-d (only directories)
 ```
 
 If you use bash, you can turn on this *experimental feature* by calling
-`_f_bash_hook_word_complete_wrap_all` after sourcing `f` *and* after any bash
-completion setup. This will alter your existing completion setup, so you might
-get a *broken* completion system.
+`_f_bash_hook_word_complete_wrap_all` after sourcing `fasd` *and* after any
+bash completion setup. This will alter your existing completion setup, so you
+might get a *broken* completion system.
 
 
 # Tweaks
 
-Some shell variables that you can set before sourcing `f`.
+Some shell variables that you can set before sourcing `fasd`. You can set them
+in `$HOME/.fasdrc`
 
 ```
 $_F_DATA
@@ -196,18 +234,22 @@ File to log all STDERR to, defaults to "/dev/null".
 
 $_F_MAX
 Max total score / weight, defaults to 2000.
+
+$_F_SHELL
+Which shell to execute fasd.sh. Some shells will run faster than others. fasd
+is faster with ksh variants.
 ```
 
 # Debugging
 
-If `f` does not work as expected, please file a bug report describing the
+If `fasd` does not work as expected, please file a bug report describing the
 unexpected behavior along with your OS version, shell version, awk version, sed
 version, and a log file.
 
 You can set `_F_SINK` to obtain a log.
 
 ```sh
-_F_SINK="$HOME/.f.log"
+export _F_SINK="$HOME/.f.log"
 ```
 
 # TODO
@@ -219,5 +261,5 @@ _F_SINK="$HOME/.f.log"
 
 # Acknowledgements
 
-`f` is written based on existing code from [z](https://github.com/rupa/z).
+`fasd` is written based on existing code from [z](https://github.com/rupa/z).
 
