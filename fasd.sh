@@ -102,7 +102,7 @@ EOS
     _f_zsh_word_complete_trigger() {
       eval 'local _f_cur="\${words[CURRENT]}"'
       # fasd --word-complete-trigger \$_f_cur 1>&2
-      eval _f_zsh_word_complete \$(fasd --word-complete-trigger \$_f_cur)
+      eval \$(fasd --word-complete-trigger _f_zsh_word_complete \$_f_cur)
     }
     # enable word mode completion
     zstyle ':completion:*' completer _complete _ignored \
@@ -150,7 +150,7 @@ EOS
     }
     _f_bash_word_complete_trigger() {
       [ "\$_f_cur" ] || eval 'local _f_cur="\${COMP_WORDS[COMP_CWORD]}"'
-      eval _f_bash_word_complete "\$(fasd --word-complete-trigger \$_f_cur)"
+      eval "\$(fasd --word-complete-trigger _f_bash_word_complete \$_f_cur)"
     }
     _f_bash_word_complete_wrap() {
       eval 'local _f_cur="\${COMP_WORDS[COMP_CWORD]}"'
@@ -207,20 +207,20 @@ EOS
   # if "$_f_cur" is a query, then eval all the arguments
   --word-complete-trigger)
     shift
-    [ "$1" ] && local _f_cur="$1" || return
+    [ "$2" ] && local _f_cur="$2" || return
     case "$_f_cur" in
       ,*)
-        echo e "$_f_cur";;
+        echo "$1" e "$_f_cur";;
       f,*)
-        echo f "${_f_cur#?}";;
+        echo "$1" f "${_f_cur#?}";;
       d,*)
-        echo d "${_f_cur#?}";;
+        echo "$1" d "${_f_cur#?}";;
       *,,)
-        echo e "$_f_cur";;
+        echo "$1" e "$_f_cur";;
       *,,f)
-        echo f "${_f_cur%?}";;
+        echo "$1" f "${_f_cur%?}";;
       *,,d)
-        echo d "${_f_cur%?}";;
+        echo "$1" d "${_f_cur%?}";;
     esac
     ;;
 
