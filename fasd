@@ -316,7 +316,7 @@ EOS
     [ "$3" ] && local mode="$3"
     # query the database, this need some local variables to be set
     while read line; do
-      [ -${typ:-e} "${line%%\|*}" ] && echo "$line"
+      [ -${typ:-e} "${line%%|*}" ] && echo "$line"
     done < "$_F_DATA" | \
     $_F_AWK -v t="$(date +%s)" -v mode="$mode" -v q="$fnd" -F"|" '
       function frecent(rank, time) {
