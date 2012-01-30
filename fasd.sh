@@ -5,7 +5,7 @@
 #   Source this file somewhere in your shell rc (.bashrc or .zshrc).
 #
 # SYNOPSIS:
-#   _f [options] [query ...]
+#   fasd [options] [query ...]
 #     options:
 #       -s        show list of files with their ranks
 #       -l        list paths only
@@ -28,19 +28,19 @@
 #   alias m="f -e mplayer"
 #   alias o="f -e xdg-open"
 
-_f() {
+fasd() {
 
   case "$1" in
   --init)
+    [ -s "$HOME/.fasdrc" ] && . "$HOME/.fasdrc"
     # set default options
     [ -z "$_F_DATA" ] && _F_DATA="$HOME/.f"
     [ -z "$_F_BLACKLIST" ] && _F_BLACKLIST="--help"
     [ -z "$_F_SHIFT" ] && _F_SHIFT="sudo busybox"
-    [ -z "$_F_IGNORE" ] && _F_IGNORE="_f cd ls echo"
+    [ -z "$_F_IGNORE" ] && _F_IGNORE="fasd cd ls echo"
     [ -z "$_F_SINK" ] && _F_SINK=/dev/null
     [ -z "$_F_TRACK_PWD" ] && _F_TRACK_PWD=1
     [ -z "$_F_MAX" ] && _F_MAX=2000
-    [ -z "$_F_QUERY_SEPARATOR" ] && _F_QUERY_SEPARATOR=,
 
     { if [ -z "$_F_AWK" ]; then
         # awk preferences
@@ -51,48 +51,58 @@ _f() {
     } >> "$_F_SINK" 2>&1
     ;;
 
+  --init-alias)
+    cat <<EOS
+    alias a='fasd -a'
+    alias s='fasd -si'
+    alias d='fasd -d'
+    alias f='fasd -f'
+    alias sd='fasd -sid'
+    alias sf='fasd -sif'
+EOS
+  ;;
+
   --init-interactive)
     { # set default aliases
-      alias ${_F_CMD_A:=a}='_f -a'
-      alias ${_F_CMD_S:=s}='_f -s'
-      alias ${_F_CMD_D:=d}='_f -d'
-      alias ${_F_CMD_F:=f}='_f -f'
-
+      eval "$(fasd --init-alias)"
       if compctl; then # zsh
-        _f --init-zsh
+        eval "$(fasd --init-zsh)"
       elif complete; then # bash
-        _f --init-bash
+        eval "$(fasd --init-bash)"
       else # posix shell
-        _f --init-posix
+        eval "$(fasd --init-posix)"
       fi
     } >> "$_F_SINK" 2>&1
     ;;
 
   --init-zsh)
+    cat <<EOS
     # zsh command mode completion
     _f_zsh_cmd_complete() {
       local compl
       read -c compl
       compstate[insert]=menu # no expand
-      eval 'reply=(${(f)"$(_f --complete "$compl")"})'
+      eval 'reply=(\${(f)"\$(fasd --complete "\$compl")"})'
     }
     # enbale command mode completion
-    compctl -U -K _f_zsh_cmd_complete -V f -x 'C[-1,-*e],s[-]n[1,e]' -c -- _f
+    compctl -U -K _f_zsh_cmd_complete -V f -x 'C[-1,-*e],s[-]n[1,e]' -c -- fasd
     # zsh word mode completion
     _f_zsh_word_complete() {
-      [ -z "$_f_cur" ] && eval 'local _f_cur="${words[CURRENT]}"'
-      eval 'local fnd="${_f_cur//$_F_QUERY_SEPARATOR/ }"'
-      local typ=${1:-e}
-      _f --query | sort -nr | sed 's/^[0-9.]*[ ]*//' | while read line; do
-        compadd -U -V f "$line"
+      [ "\$2" ] && local _f_cur="\$2"
+      [ -z "\$_f_cur" ] && eval 'local _f_cur="\${words[CURRENT]}"'
+      eval 'local fnd="\${_f_cur//,/ }"'
+      local typ=\${1:-e}
+      fasd --query \$typ \$fnd | sort -nr | sed 's/^[0-9.]*[ ]*//' | while read line; do
+        compadd -U -V f "\$line"
       done
       compstate[insert]=menu # no expand
     }
     _f_zsh_word_complete_f() { _f_zsh_word_complete f ; }
     _f_zsh_word_complete_d() { _f_zsh_word_complete d ; }
     _f_zsh_word_complete_trigger() {
-      eval 'local _f_cur="${words[CURRENT]}"'
-      _f --word-complete-trigger _f_zsh_word_complete
+      eval 'local _f_cur="\${words[CURRENT]}"'
+      # fasd --word-complete-trigger \$_f_cur 1>&2
+      eval _f_zsh_word_complete \$(fasd --word-complete-trigger \$_f_cur)
     }
     # enable word mode completion
     zstyle ':completion:*' completer _complete _ignored \
@@ -102,80 +112,85 @@ _f() {
     zle -C f-complete-f 'menu-select' _f_zsh_word_complete_f
     zle -C f-complete-d 'menu-select' _f_zsh_word_complete_d
     # add zsh hook
-    _f_preexec() { { eval "_f --add $(_f --sanitize $3)"; } >> "$_F_SINK" 2>&1; }
+    _f_preexec() { { eval "fasd --add \$(fasd --sanitize \$3)"; } >> "\$_F_SINK" 2>&1; }
     autoload -U add-zsh-hook
     add-zsh-hook preexec _f_preexec
+EOS
     ;;
 
   --init-bash)
+    cat <<EOS
     # bash command mode completion
     _f_bash_cmd_complete() {
       # complete command after "-e"
-      eval 'local cur=${COMP_WORDS[COMP_CWORD]}
-      [[ ${COMP_WORDS[COMP_CWORD-1]} == -*e ]] && \
-        COMPREPLY=( $(compgen -A command $cur) ) && return'
+      eval 'local cur=\${COMP_WORDS[COMP_CWORD]}
+      [[ \${COMP_WORDS[COMP_CWORD-1]} == -*e ]] && \
+        COMPREPLY=( \$(compgen -A command \$cur) ) && return'
       # get completion results using expanded aliases
-      local RESULT=$( _f --complete "$(alias -p ${COMP_WORDS} | \
-        sed -n "\$s/^.*'\(.*\)'/\1/p") ${COMP_LINE#* }" )
-      local IFS=$'\n'
-      eval 'COMPREPLY=( $RESULT )'
+      local RESULT=\$( fasd --complete "\$(alias -p \${COMP_WORDS} | \
+        sed -n "\\\$s/^.*'\(.*\)'/\1/p") \${COMP_LINE#* }" )
+      local IFS=\$'\n'
+      eval 'COMPREPLY=( \$RESULT )'
     }
     _f_bash_hook_cmd_complete() {
-      for cmd in $*; do
-        complete -F _f_bash_cmd_complete $cmd
+      for cmd in \$*; do
+        complete -F _f_bash_cmd_complete \$cmd
       done
     }
     # enable bash command mode completion
-    _f_bash_hook_cmd_complete $_F_CMD_A $_F_CMD_S $_F_CMD_D $_F_CMD_F
+    _f_bash_hook_cmd_complete a s d f sd sf
     # bash word mode completion
     _f_bash_word_complete() {
-      [ "$_f_cur" ] || eval 'local _f_cur="${COMP_WORDS[COMP_CWORD]}"'
-      local typ=${1:-e}
-      eval 'local fnd="${_f_cur//$_F_QUERY_SEPARATOR/ }"'
-      local RESULT=$(_f --query | sed 's/^[0-9.]*[ ]*//')
-      local IFS=$'\n'
-      eval 'COMPREPLY=( $RESULT )'
+      [ "\$_f_cur" ] || eval 'local _f_cur="\${COMP_WORDS[COMP_CWORD]}"'
+      local typ=\${1:-e}
+      eval 'local fnd="\${_f_cur//,/ }"'
+      local RESULT=\$(fasd --query \$typ \$fnd | sed 's/^[0-9.]*[ ]*//')
+      local IFS=\$'\n'
+      eval 'COMPREPLY=( \$RESULT )'
     }
     _f_bash_word_complete_trigger() {
-      [ "$_f_cur" ] || eval 'local _f_cur="${COMP_WORDS[COMP_CWORD]}"'
-      _f --word-complete-trigger _f_bash_word_complete
+      [ "\$_f_cur" ] || eval 'local _f_cur="\${COMP_WORDS[COMP_CWORD]}"'
+      eval _f_bash_word_complete "\$(fasd --word-complete-trigger \$_f_cur)"
     }
     _f_bash_word_complete_wrap() {
-      eval 'local _f_cur="${COMP_WORDS[COMP_CWORD]}"'
+      eval 'local _f_cur="\${COMP_WORDS[COMP_CWORD]}"'
       _f_bash_word_complete_trigger
-      eval 'local z=${COMP_WORDS[0]}'
+      eval 'local z=\${COMP_WORDS[0]}'
       # try original comp func
-      [ "$COMPREPLY" ] || eval "$( echo "$_F_BASH_COMPLETE_P" | \
-        sed -n "/ $z$/"'s/.*-F \(.*\) .*/\1/p' )"
+      [ "\$COMPREPLY" ] || eval "\$( echo "\$_F_BASH_COMPLETE_P" | \
+        sed -n "/ \$z\$/"'s/.*-F \(.*\) .*/\1/p' )"
       # fall back on original complete options
-      local cmd="$(echo "$_F_BASH_COMPLETE_P" | \
-        sed -n "/ $z$/"'s/complete/compgen/') $_f_cur"
-      [ "$COMPREPLY" ] || eval 'COMPREPLY=( $(eval $cmd) )'
+      local cmd="\$(echo "\$_F_BASH_COMPLETE_P" | \
+        sed -n "/ \$z\$/"'s/complete/compgen/') \$_f_cur"
+      [ "\$COMPREPLY" ] || eval 'COMPREPLY=( \$(eval \$cmd) )'
     }
     _f_bash_hook_word_complete_wrap_all() {
-      export _F_BASH_COMPLETE_P="$(complete -p)"
-      for cmd in $(complete -p | awk '{print $NF}' | tr '\n' ' '); do
-        complete -o default -o bashdefault -F _f_bash_word_complete_wrap $cmd
+      export _F_BASH_COMPLETE_P="\$(complete -p)"
+      for cmd in \$(complete -p | awk '{print \$NF}' | tr '\n' ' '); do
+        complete -o default -o bashdefault -F _f_bash_word_complete_wrap \$cmd
       done
     }
     # enable word mode completion as default completion
     complete -o default -o bashdefault -D -F _f_bash_word_complete_trigger
     # add bash hook
-    echo $PROMPT_COMMAND | grep -v -q "_f --add" && \
-      PROMPT_COMMAND='eval "_f --add $(_f --sanitize $(history 1 | \
-      sed -e "s/^[ ]*[0-9]*[ ]*//"))" >> "$_F_SINK" 2>&1;'"$PROMPT_COMMAND"
+    echo \$PROMPT_COMMAND | grep -v -q "fasd --add" && \
+      PROMPT_COMMAND='eval "fasd --add \$(fasd --sanitize \$(history 1 | \
+      sed -e "s/^[ ]*[0-9]*[ ]*//"))" >> "\$_F_SINK" 2>&1;'"\$PROMPT_COMMAND"
+EOS
     ;;
 
   --init-posix)
+    cat <<EOS
     _f_ps1_func() {
-      eval "_f --add $(_f --sanitize $(fc -nl -0 | sed -n '$s/\s*\(.*\)/\1/p'))"
+      eval "fasd --add \$(fasd --sanitize \$(fc -nl -0 | sed -n '\$s/\s*\(.*\)/\1/p'))"
     }
     _f_ps1_install() {
-      echo "$PS1" | grep -v -q "_f_ps1_func" && \
-      export PS1="\$(_f_ps1_func >> "$_F_SINK" 2>&1)$PS1"
+      echo "\$PS1" | grep -v -q "_f_ps1_func" && \
+      export PS1="\\\$(_f_ps1_func >> "\$_F_SINK" 2>&1)\$PS1"
     }
-    echo "$PS1" | grep -q '\\' && _f_ps1_install
-    [ "$KSH_VERSION" ] && _f_ps1_install # ksh has the compatibility
+    echo "\$PS1" | grep -q '\\\\' && _f_ps1_install
+    [ "\$KSH_VERSION" ] && _f_ps1_install # ksh has the compatibility
+EOS
     ;;
 
   --readlink)
@@ -192,23 +207,20 @@ _f() {
   # if "$_f_cur" is a query, then eval all the arguments
   --word-complete-trigger)
     shift
+    [ "$1" ] && local _f_cur="$1" || return
     case "$_f_cur" in
-      $_F_QUERY_SEPARATOR*)
-        eval "$@";;
-      f$_F_QUERY_SEPARATOR*)
-        _f_cur=${_f_cur#?}
-        eval "$@" f;;
-      d$_F_QUERY_SEPARATOR*)
-        _f_cur=${_f_cur#?}
-        eval "$@" d;;
-      *$_F_QUERY_SEPARATOR$_F_QUERY_SEPARATOR)
-        eval "$@";;
-      *$_F_QUERY_SEPARATOR${_F_QUERY_SEPARATOR}f)
-        _f_cur=${_f_cur%?}
-        eval "$@" f;;
-      *$_F_QUERY_SEPARATOR${_F_QUERY_SEPARATOR}d)
-        _f_cur=${_f_cur%?}
-        eval "$@" d;;
+      ,*)
+        echo e "$_f_cur";;
+      f,*)
+        echo f "${_f_cur#?}";;
+      d,*)
+        echo d "${_f_cur#?}";;
+      *,,)
+        echo e "$_f_cur";;
+      *,,f)
+        echo f "${_f_cur%?}";;
+      *,,d)
+        echo d "${_f_cur%?}";;
     esac
     ;;
 
@@ -250,7 +262,7 @@ _f() {
     local paths
     while [ "$1" ]; do
       # add the adsolute path to "paths", and a separator "|"
-      paths="$paths|$(_f --readlink "$1" 2>> "$_F_SINK")"
+      paths="$paths|$(fasd --readlink "$1" 2>> "$_F_SINK")"
       shift
     done
 
@@ -297,6 +309,10 @@ _f() {
     ;;
 
   --query)
+    shift
+    [ "$1" ] && local typ="$1"
+    [ "$2" ] && local fnd="$2"
+    [ "$3" ] && local mode="$3"
     # query the database, this need some local variables to be set
     while read line; do
       [ -${typ:-e} "${line%%\|*}" ] && echo "$line"
@@ -374,7 +390,7 @@ _f() {
           a*) local typ=e;;
           d*) local typ=d;;
           f*) local typ=f;;
-          h*) echo "_f [options] [query ...]
+          h*) echo "fasd [options] [query ...]
   options:
     -s        show list of files with their ranks
     -l        list paths only
@@ -397,7 +413,7 @@ _f() {
     esac
 
     local result
-    result="$(_f --query 2>> "$_F_SINK")" # query the database
+    result="$(fasd --query 2>> "$_F_SINK")" # query the database
     [ $? -gt 0 ] && return
     if [ "$interactive" ]; then
       result="$(echo "$result" | sort -nr)"
@@ -419,10 +435,10 @@ _f() {
   esac
 }
 
-_f --init
+fasd --init
 
 case "$-" in
-  *i*) _f --init-interactive;; # assume being sourced
-  *) _f "$@" # assume being executed as an executable
+  *i*) fasd --init-interactive;; # assume being sourced
+  *) fasd "$@" # assume being executed as an executable
 esac
 
