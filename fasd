@@ -83,15 +83,15 @@ EOS
       local compl
       read -c compl
       compstate[insert]=menu # no expand
-      eval 'reply=(\${(f)"\$(fasd --complete "\$compl")"})'
+      reply=(\${(f)"\$(fasd --complete "\$compl")"})
     }
     # enbale command mode completion
     compctl -U -K _f_zsh_cmd_complete -V f -x 'C[-1,-*e],s[-]n[1,e]' -c -- fasd
     # zsh word mode completion
     _f_zsh_word_complete() {
       [ "\$2" ] && local _f_cur="\$2"
-      [ -z "\$_f_cur" ] && eval 'local _f_cur="\${words[CURRENT]}"'
-      eval 'local fnd="\${_f_cur//,/ }"'
+      [ -z "\$_f_cur" ] && local _f_cur="\${words[CURRENT]}"
+      local fnd="\${_f_cur//,/ }"
       local typ=\${1:-e}
       fasd --query \$typ \$fnd | sort -nr | sed 's/^[0-9.]*[ ]*//' | while read line; do
         compadd -U -V f "\$line"
@@ -101,7 +101,7 @@ EOS
     _f_zsh_word_complete_f() { _f_zsh_word_complete f ; }
     _f_zsh_word_complete_d() { _f_zsh_word_complete d ; }
     _f_zsh_word_complete_trigger() {
-      eval 'local _f_cur="\${words[CURRENT]}"'
+      local _f_cur="\${words[CURRENT]}"
       # fasd --word-complete-trigger \$_f_cur 1>&2
       eval \$(fasd --word-complete-trigger _f_zsh_word_complete \$_f_cur)
     }
@@ -124,14 +124,14 @@ EOS
     # bash command mode completion
     _f_bash_cmd_complete() {
       # complete command after "-e"
-      eval 'local cur=\${COMP_WORDS[COMP_CWORD]}
+      local cur=\${COMP_WORDS[COMP_CWORD]}
       [[ \${COMP_WORDS[COMP_CWORD-1]} == -*e ]] && \
-        COMPREPLY=( \$(compgen -A command \$cur) ) && return'
+        COMPREPLY=( \$(compgen -A command \$cur) ) && return
       # get completion results using expanded aliases
       local RESULT=\$( fasd --complete "\$(alias -p \${COMP_WORDS} | \
         sed -n "\\\$s/^.*'\(.*\)'/\1/p") \${COMP_LINE#* }" )
       local IFS=\$'\n'
-      eval 'COMPREPLY=( \$RESULT )'
+      COMPREPLY=( \$RESULT )
     }
     _f_bash_hook_cmd_complete() {
       for cmd in \$*; do
@@ -142,28 +142,28 @@ EOS
     _f_bash_hook_cmd_complete a s d f sd sf
     # bash word mode completion
     _f_bash_word_complete() {
-      [ "\$_f_cur" ] || eval 'local _f_cur="\${COMP_WORDS[COMP_CWORD]}"'
+      [ "\$_f_cur" ] || local _f_cur="\${COMP_WORDS[COMP_CWORD]}"
       local typ=\${1:-e}
-      eval 'local fnd="\${_f_cur//,/ }"'
+      local fnd="\${_f_cur//,/ }"
       local RESULT=\$(fasd --query \$typ \$fnd | sed 's/^[0-9.]*[ ]*//')
       local IFS=\$'\n'
-      eval 'COMPREPLY=( \$RESULT )'
+      COMPREPLY=( \$RESULT )
     }
     _f_bash_word_complete_trigger() {
-      [ "\$_f_cur" ] || eval 'local _f_cur="\${COMP_WORDS[COMP_CWORD]}"'
+      [ "\$_f_cur" ] || local _f_cur="\${COMP_WORDS[COMP_CWORD]}"
       eval "\$(fasd --word-complete-trigger _f_bash_word_complete \$_f_cur)"
     }
     _f_bash_word_complete_wrap() {
-      eval 'local _f_cur="\${COMP_WORDS[COMP_CWORD]}"'
+      local _f_cur="\${COMP_WORDS[COMP_CWORD]}"
       _f_bash_word_complete_trigger
-      eval 'local z=\${COMP_WORDS[0]}'
+      local z=\${COMP_WORDS[0]}
       # try original comp func
       [ "\$COMPREPLY" ] || eval "\$( echo "\$_F_BASH_COMPLETE_P" | \
         sed -n "/ \$z\$/"'s/.*-F \(.*\) .*/\1/p' )"
       # fall back on original complete options
       local cmd="\$(echo "\$_F_BASH_COMPLETE_P" | \
         sed -n "/ \$z\$/"'s/complete/compgen/') \$_f_cur"
-      [ "\$COMPREPLY" ] || eval 'COMPREPLY=( \$(eval \$cmd) )'
+      [ "\$COMPREPLY" ] || COMPREPLY=( \$(eval \$cmd) )
     }
     _f_bash_hook_word_complete_wrap_all() {
       export _F_BASH_COMPLETE_P="\$(complete -p)"
