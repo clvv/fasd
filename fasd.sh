@@ -439,6 +439,12 @@ fasd --init
 
 case "$-" in
   *i*) fasd --init-interactive;; # assume being sourced
-  *) fasd "$@" # assume being executed as an executable
+  *) # assume being executed as an executable
+    if [ -x "$_F_SHELL" -a -z "$_F_SET" ]; then
+      _F_SET=1 $_F_SHELL "$0" "$@"
+      exit $?
+    else
+      fasd "$@"
+    fi
 esac
 
