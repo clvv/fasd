@@ -32,6 +32,7 @@ fasd() {
 
   case "$1" in
   --init)
+    [ -s "/etc/fasdrc" ] && . "/etc/fasdrc"
     [ -s "$HOME/.fasdrc" ] && . "$HOME/.fasdrc"
     # set default options
     [ -z "$_F_DATA" ] && _F_DATA="$HOME/.f"
