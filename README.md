@@ -210,9 +210,6 @@ in `$HOME/.fasdrc`
 $_F_DATA
 Path to the f data file, default "$HOME/.f".
 
-$_F_CMD_{A,S,D,F}
-Commands to call _f.
-
 $_F_BLACKLIST
 List of blacklisted strings. Commands matching them will not be processed.
 Default is "--help".
@@ -221,7 +218,7 @@ $_F_SHIFT
 List of all commands that needs to be shifted, defaults to "sudo busybox".
 
 $_F_IGNORE
-List of all commands that will be ignored, defaults to "_f cd ls echo".
+List of all commands that will be ignored, defaults to "fasd cd ls echo".
 
 $_F_TRACK_PWD
 f defaults to track your "$PWD". Set this to 0 to disable this behavior.
