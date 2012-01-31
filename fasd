@@ -51,7 +51,7 @@ fasd() {
           $awk "" && _F_AWK=$awk && break
         done
       fi
-    } >> "$_F_SINK" 2>&1
+    } >> "${_F_SINK:-/dev/null}" 2>&1
     ;;
 
   --init-alias)
