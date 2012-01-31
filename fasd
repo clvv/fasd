@@ -191,8 +191,7 @@ EOS
       echo "\$PS1" | grep -v -q "_f_ps1_func" && \
       export PS1="\\\$(_f_ps1_func)\$PS1"
     }
-    echo "\$PS1" | grep -q '\\\\' && _f_ps1_install
-    [ "\$KSH_VERSION" ] && _f_ps1_install # ksh has the compatibility
+    _f_ps1_install
 EOS
     ;;
 
