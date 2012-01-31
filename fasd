@@ -113,7 +113,7 @@ EOS
     zle -C f-complete-f 'menu-select' _f_zsh_word_complete_f
     zle -C f-complete-d 'menu-select' _f_zsh_word_complete_d
     # add zsh hook
-    _f_preexec() { { eval "fasd --add \$(fasd --sanitize \$3)"; } >> "\$_F_SINK" 2>&1; }
+    _f_preexec() { { eval "fasd --add \$(fasd --sanitize \$3)"; } >> "$_F_SINK" 2>&1; }
     autoload -U add-zsh-hook
     add-zsh-hook preexec _f_preexec
 EOS
@@ -166,7 +166,7 @@ EOS
       [ "\$COMPREPLY" ] || COMPREPLY=( \$(eval \$cmd) )
     }
     _f_bash_hook_word_complete_wrap_all() {
-      export _F_BASH_COMPLETE_P="\$(complete -p)"
+      _F_BASH_COMPLETE_P="\$(complete -p)"
       for cmd in \$(complete -p | awk '{print \$NF}' | tr '\n' ' '); do
         complete -o default -o bashdefault -F _f_bash_word_complete_wrap \$cmd
       done
@@ -176,7 +176,7 @@ EOS
     # add bash hook
     echo \$PROMPT_COMMAND | grep -v -q "fasd --add" && \
       PROMPT_COMMAND='eval "fasd --add \$(fasd --sanitize \$(history 1 | \
-      sed -e "s/^[ ]*[0-9]*[ ]*//"))" >> "\$_F_SINK" 2>&1;'"\$PROMPT_COMMAND"
+      sed -e "s/^[ ]*[0-9]*[ ]*//"))" >> "$_F_SINK" 2>&1;'"\$PROMPT_COMMAND"
 EOS
     ;;
 
@@ -187,7 +187,7 @@ EOS
     }
     _f_ps1_install() {
       echo "\$PS1" | grep -v -q "_f_ps1_func" && \
-      export PS1="\\\$(_f_ps1_func >> "\$_F_SINK" 2>&1)\$PS1"
+      export PS1="\\\$(_f_ps1_func >> "$_F_SINK" 2>&1)\$PS1"
     }
     echo "\$PS1" | grep -q '\\\\' && _f_ps1_install
     [ "\$KSH_VERSION" ] && _f_ps1_install # ksh has the compatibility
