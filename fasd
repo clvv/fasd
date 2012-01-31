@@ -183,11 +183,13 @@ EOS
   --init-posix)
     cat <<EOS
     _f_ps1_func() {
-      eval "fasd --add \$(fasd --sanitize \$(fc -nl -0 | sed -n '\$s/\s*\(.*\)/\1/p'))"
+      { eval "fasd --add \
+        \$(fasd --sanitize \$(fc -nl -0 | sed -n '\$s/\s*\(.*\)/\1/p'))"
+      } >> "$_F_SINK" 2>&1
     }
     _f_ps1_install() {
       echo "\$PS1" | grep -v -q "_f_ps1_func" && \
-      export PS1="\\\$(_f_ps1_func >> "$_F_SINK" 2>&1)\$PS1"
+      export PS1="\\\$(_f_ps1_func)\$PS1"
     }
     echo "\$PS1" | grep -q '\\\\' && _f_ps1_install
     [ "\$KSH_VERSION" ] && _f_ps1_install # ksh has the compatibility
