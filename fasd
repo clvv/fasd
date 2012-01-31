@@ -32,18 +32,20 @@ fasd() {
 
   case "$1" in
   --init)
-    [ -s "/etc/fasdrc" ] && . "/etc/fasdrc"
-    [ -s "$HOME/.fasdrc" ] && . "$HOME/.fasdrc"
-    # set default options
-    [ -z "$_F_DATA" ] && _F_DATA="$HOME/.f"
-    [ -z "$_F_BLACKLIST" ] && _F_BLACKLIST="--help"
-    [ -z "$_F_SHIFT" ] && _F_SHIFT="sudo busybox"
-    [ -z "$_F_IGNORE" ] && _F_IGNORE="fasd cd ls echo"
-    [ -z "$_F_SINK" ] && _F_SINK=/dev/null
-    [ -z "$_F_TRACK_PWD" ] && _F_TRACK_PWD=1
-    [ -z "$_F_MAX" ] && _F_MAX=2000
+    { # source rc files if present
+      [ -s "/etc/fasdrc" ] && . "/etc/fasdrc"
+      [ -s "$HOME/.fasdrc" ] && . "$HOME/.fasdrc"
 
-    { if [ -z "$_F_AWK" ]; then
+      # set default options
+      [ -z "$_F_DATA" ] && _F_DATA="$HOME/.f"
+      [ -z "$_F_BLACKLIST" ] && _F_BLACKLIST="--help"
+      [ -z "$_F_SHIFT" ] && _F_SHIFT="sudo busybox"
+      [ -z "$_F_IGNORE" ] && _F_IGNORE="fasd cd ls echo"
+      [ -z "$_F_SINK" ] && _F_SINK=/dev/null
+      [ -z "$_F_TRACK_PWD" ] && _F_TRACK_PWD=1
+      [ -z "$_F_MAX" ] && _F_MAX=2000
+
+      if [ -z "$_F_AWK" ]; then
         # awk preferences
         for awk in mawk gawk original-awk nawk awk; do
           $awk "" && _F_AWK=$awk && break
@@ -65,15 +67,15 @@ EOS
   ;;
 
   --init-interactive)
-    { # set default aliases
-      eval "$(fasd --init-alias)"
-      if compctl; then # zsh
+    { if compctl; then # zsh
         eval "$(fasd --init-zsh)"
       elif complete; then # bash
         eval "$(fasd --init-bash)"
       else # posix shell
         eval "$(fasd --init-posix)"
       fi
+      # set default aliases
+      eval "$(fasd --init-alias)"
     } >> "$_F_SINK" 2>&1
     ;;
 
@@ -209,8 +211,7 @@ EOS
 
   # if "$_f_cur" is a query, then eval all the arguments
   --word-complete-trigger)
-    shift
-    [ "$2" ] && local _f_cur="$2" || return
+    shift; [ "$2" ] && local _f_cur="$2" || return
     case "$_f_cur" in
       ,*)
         echo "$1" e "$_f_cur";;
@@ -228,8 +229,7 @@ EOS
     ;;
 
   --sanitize)
-    shift
-    echo "$@" | sed \
+    shift; echo "$@" | sed \
       's/\(^\| \).\?[<>|&]\+/ /g;s/&$//;s/\(\$(\|`\)//g;s/\([^\\]\)[`)]/\1/g'
     ;;
 
@@ -379,7 +379,7 @@ EOS
     while [ "$1" ]; do case "$1" in
       --complete) [ "$2" = "--" ] && shift; set -- $(echo $2); local list=1 r=r;;
       --) while [ "$2" ]; do shift; fnd="$fnd$1 "; last="$1"; done;;
-      -*) local o="${1#-}"; while [ "$o" ]; do case $o in
+      -*) local o="${1#-}"; while [ "$o" ]; do case "$o" in
           s*) local show=1;;
           l*) local list=1;;
           i*) local interactive=1 show=1;;
