@@ -44,7 +44,7 @@ fasd() {
 
     { if [ -z "$_F_AWK" ]; then
         # awk preferences
-        for awk in gawk original-awk nawk mawk awk; do
+        for awk in mawk gawk original-awk nawk awk; do
           $awk "" && _F_AWK=$awk && break
         done
       fi
