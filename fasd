@@ -135,8 +135,7 @@ EOS
       # get completion results using expanded aliases
       local RESULT=\$( fasd --complete "\$(alias -p \${COMP_WORDS} | \
         sed -n "\\\$s/^.*'\(.*\)'/\1/p") \${COMP_LINE#* }" )
-      local IFS=\$'\n'
-      COMPREPLY=( \$RESULT )
+      IFS=\$'\n' COMPREPLY=( \$RESULT )
     }
     _f_bash_hook_cmd_complete() {
       for cmd in \$*; do
@@ -151,8 +150,7 @@ EOS
       local typ=\${1:-e}
       local fnd="\${_f_cur//,/ }"
       local RESULT=\$(fasd --query \$typ \$fnd | sed 's/^[0-9.]*[ ]*//')
-      local IFS=\$'\n'
-      COMPREPLY=( \$RESULT )
+      IFS=\$'\n' COMPREPLY=( \$RESULT )
     }
     _f_bash_word_complete_trigger() {
       [ "\$_f_cur" ] || local _f_cur="\${COMP_WORDS[COMP_CWORD]}"
@@ -175,9 +173,9 @@ EOS
       for cmd in \$(complete -p | awk '{print \$NF}' | tr '\n' ' '); do
         complete -o default -o bashdefault -F _f_bash_word_complete_wrap \$cmd
       done
+      # enable word mode completion as default completion
+      complete -o default -o bashdefault -D -F _f_bash_word_complete_trigger
     }
-    # enable word mode completion as default completion
-    complete -o default -o bashdefault -D -F _f_bash_word_complete_trigger
     # add bash hook
     echo \$PROMPT_COMMAND | grep -v -q "fasd --add" && \
       PROMPT_COMMAND='eval "fasd --add \$(fasd --sanitize \$(history 1 | \
