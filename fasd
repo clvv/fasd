@@ -44,6 +44,8 @@ fasd() {
       [ -z "$_F_SINK" ] && _F_SINK=/dev/null
       [ -z "$_F_TRACK_PWD" ] && _F_TRACK_PWD=1
       [ -z "$_F_MAX" ] && _F_MAX=2000
+      [ -z "$_F_BACKENDS" ] && _F_BACKENDS=native
+
 
       if [ -z "$_F_AWK" ]; then
         # awk preferences
@@ -322,10 +324,10 @@ EOS
     done | $_F_AWK -v t="$(date +%s)" -v mode="$mode" -v q="$fnd" -F"|" '
       function frecent(rank, time) {
         dx = t-time
-        if( dx < 3600 ) return rank*4
-        if( dx < 86400 ) return rank*2
-        if( dx < 604800 ) return rank/2
-        return rank/4
+        if( dx < 3600 ) return 6
+        if( dx < 86400 ) return 4
+        if( dx < 604800 ) return 2
+        return 1
       }
       function likelihood(pattern, path) {
         m = gsub( "/+", "/", path )
@@ -344,12 +346,15 @@ EOS
         return r
       }
       function getRank() {
-        if( mode == "rank" )
-          f = $2
-        else
-          f = frecent($2, $3)
-        wcase[$1] = f * likelihood( pattern, $1 )
-        nocase[$1] = f * likelihood( pattern2, tolower($1) )
+        if(!wcase[$1]) {
+          times[$1] = $2
+          la[$1] = $3
+          wcase[$1] = likelihood( pattern, $1 )
+          if(!cx) nocase[$1] = likelihood( pattern2, tolower($1) )
+        } else {
+          times[$1] += $2
+          if($3 > la[$1]) la[$1] = $3
+        }
       }
       BEGIN {
         split(q, pattern, " ")
@@ -362,28 +367,33 @@ EOS
       }
       END {
         if( cx ) {
-          for( i in wcase )
-            if( wcase[i] ) printf "%-10s %s\n", wcase[i], i
+          for( i in wcase ) {
+            if( wcase[i] )
+              printf "%-10s %s\n", wcase[i] * times[i] * frecent(la[i]), i
+          }
         } else if( ncx ) {
-          for( i in nocase )
-            if( nocase[i] ) printf "%-10s %s\n", nocase[i], i
+          for( i in nocase ) {
+            if( nocase[i] )
+              printf "%-10s %s\n", nocase[i] * times[i] * frecent(la[i]), i
+          }
         }
       }' - 2>> "$_F_SINK"
     ;;
 
   --backend)
-    local stamp=$(( $(date +%s) - 3500 ))
     case $2 in
       native)
         cat "$_F_DATA"
         ;;
       viminfo)
+        local i=100
         while IFS=" " read line; do
           [ "${line:0:1}" = ">" ] || continue
           local fl=${line:2}
           fl="${fl/\~/$HOME/}"
           fl="${fl/\/\///}"
-          echo "${fl}|1|$stamp"
+          i=$((i-1))
+          echo "$fl|$i"
         done < "$HOME/.viminfo"
         ;;
       recently-used)
@@ -393,10 +403,10 @@ EOS
           sed '1d;s/".*$//' | \
           tr '\n' '|' | \
           sed 's@|/@\n@g' | \
-          awk -F'|' -v stamp=$stamp '{
+          awk -F'|' '{
             sum = 0
             for( i=2; i<=NF; i++ ) sum += $i
-            print $1 "|" sum "|" stamp
+            print $1 "|" sum
           }'
         ;;
     esac
@@ -404,7 +414,7 @@ EOS
 
   *) # parsing logic and processing
     [ -f "$_F_DATA" ] || return # no db yet
-    local fnd last backend=native
+    local fnd last backends="$_F_BACKENDS"
     while [ "$1" ]; do case "$1" in
       --complete) [ "$2" = "--" ] && shift; set -- $(echo $2); local list=1 r=r;;
       --) while [ "$2" ]; do shift; fnd="$fnd$1 "; last="$1"; done;;
@@ -421,15 +431,15 @@ EOS
                 shift
               fi; break;;
           b*) o="${o#?}"; if [ "$o" ]; then
-                backend="$backend $o"
+                backends="$o"
               else
-                backend="$backend ${2:?"Argument needed after -b"}"
+                backends="${2:?"Argument needed after -B"}"
                 shift
               fi; break;;
           B*) o="${o#?}"; if [ "$o" ]; then
-                backend="$o"
+                backends="$backends $o"
               else
-                backend="${2:?"Argument needed after -B"}"
+                backends="$backends ${2:?"Argument needed after -b"}"
                 shift
               fi; break;;
           a*) local typ=e;;
@@ -457,8 +467,8 @@ EOS
        && $exec "$last" && return;;
     esac
 
-    local each; for each in $backend; do
-      _f_data="$_f_data$(fasd --backend $each)"
+    local each; for each in $backends; do
+      _f_data="$_f_data$'\n'$(fasd --backend $each)"
     done
 
     local result
