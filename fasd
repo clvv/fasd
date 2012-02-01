@@ -232,7 +232,7 @@ EOS
     # stop if we don't own ~/.f (we're another user but our ENV is still set)
     [ -f "$_F_DATA" -a ! -O "$_F_DATA" ] && return
 
-    # make zsh do word splitting here
+    # make zsh do word spliting for the for loop to work
     [ "$ZSH_VERSION" ] && emulate sh && setopt localoptions
 
     # blacklists
@@ -308,11 +308,17 @@ EOS
     [ "$1" ] && local typ="$1"
     [ "$2" ] && local fnd="$2"
     [ "$3" ] && local mode="$3"
+
+    # make zsh do word spliting for the for loop to work
+    [ "$ZSH_VERSION" ] && emulate sh && setopt localoptions
+
+    # cat all backends
     local each _f_data; for each in $_F_BACKENDS; do
       _f_data="$_f_data$(echo)$(fasd --backend $each)"
     done
     [ "$_f_data" ] || _f_data="$(cat "$_F_DATA")"
-    # query the database, this need some local variables to be set
+
+    # query the database
     echo "$_f_data" | while read line; do
       [ -${typ:-e} "${line%%\|*}" ] && echo "$line"
     done | $_F_AWK -v t="$(date +%s)" -v mode="$mode" -v q="$fnd" -F"|" '
