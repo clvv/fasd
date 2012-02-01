@@ -320,7 +320,7 @@ EOS
     [ "$_f_data" ] || local _f_data="$(cat "$_F_DATA")"
     # query the database, this need some local variables to be set
     echo "$_f_data" | while read line; do
-      [ -${typ:-e} "${line%%|*}" ] && echo "$line"
+      [ -${typ:-e} "${line%%\|*}" ] && echo "$line"
     done | $_F_AWK -v t="$(date +%s)" -v mode="$mode" -v q="$fnd" -F"|" '
       function frecent(rank, time) {
         dx = t-time
