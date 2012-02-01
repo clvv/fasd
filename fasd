@@ -318,10 +318,10 @@ EOS
     [ "$2" ] && local fnd="$2"
     [ "$3" ] && local mode="$3"
     # query the database, this need some local variables to be set
-    while read line; do
+    [ "$_f_data" ] || local _f_data="$(cat "$_F_DATA")"
+    echo "$_f_data" | while read line; do
       [ -${typ:-e} "${line%%|*}" ] && echo "$line"
-    done < "$_F_DATA" | \
-    $_F_AWK -v t="$(date +%s)" -v mode="$mode" -v q="$fnd" -F"|" '
+    done | $_F_AWK -v t="$(date +%s)" -v mode="$mode" -v q="$fnd" -F"|" '
       function frecent(rank, time) {
         dx = t-time
         if( dx < 3600 ) return rank*4
@@ -373,9 +373,40 @@ EOS
       }' - 2>> "$_F_SINK"
     ;;
 
+  --backend)
+    local stamp=$(( $(date +%s) - 3500 ))
+    case $2 in
+      native)
+        cat "$_F_DATA"
+        ;;
+      viminfo)
+        while IFS=" " read line; do
+          [ "${line:0:1}" = ">" ] || continue
+          local fl=${line:2}
+          fl="${fl/\~/$HOME/}"
+          fl="${fl/\/\///}"
+          echo "${fl}|1|$stamp"
+        done < "$HOME/.viminfo"
+        ;;
+      recently-used)
+        tr -d '\n' \
+          < "$HOME/.local/share/recently-used.xbel" | \
+          sed 's@\(file:/\|count="\)@\n@g' | \
+          sed '1d;s/".*$//' | \
+          tr '\n' '|' | \
+          sed 's@|/@\n@g' | \
+          awk -F'|' -v stamp=$stamp '{
+            sum = 0
+            for( i=2; i<=NF; i++ ) sum += $i
+            print $1 "|" sum "|" stamp
+          }'
+        ;;
+    esac
+    ;;
+
   *) # parsing logic and processing
     [ -f "$_F_DATA" ] || return # no db yet
-    local fnd last
+    local fnd last backend=native
     while [ "$1" ]; do case "$1" in
       --complete) [ "$2" = "--" ] && shift; set -- $(echo $2); local list=1 r=r;;
       --) while [ "$2" ]; do shift; fnd="$fnd$1 "; last="$1"; done;;
@@ -386,9 +417,21 @@ EOS
           r*) local mode=rank;;
           t*) local mode=recent;;
           e*) o="${o#?}"; if [ "$o" ]; then # there are characters after "-e"
-                local exec=$o # anything after "-e"
+                local exec="$o" # anything after "-e"
               else # use the next argument
                 local exec=${2:?"Argument needed after -e"}
+                shift
+              fi; break;;
+          b*) o="${o#?}"; if [ "$o" ]; then
+                backend="$backend $o"
+              else
+                backend="$backend ${2:?"Argument needed after -b"}"
+                shift
+              fi; break;;
+          B*) o="${o#?}"; if [ "$o" ]; then
+                backend="$o"
+              else
+                backend="${2:?"Argument needed after -b"}"
                 shift
               fi; break;;
           a*) local typ=e;;
@@ -415,6 +458,10 @@ EOS
      /*) [ -z "$show$list" -a -${typ:-e} "$last" -a "$exec" ] \
        && $exec "$last" && return;;
     esac
+
+    local each; for each in $backend; do
+      _f_data="$_f_data$(fasd --backend $each)"
+    done
 
     local result
     result="$(fasd --query 2>> "$_F_SINK")" # query the database
