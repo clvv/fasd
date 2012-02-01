@@ -243,8 +243,7 @@ EOS
     [ "$ZSH_VERSION" ] && emulate sh && setopt localoptions
 
     # blacklists
-    local each
-    for each in $_F_BLACKLIST; do
+    local each; for each in $_F_BLACKLIST; do
       case " $* " in *\ $each\ *) return;; esac
     done
 
@@ -263,8 +262,7 @@ EOS
 
     shift # shift out the command itself
 
-    local paths
-    while [ "$1" ]; do
+    local paths; while [ "$1" ]; do
       # add the adsolute path to "paths", and a separator "|"
       paths="$paths|$(fasd --readlink "$1" 2>> "$_F_SINK")"
       shift
@@ -431,7 +429,7 @@ EOS
           B*) o="${o#?}"; if [ "$o" ]; then
                 backend="$o"
               else
-                backend="${2:?"Argument needed after -b"}"
+                backend="${2:?"Argument needed after -B"}"
                 shift
               fi; break;;
           a*) local typ=e;;
