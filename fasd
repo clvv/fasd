@@ -387,14 +387,11 @@ EOS
         ;;
       viminfo)
         local i=100
-        while IFS=" " read line; do
-          [ "${line:0:1}" = ">" ] || continue
-          local fl=${line:2}
-          fl="${fl/\~/$HOME/}"
-          fl="${fl/\/\///}"
-          i=$((i-1))
-          echo "$fl|$i"
-        done < "$HOME/.viminfo"
+        < "$HOME/.viminfo" sed -n -e '/^>/s@~@'"$HOME"'@p' | \
+          while IFS=" " read line; do
+            i=$((i-1))
+            echo "${line#??}|$i"
+          done
         ;;
       recently-used)
         tr -d '\n' \
@@ -414,7 +411,7 @@ EOS
 
   *) # parsing logic and processing
     [ -f "$_F_DATA" ] || return # no db yet
-    local fnd last backends="$_F_BACKENDS"
+    local fnd last backends="$_F_BACKENDS" _f_data
     while [ "$1" ]; do case "$1" in
       --complete) [ "$2" = "--" ] && shift; set -- $(echo $2); local list=1 r=r;;
       --) while [ "$2" ]; do shift; fnd="$fnd$1 "; last="$1"; done;;
@@ -468,7 +465,7 @@ EOS
     esac
 
     local each; for each in $backends; do
-      _f_data="$_f_data$'\n'$(fasd --backend $each)"
+      _f_data="$_f_data$(echo)$(fasd --backend $each)"
     done
 
     local result
