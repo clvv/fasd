@@ -403,7 +403,7 @@ _f() {
       result="$(echo "$result" | sort -nr)"
       echo "$result" | sed = | sed 'N;s/\n/	/' | sort -nr
       local i; printf "> "; read i; [ 0 -lt "${i:-0}" ] || return 1
-      ${exec:=echo} "$(echo "$result" | sed -n "${i:-1}"'s/^[0-9.]*[ ]*//p')"
+      ${exec:-echo} "$(echo "$result" | sed -n "${i:-1}"'s/^[0-9.]*[ ]*//p')"
     elif [ "$list" ]; then
       echo "$result" | sort -n${r} | sed 's/^[0-9.]*[ ]*//'
     elif [ "$show" ]; then
