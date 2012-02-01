@@ -314,10 +314,10 @@ EOS
     [ "$1" ] && local typ="$1"
     [ "$2" ] && local fnd="$2"
     [ "$3" ] && local mode="$3"
-    local each; for each in $_F_BACKENDS; do
+    local each _f_data; for each in $_F_BACKENDS; do
       _f_data="$_f_data$(echo)$(fasd --backend $each)"
     done
-    [ "$_f_data" ] || local _f_data="$(cat "$_F_DATA")"
+    [ "$_f_data" ] || _f_data="$(cat "$_F_DATA")"
     # query the database, this need some local variables to be set
     echo "$_f_data" | while read line; do
       [ -${typ:-e} "${line%%\|*}" ] && echo "$line"
