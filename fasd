@@ -387,7 +387,7 @@ EOS
         ;;
       viminfo)
         local i=100
-        < "$HOME/.viminfo" sed -n -e '/^>/s@~@'"$HOME"'@p' | \
+        < "$HOME/.viminfo" sed -n -e '/^>/{s@~@'"$HOME"'@;p}' | \
           while IFS=" " read line; do
             i=$((i-1))
             echo "${line#??}|$i"
