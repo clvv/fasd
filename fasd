@@ -212,18 +212,12 @@ EOS
   --word-complete-trigger)
     shift; [ "$2" ] && local _f_cur="$2" || return
     case "$_f_cur" in
-      ,*)
-        echo "$1" e "$_f_cur";;
-      f,*)
-        echo "$1" f "${_f_cur#?}";;
-      d,*)
-        echo "$1" d "${_f_cur#?}";;
-      *,,)
-        echo "$1" e "$_f_cur";;
-      *,,f)
-        echo "$1" f "${_f_cur%?}";;
-      *,,d)
-        echo "$1" d "${_f_cur%?}";;
+      ,*) echo "$1" e "$_f_cur";;
+      f,*) echo "$1" f "${_f_cur#?}";;
+      d,*) echo "$1" d "${_f_cur#?}";;
+      *,,) echo "$1" e "$_f_cur";;
+      *,,f) echo "$1" f "${_f_cur%?}";;
+      *,,d) echo "$1" d "${_f_cur%?}";;
     esac
     ;;
 
