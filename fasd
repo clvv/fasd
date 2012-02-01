@@ -63,7 +63,7 @@ fasd() {
     alias sf='fasd -sif'
     alias d='fasd -d'
     alias f='fasd -f'
-    z() { [ \$# -gt 0 ] && cd "\$(d "\$@")" || d "\$@"; }
+    z() { [ \$# -gt 0 ] && cd "\$(fasd -d "\$@")" || fasd -d "\$@"; }
 EOS
   ;;
 
