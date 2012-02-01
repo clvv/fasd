@@ -46,7 +46,6 @@ fasd() {
       [ -z "$_F_MAX" ] && _F_MAX=2000
       [ -z "$_F_BACKENDS" ] && _F_BACKENDS=native
 
-
       if [ -z "$_F_AWK" ]; then
         # awk preferences
         for awk in mawk gawk original-awk nawk awk; do
@@ -315,8 +314,11 @@ EOS
     [ "$1" ] && local typ="$1"
     [ "$2" ] && local fnd="$2"
     [ "$3" ] && local mode="$3"
-    # query the database, this need some local variables to be set
+    local each; for each in $_F_BACKENDS; do
+      _f_data="$_f_data$(echo)$(fasd --backend $each)"
+    done
     [ "$_f_data" ] || local _f_data="$(cat "$_F_DATA")"
+    # query the database, this need some local variables to be set
     echo "$_f_data" | while read line; do
       [ -${typ:-e} "${line%%|*}" ] && echo "$line"
     done | $_F_AWK -v t="$(date +%s)" -v mode="$mode" -v q="$fnd" -F"|" '
@@ -409,7 +411,7 @@ EOS
 
   *) # parsing logic and processing
     [ -f "$_F_DATA" ] || return # no db yet
-    local fnd last backends="$_F_BACKENDS" _f_data
+    local fnd last _F_BACKENDS="$_F_BACKENDS" _f_data
     while [ "$1" ]; do case "$1" in
       --complete) [ "$2" = "--" ] && shift; set -- $(echo $2); local list=1 r=r;;
       --) while [ "$2" ]; do shift; fnd="$fnd$1 "; last="$1"; done;;
@@ -426,15 +428,15 @@ EOS
                 shift
               fi; break;;
           b*) o="${o#?}"; if [ "$o" ]; then
-                backends="$o"
+                _F_BACKENDS="$o"
               else
-                backends="${2:?"Argument needed after -B"}"
+                _F_BACKENDS="${2:?"Argument needed after -B"}"
                 shift
               fi; break;;
           B*) o="${o#?}"; if [ "$o" ]; then
-                backends="$backends $o"
+                _F_BACKENDS="$_F_BACKENDS $o"
               else
-                backends="$backends ${2:?"Argument needed after -b"}"
+                _F_BACKENDS="$_F_BACKENDS ${2:?"Argument needed after -b"}"
                 shift
               fi; break;;
           a*) local typ=e;;
@@ -461,10 +463,6 @@ EOS
      /*) [ -z "$show$list" -a -${typ:-e} "$last" -a "$exec" ] \
        && $exec "$last" && return;;
     esac
-
-    local each; for each in $backends; do
-      _f_data="$_f_data$(echo)$(fasd --backend $each)"
-    done
 
     local result
     result="$(fasd --query 2>> "$_F_SINK")" # query the database
