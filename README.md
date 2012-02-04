@@ -160,10 +160,13 @@ fasd [options] [query ...]
     -l        list paths only
     -i        interactive mode
     -e <cmd>  set command to execute on the result file
+    -b <name> only use <name> backend
+    -B <name> add addition backend <name>
     -a        match files and directories
     -d        match directories only
     -f        match files only
     -r        match by rank only
+    -t        match by recent access only
     -h        show a brief help message
 ```
 
