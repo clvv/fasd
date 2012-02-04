@@ -274,14 +274,14 @@ EOS
         split(list, files, "|")
         for(i in files) {
           path = files[i]
-          if ( path == "" ) continue
+          if(path == "") continue
           paths[path] = path # array for checking
           rank[path] = 1
           time[path] = now
         }
       }
       $2 >= 1 {
-        if( $1 in paths ) {
+        if($1 in paths) {
           rank[$1] = $2 + 1
           time[$1] = now
         } else {
@@ -291,10 +291,10 @@ EOS
         count += $2
       }
       END {
-        if( count > max )
-          for( i in rank ) print i "|" 0.9*rank[i] "|" time[i] # aging
+        if(count > max)
+          for(i in rank) print i "|" 0.9*rank[i] "|" time[i] # aging
         else
-          for( i in rank ) print i "|" rank[i] "|" time[i]
+          for(i in rank) print i "|" rank[i] "|" time[i]
       }' "$_F_DATA" 2>> "$_F_SINK" >| "$tempfile"
     if [ $? -ne 0 -a -f "$_F_DATA" ]; then
       env rm -f "$tempfile"
@@ -336,18 +336,18 @@ EOS
         return 1
       }
       function likelihood(pattern, path) {
-        m = gsub( "/+", "/", path )
+        m = gsub("/+", "/", path)
         r = 1
-        for( i in pattern ) {
+        for(i in pattern) {
           tmp = path
-          gsub( ".*" pattern[i], "", tmp)
-          n = gsub( "/+", "/", tmp )
-          if( n == m )
+          gsub(".*" pattern[i], "", tmp)
+          n = gsub("/+", "/", tmp)
+          if(n == m)
             return 0
-          else if( n == 0 )
+          else if(n == 0)
             r *= 20 # F
           else
-            r *= 1 - ( n / m )
+            r *= 1 - (n / m)
         }
         return r
       }
@@ -355,8 +355,8 @@ EOS
         if(!wcase[$1]) {
           times[$1] = $2
           la[$1] = $3
-          wcase[$1] = likelihood( pattern, $1 )
-          if(!cx) nocase[$1] = likelihood( pattern2, tolower($1) )
+          wcase[$1] = likelihood(pattern, $1)
+          if(!cx) nocase[$1] = likelihood(pattern2, tolower($1))
         } else {
           times[$1] += $2
           if($3 > la[$1]) la[$1] = $3
@@ -364,7 +364,7 @@ EOS
       }
       BEGIN {
         split(q, pattern, " ")
-        for( i in pattern ) pattern2[i] = tolower(pattern[i]) # nocase
+        for(i in pattern) pattern2[i] = tolower(pattern[i]) # nocase
       }
       {
         getRank()
@@ -372,14 +372,14 @@ EOS
         ncx = ncx || nocase[$1]
       }
       END {
-        if( cx ) {
-          for( i in wcase ) {
-            if( wcase[i] )
+        if(cx) {
+          for(i in wcase) {
+            if(wcase[i])
               printf "%-10s %s\n", '"$prior"' * wcase[i], i
           }
-        } else if( ncx ) {
-          for( i in nocase ) {
-            if( nocase[i] )
+        } else if(ncx) {
+          for(i in nocase) {
+            if(nocase[i])
               printf "%-10s %s\n", '"$prior"' * nocase[i], i
           }
         }
@@ -497,7 +497,7 @@ EOS
 
 fasd --init
 
-case "$-" in
+case $- in
   *i*) fasd --init-interactive;; # assume being sourced
   *) # assume being executed as an executable
     if [ -x "$_F_SHELL" -a -z "$_F_SET" ]; then
