@@ -318,11 +318,17 @@ EOS
     done
     [ "$_f_data" ] || _f_data="$(cat "$_F_DATA")"
 
+    case $mode in
+      rank) local prior='times[i]';;
+      recent) local prior='(t-la[i])';;
+      *) local prior='times[i] * frecent(la[i])' ;;
+    esac
+
     # query the database
     echo "$_f_data" | while read line; do
       [ -${typ:-e} "${line%%\|*}" ] && echo "$line"
-    done | $_F_AWK -v t="$(date +%s)" -v mode="$mode" -v q="$fnd" -F"|" '
-      function frecent(rank, time) {
+    done | $_F_AWK -v t="$(date +%s)" -v q="$fnd" -F"|" '
+      function frecent(time) {
         dx = t-time
         if( dx < 3600 ) return 6
         if( dx < 86400 ) return 4
@@ -369,12 +375,12 @@ EOS
         if( cx ) {
           for( i in wcase ) {
             if( wcase[i] )
-              printf "%-10s %s\n", wcase[i] * times[i] * frecent(la[i]), i
+              printf "%-10s %s\n", '"$prior"' * wcase[i], i
           }
         } else if( ncx ) {
           for( i in nocase ) {
             if( nocase[i] )
-              printf "%-10s %s\n", nocase[i] * times[i] * frecent(la[i]), i
+              printf "%-10s %s\n", '"$prior"' * nocase[i], i
           }
         }
       }' - 2>> "$_F_SINK"
