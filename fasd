@@ -420,7 +420,7 @@ EOS
           l*) local list=1;;
           i*) local interactive=1 show=1;;
           r*) local mode=rank;;
-          t*) local mode=recent;;
+          t*) local mode=recent r=r;;
           e*) o="${o#?}"; if [ "$o" ]; then # there are characters after "-e"
                 local exec="$o" # anything after "-e"
               else # use the next argument
@@ -464,11 +464,13 @@ EOS
        && $exec "$last" && return;;
     esac
 
+    [ -z "$r" ] && local R=r # reverse of $r
+
     local result
     result="$(fasd --query 2>> "$_F_SINK")" # query the database
     [ $? -gt 0 ] && return
     if [ "$interactive" ] || [ "$exec" -a -z "$fnd$list$show" -a -t 1 ]; then
-      result="$(echo "$result" | sort -nr)"
+      result="$(echo "$result" | sort -n${R})"
       echo "$result" | sed = | sed 'N;s/\n/	/' | sort -nr
       local i; printf "> "; read i; [ 0 -lt "${i:-0}" ] || return 1
       ${exec:-echo} "$(echo "$result" | sed -n "${i:-1}"'s/^[0-9.]*[ ]*//p')"
@@ -477,9 +479,9 @@ EOS
     elif [ "$show" ]; then
       echo "$result" | sort -n${r}
     elif [ "$fnd" -a "$exec" ]; then # exec
-      $exec "$(echo "$result" | sort -n | sed -n '$s/^[0-9.]*[ ]*//p')"
+      $exec "$(echo "$result" | sort -n${r} | sed -n '$s/^[0-9.]*[ ]*//p')"
     elif [ "$fnd" -a ! -t 1 ]; then # echo if output is not terminal
-      echo "$result" | sort -n | sed -n '$s/^[0-9.]*[ ]*//p'
+      echo "$result" | sort -n${r} | sed -n '$s/^[0-9.]*[ ]*//p'
     else # no args, show
       echo "$result" | sort -n${r}
     fi
