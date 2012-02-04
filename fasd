@@ -276,7 +276,7 @@ EOS
     # add current pwd if the option is set
     [ "$_F_TRACK_PWD" = "1" -a "$PWD" != "$HOME" ] && paths="$paths|$PWD"
 
-    [ -z "${paths##|}" ] && return # stop if we have nothing to add
+    [ -z "${paths##\|}" ] && return # stop if we have nothing to add
 
     # maintain the file
     local tempfile
