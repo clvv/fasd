@@ -351,23 +351,20 @@ EOS
         }
         return r
       }
-      function getRank() {
+      BEGIN {
+        split(q, pattern, " ")
+        for(i in pattern) pattern_lower[i] = tolower(pattern[i]) # nocase
+      }
+      {
         if(!wcase[$1]) {
           times[$1] = $2
           la[$1] = $3
           wcase[$1] = likelihood(pattern, $1)
-          if(!cx) nocase[$1] = likelihood(pattern2, tolower($1))
+          if(!cx) nocase[$1] = likelihood(pattern_lower, tolower($1))
         } else {
           times[$1] += $2
           if($3 > la[$1]) la[$1] = $3
         }
-      }
-      BEGIN {
-        split(q, pattern, " ")
-        for(i in pattern) pattern2[i] = tolower(pattern[i]) # nocase
-      }
-      {
-        getRank()
         cx = cx || wcase[$1]
         ncx = ncx || nocase[$1]
       }
