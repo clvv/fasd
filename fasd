@@ -93,7 +93,7 @@ EOS
       reply=(\${(f)"\$(fasd --complete "\$compl")"})
     }
     # enbale command mode completion
-    compctl -U -K _f_zsh_cmd_complete -V f -x 'C[-1,-*e],s[-]n[1,e]' -c -- fasd
+    compctl -U -K _f_zsh_cmd_complete -V f -x 'C[-1,-*e],s[-]n[1,e]' -c -- fasd z
     # zsh word mode completion
     _f_zsh_word_complete() {
       [ "\$2" ] && local _f_cur="\$2"
@@ -135,8 +135,16 @@ EOS
       [[ \${COMP_WORDS[COMP_CWORD-1]} == -*e ]] && \
         COMPREPLY=( \$(compgen -A command \$cur) ) && return
       # get completion results using expanded aliases
-      local RESULT=\$( fasd --complete "\$(alias -p \${COMP_WORDS} | \
+      local RESULT=\$( fasd --complete "\$(alias -p \${COMP_WORDS} 2>> "$_F_SINK" | \
         sed -n "\\\$s/^.*'\(.*\)'/\1/p") \${COMP_LINE#* }" )
+      IFS=\$'\n' COMPREPLY=( \$RESULT )
+    }
+    _f_bash_cmd_complete_f() {
+      local RESULT=\$( fasd -f --complete "\$COMP_LINE" )
+      IFS=\$'\n' COMPREPLY=( \$RESULT )
+    }
+    _f_bash_cmd_complete_d() {
+      local RESULT=\$( fasd -d --complete "\$COMP_LINE" )
       IFS=\$'\n' COMPREPLY=( \$RESULT )
     }
     _f_bash_hook_cmd_complete() {
@@ -145,7 +153,8 @@ EOS
       done
     }
     # enable bash command mode completion
-    _f_bash_hook_cmd_complete a s d f sd sf
+    _f_bash_hook_cmd_complete fasd a s d f sd sf
+    complete -F _f_bash_cmd_complete_d z
     # bash word mode completion
     _f_bash_word_complete() {
       [ "\$_f_cur" ] || local _f_cur="\${COMP_WORDS[COMP_CWORD]}"
