@@ -235,7 +235,7 @@ EOS
 
   --sanitize)
     shift; echo "$@" | sed \
-      's/\(^\| \).\?[<>|&]\+/ /g;s/&$//;s/\(\$(\|`\)//g;s/\([^\\]\)[`)]/\1/g'
+      's/\(^\| \).\?[<>|&]\+/ /g;s/&$//;s/\(\$(\|`\)//g;s/\([^\\]\)[`);]/\1/g'
     ;;
 
   --add) # add entries
@@ -330,10 +330,11 @@ EOS
     done
     [ "$_f_data" ] || _f_data="$(cat "$_F_DATA")"
 
+    # set mode specific code for calculating the prior
     case $mode in
       rank) local prior='times[i]';;
       recent) local prior='(t-la[i])';;
-      *) local prior='times[i] * frecent(la[i])' ;;
+      *) local prior='times[i] * frecent(la[i])';;
     esac
 
     # query the database
