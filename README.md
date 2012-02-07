@@ -204,6 +204,21 @@ If you use bash, you can turn on this *experimental feature* by calling
 bash completion setup. This will alter your existing completion setup, so you
 might get a *broken* completion system.
 
+# Backends
+
+Fasd can take advantage of different sources of recent / frequent files. Most
+desktop environments (like Gtk) and some editors (like Vim) keep a list of
+accessed files. Fasd can use them as additional backends if the data can be
+converted into fasd's native format. As of now, fasd supports Gtk's
+`recently-used.xbel` and Vim's `viminfo` backends. You can define your own
+backend by declaring a function by that name in your `.fasdrc`. You set defualt
+backend with `_F_BACKENDS` variable in our `.fasdrc`.
+
+Fasd can mimic [v](http://github.com/rupa/v)'s behavior by this alias:
+
+```sh
+alias v='f -e vim -b viminfo'
+```
 
 # Tweaks
 
@@ -239,6 +254,9 @@ Max total score / weight, defaults to 2000.
 $_F_SHELL
 Which shell to execute. Some shells will run faster than others. fasd
 is faster with ksh variants.
+
+$_F_BACKENDS
+Defualt backends.
 ```
 
 # Debugging

@@ -422,6 +422,7 @@ EOS
             print $1 "|" sum
           }'
         ;;
+      *) eval "$2";;
     esac
     ;;
 
