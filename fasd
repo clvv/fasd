@@ -109,7 +109,6 @@ EOS
     _f_zsh_word_complete_d() { _f_zsh_word_complete d ; }
     _f_zsh_word_complete_trigger() {
       local _f_cur="\${words[CURRENT]}"
-      # fasd --word-complete-trigger \$_f_cur 1>&2
       eval \$(fasd --word-complete-trigger _f_zsh_word_complete \$_f_cur)
     }
     # enable word mode completion
@@ -120,7 +119,9 @@ EOS
     zle -C f-complete-f 'menu-select' _f_zsh_word_complete_f
     zle -C f-complete-d 'menu-select' _f_zsh_word_complete_d
     # add zsh hook
-    _f_preexec() { { eval "fasd --add \$(fasd --sanitize \$3)"; } >> "$_F_SINK" 2>&1; }
+    _f_preexec() {
+      { eval "fasd --add \$(fasd --sanitize \$3)"; } >> "$_F_SINK" 2>&1
+    }
     autoload -U add-zsh-hook
     add-zsh-hook preexec _f_preexec
 EOS
@@ -135,16 +136,16 @@ EOS
       [[ \${COMP_WORDS[COMP_CWORD-1]} == -*e ]] && \
         COMPREPLY=( \$(compgen -A command \$cur) ) && return
       # get completion results using expanded aliases
-      local RESULT=\$( fasd --complete "\$(alias -p \${COMP_WORDS} 2>> "$_F_SINK" | \
-        sed -n "\\\$s/^.*'\(.*\)'/\1/p") \${COMP_LINE#* }" )
+      local RESULT=\$( fasd -q --complete "\$(alias -p \$COMP_WORDS \
+        2>> "$_F_SINK" | sed -n "\\\$s/^.*'\(.*\)'/\1/p") \${COMP_LINE#* }" )
       IFS=\$'\n' COMPREPLY=( \$RESULT )
     }
     _f_bash_cmd_complete_f() {
-      local RESULT=\$( fasd -f --complete "\$COMP_LINE" )
+      local RESULT=\$( fasd -qf --complete "\$COMP_LINE" )
       IFS=\$'\n' COMPREPLY=( \$RESULT )
     }
     _f_bash_cmd_complete_d() {
-      local RESULT=\$( fasd -d --complete "\$COMP_LINE" )
+      local RESULT=\$( fasd -qd --complete "\$COMP_LINE" )
       IFS=\$'\n' COMPREPLY=( \$RESULT )
     }
     _f_bash_hook_cmd_complete() {
@@ -157,10 +158,11 @@ EOS
     complete -F _f_bash_cmd_complete_d z
     # bash word mode completion
     _f_bash_word_complete() {
+      [ "\$2" ] && local _f_cur="\$2"
       [ "\$_f_cur" ] || local _f_cur="\${COMP_WORDS[COMP_CWORD]}"
       local typ=\${1:-e}
       local fnd="\${_f_cur//,/ }"
-      local RESULT=\$(fasd --query \$typ \$fnd | sed 's/^[0-9.]*[ ]*//')
+      local RESULT=\$(fasd -q --query \$typ \$fnd | sed 's/^[0-9.]*[ ]*//')
       IFS=\$'\n' COMPREPLY=( \$RESULT )
     }
     _f_bash_word_complete_trigger() {
@@ -320,6 +322,8 @@ EOS
     [ "$1" ] && local typ="$1"
     [ "$2" ] && local fnd="$2"
     [ "$3" ] && local mode="$3"
+    [ "$4" ] && local quote="$4"
+    [ "$quote" ] && local qts='"\""' || local qts=
 
     # make zsh do word spliting for the for loop to work
     [ "$ZSH_VERSION" ] && emulate sh && setopt localoptions
@@ -385,12 +389,12 @@ EOS
         if(cx) {
           for(i in wcase) {
             if(wcase[i])
-              printf "%-10s %s\n", '"$prior"' * wcase[i], i
+              printf "%-10s %s\n", '"$prior"' * wcase[i], '"$qts"' i '"$qts"'
           }
         } else if(ncx) {
           for(i in nocase) {
             if(nocase[i])
-              printf "%-10s %s\n", '"$prior"' * nocase[i], i
+              printf "%-10s %s\n", '"$prior"' * nocase[i], '"$qts"' i '"$qts"'
           }
         }
       }' - 2>> "$_F_SINK"
@@ -431,6 +435,7 @@ EOS
     local fnd last _F_BACKENDS="$_F_BACKENDS" _f_data
     while [ "$1" ]; do case "$1" in
       --complete) [ "$2" = "--" ] && shift; set -- $(echo $2); local list=1 r=r;;
+      --query) fasd "$@";;
       --) while [ "$2" ]; do shift; fnd="$fnd$1 "; last="$1"; done;;
       -*) local o="${1#-}"; while [ "$o" ]; do case "$o" in
           s*) local show=1;;
@@ -459,6 +464,7 @@ EOS
           a*) local typ=e;;
           d*) local typ=d;;
           f*) local typ=f;;
+          q*) local quote=1;;
           h*) echo "fasd [options] [query ...]
   options:
     -s        show list of files with their ranks
