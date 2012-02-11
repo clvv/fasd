@@ -154,10 +154,10 @@ match.
 able to use `fasd` in all POSIX compliant shells. Your shell need to support
 command substitution in `$PS1` in order for `fasd` to automatically track your
 commands and files. This feature is not specified by the POSIX standard, but
-it's nonetheless present in many POSIX compliant shells. If you use some shell
-other than `bash`, `zsh` or `ksh` and `fasd` does not work out of the box for
-you, you can try calling `_f_ps1_install` to manually install the hook to your
-`$PS1`.
+it's nonetheless present in many POSIX compliant shells.
+
+Fasd has been tested on the following shells: bash, zsh, mksh, pdksh, dash,
+busybox ash, FreeBSD 9 /bin/sh and OpenBSD /bin/sh.
 
 # Synopsis
 
@@ -279,14 +279,9 @@ You can set `_F_SINK` in your `.fasdrc` to obtain a log.
 _F_SINK="$HOME/.f.log"
 ```
 
-# TODO
+# COPYING
 
-1. Tests!
-2. Multiple searches, parameters separated by `-`.
-3. More backends: `rencently-used.xbel`, `.viminfo`, etc.
-4. Code refactoring, more modular setup.
-
-# Acknowledgements
-
-`fasd` is written based on existing code from [z](https://github.com/rupa/z).
+Fasd is originally written based on code from [z](https://github.com/rupa/z) by
+rupa deadwyler under the WTFPL license. Most if not all code has been
+rewritten. Fasd is licensed under the "MIT/X11" license.
 
