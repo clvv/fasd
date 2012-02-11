@@ -62,7 +62,9 @@ fasd() {
     alias sf='fasd -sif'
     alias d='fasd -d'
     alias f='fasd -f'
-    z() { [ \$# -gt 0 ] && cd "\$(fasd -d "\$@")" || fasd -d "\$@"; }
+    # function to execute built-in cd
+    fasd_cd() { [ \$# -gt 1 ] && cd "\$(fasd "\$@")" || fasd "\$@"; }
+    alias z='fasd_cd -d'
 EOS
   ;;
 
@@ -89,7 +91,7 @@ EOS
       reply=(\${(f)"\$(fasd --complete "\$compl")"})
     }
     # enbale command mode completion
-    compctl -U -K _f_zsh_cmd_complete -V f -x 'C[-1,-*e],s[-]n[1,e]' -c -- fasd z
+    compctl -U -K _f_zsh_cmd_complete -V f -x 'C[-1,-*e],s[-]n[1,e]' -c -- fasd fasd_cd
     # zsh word mode completion
     _f_zsh_word_complete() {
       [ "\$2" ] && local _f_cur="\$2"
@@ -136,22 +138,13 @@ EOS
         2>> "$_F_SINK" | sed -n "\\\$s/^.*'\(.*\)'/\1/p") \${COMP_LINE#* }" )
       IFS=\$'\n' COMPREPLY=( \$RESULT )
     }
-    _f_bash_cmd_complete_f() {
-      local RESULT=\$( fasd -qf --complete "\$COMP_LINE" )
-      IFS=\$'\n' COMPREPLY=( \$RESULT )
-    }
-    _f_bash_cmd_complete_d() {
-      local RESULT=\$( fasd -qd --complete "\$COMP_LINE" )
-      IFS=\$'\n' COMPREPLY=( \$RESULT )
-    }
     _f_bash_hook_cmd_complete() {
       for cmd in \$*; do
         complete -F _f_bash_cmd_complete \$cmd
       done
     }
     # enable bash command mode completion
-    _f_bash_hook_cmd_complete fasd a s d f sd sf
-    complete -F _f_bash_cmd_complete_d z
+    _f_bash_hook_cmd_complete fasd a s d f sd sf z
     # bash word mode completion
     _f_bash_word_complete() {
       [ "\$2" ] && local _f_cur="\$2"
