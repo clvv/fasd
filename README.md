@@ -1,8 +1,10 @@
 # Fasd
 
 Fasd is a tool for quick access to files for POSIX shells. It is inspired by
-tools like `autojump`, `z` and `v`. Fasd keeps track of files you have accessed,
-so that you can quickly reference them in the command line.
+tools like `autojump`(https://github.com/joelthelion/autojump),
+`z`(http://github.com/rupa/z) and `v`(https://github.com/rupa/v). Fasd keeps
+track of files you have accessed, so that you can quickly reference them in the
+command line.
 
 The name fasd comes from the defualt suggested aliases `f`(files),
 `a`(files/directories), `s`(show/search/select), `d`(directories).
@@ -16,6 +18,19 @@ and [Bayesian Ranking](https://github.com/clvv/f/wiki/Bayesian-Ranking) to rank
 files and directories for a set of given matching patterns. "Frecency" is used
 as the prior probability distribution, and a simple algorithm is used to
 calculate the likelihood of the given set of patterns.
+
+# A Note for Early Adopters
+
+Fasd was originally named `f`. `f` was renamed to fasd for varous reasons. And
+the latest release contains many improvements compared to old master branch of
+`f`, most improtantly fasd acquired the ability to be run as an executable
+(instead of as a shell function, which is comparably slower). Previous f users
+please update all of your f-related configurations accordingly. And don't
+forget to rename your database file:
+
+```
+mv "$HOME/.f" "$HOME/.fasd"
+```
 
 # Introduction
 
@@ -132,11 +147,11 @@ alias m='f -e mplayer' # quick opening files with mplayer
 alias o='a -e xdg-open' # quick opening files with xdg-open
 ```
 
-If you're using bash, you have to call `_f_bash_hook_cmd_complete` to make
+If you're using bash, you have to call `_fasd_bash_hook_cmd_complete` to make
 completion work. For instance:
 
 ```bash
-_f_bash_hook_cmd_complete v m j o
+_fasd_bash_hook_cmd_complete v m j o
 ```
 
 Fasd also offers interactive selection mode.
@@ -218,7 +233,7 @@ bindkey '^X^D' f-complete-d  # C-x C-d to do f-complete-d (only directories)
 ```
 
 If you use bash, you can turn on this *experimental feature* by calling
-`_f_bash_hook_word_complete_wrap_all` after sourcing `fasd` *and* after any
+`_fasd_bash_hook_word_complete_wrap_all` after sourcing `fasd` *and* after any
 bash completion setup. This will alter your existing completion setup, so you
 might get a *broken* completion system.
 
@@ -230,7 +245,7 @@ accessed files. Fasd can use them as additional backends if the data can be
 converted into fasd's native format. As of now, fasd supports Gtk's
 `recently-used.xbel` and Vim's `viminfo` backends. You can define your own
 backend by declaring a function by that name in your `.fasdrc`. You set defualt
-backend with `_F_BACKENDS` variable in our `.fasdrc`.
+backend with `_FASD_BACKENDS` variable in our `.fasdrc`.
 
 Fasd can mimic [v](http://github.com/rupa/v)'s behavior by this alias:
 
@@ -244,36 +259,36 @@ Some shell variables that you can set before sourcing `fasd`. You can set them
 in `$HOME/.fasdrc`
 
 ```
-$_F_DATA
-Path to the f data file, default "$HOME/.f".
+$_FASD_DATA
+Path to the f data file, default "$HOME/.fasd".
 
-$_F_BLACKLIST
+$_FASD_BLACKLIST
 List of blacklisted strings. Commands matching them will not be processed.
 Default is "--help".
 
-$_F_SHIFT
+$_FASD_SHIFT
 List of all commands that needs to be shifted, defaults to "sudo busybox".
 
-$_F_IGNORE
+$_FASD_IGNORE
 List of all commands that will be ignored, defaults to "fasd cd ls echo".
 
-$_F_TRACK_PWD
+$_FASD_TRACK_PWD
 f defaults to track your "$PWD". Set this to 0 to disable this behavior.
 
-$_F_AWK
+$_FASD_AWK
 Which awk to use. f can detect and use a compatible awk.
 
-$_F_SINK
+$_FASD_SINK
 File to log all STDERR to, defaults to "/dev/null".
 
-$_F_MAX
+$_FASD_MAX
 Max total score / weight, defaults to 2000.
 
-$_F_SHELL
+$_FASD_SHELL
 Which shell to execute. Some shells will run faster than others. fasd
 is faster with ksh variants.
 
-$_F_BACKENDS
+$_FASD_BACKENDS
 Defualt backends.
 ```
 
@@ -283,10 +298,10 @@ If fasd does not work as expected, please file a bug report describing the
 unexpected behavior along with your OS version, shell version, awk version, sed
 version, and a log file.
 
-You can set `_F_SINK` in your `.fasdrc` to obtain a log.
+You can set `_FASD_SINK` in your `.fasdrc` to obtain a log.
 
 ```sh
-_F_SINK="$HOME/.f.log"
+_FASD_SINK="$HOME/.fasd.log"
 ```
 
 # COPYING

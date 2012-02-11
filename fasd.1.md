@@ -90,7 +90,7 @@ keybindings you like:
     bindkey '^X^D' f-complete-d  # C-x C-d to do f-complete-d (only directories)
 
 If you use bash, you can turn on this experimental feature by calling
-`_f_bash_hook_word_complete_wrap_all` after sourcing `fasd` and after any bash
+`_fasd_bash_hook_word_complete_wrap_all` after sourcing `fasd` and after any bash
 completion setup. This will alter your existing completion setup, so you might
 get a *broken* completion system.
 
@@ -102,43 +102,43 @@ accessed files. Fasd can use them as additional backends if the data can be
 converted into fasd's native format. As of now, fasd supports Gtk's
 `recently-used.xbel` and Vim's `viminfo` backends. You can define your own
 backend by declaring a function by that name in your `.fasdrc`. You set defualt
-backend with `_F_BACKENDS` variable in our `.fasdrc`.
+backend with `_FASD_BACKENDS` variable in our `.fasdrc`.
 
 # TWEAKS
 
 Upon every execution, fasd will source "/etc/fasdrc" and "$HOME/.fasdrc" if
 they are present. Below are some variables you can set:
 
-    $_F_DATA
-    Path to the f data file, default "$HOME/.f".
+    $_FASD_DATA
+    Path to the f data file, default "$HOME/.fasd".
 
-    $_F_BLACKLIST
+    $_FASD_BLACKLIST
     List of blacklisted strings. Commands matching them will not be processed.
     Default is "--help".
 
-    $_F_SHIFT
+    $_FASD_SHIFT
     List of all commands that needs to be shifted, defaults to "sudo busybox".
 
-    $_F_IGNORE
+    $_FASD_IGNORE
     List of all commands that will be ignored, defaults to "fasd cd ls echo".
 
-    $_F_TRACK_PWD
+    $_FASD_TRACK_PWD
     f defaults to track your "$PWD". Set this to 0 to disable this behavior.
 
-    $_F_AWK
+    $_FASD_AWK
     Which awk to use. fasd can detect and use a compatible awk.
 
-    $_F_SINK
+    $_FASD_SINK
     File to log all STDERR to, defaults to "/dev/null".
 
-    $_F_MAX
+    $_FASD_MAX
     Max total score / weight, defaults to 2000.
 
-    $_F_SHELL
+    $_FASD_SHELL
     Which shell to execute. Some shells will run faster than others. fasd
     is faster with ksh variants.
 
-    $_F_BACKENDS
+    $_FASD_BACKENDS
     Defualt backends.
 
 # DEBUGGING
@@ -147,7 +147,7 @@ If fasd does not work as expected, please file a bug report on GitHub describing
 the unexpected behavior along with your OS version, shell version, awk version,
 sed version, and a log file.
 
-You can set `_F_SINK` in your `.fasdrc` to obtain a log.
+You can set `_FASD_SINK` in your `.fasdrc` to obtain a log.
 
-    _F_SINK="$HOME/.f.log"
+    _FASD_SINK="$HOME/.fasd.log"
 

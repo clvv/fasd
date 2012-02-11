@@ -107,7 +107,7 @@ bindkey\ \[aq]^X^D\[aq]\ f-complete-d\ \ #\ C-x\ C-d\ to\ do\ f-complete-d\ (onl
 .fi
 .PP
 If you use bash, you can turn on this experimental feature by calling
-\f[C]_f_bash_hook_word_complete_wrap_all\f[] after sourcing
+\f[C]_fasd_bash_hook_word_complete_wrap_all\f[] after sourcing
 \f[C]fasd\f[] and after any bash completion setup.
 This will alter your existing completion setup, so you might get a
 \f[I]broken\f[] completion system.
@@ -122,7 +122,7 @@ As of now, fasd supports Gtk's \f[C]recently-used.xbel\f[] and Vim's
 \f[C]viminfo\f[] backends.
 You can define your own backend by declaring a function by that name in
 your \f[C].fasdrc\f[].
-You set defualt backend with \f[C]_F_BACKENDS\f[] variable in our
+You set defualt backend with \f[C]_FASD_BACKENDS\f[] variable in our
 \f[C].fasdrc\f[].
 .SH TWEAKS
 .PP
@@ -132,36 +132,36 @@ Below are some variables you can set:
 .IP
 .nf
 \f[C]
-$_F_DATA
-Path\ to\ the\ f\ data\ file,\ default\ "$HOME/.f".
+$_FASD_DATA
+Path\ to\ the\ f\ data\ file,\ default\ "$HOME/.fasd".
 
-$_F_BLACKLIST
+$_FASD_BLACKLIST
 List\ of\ blacklisted\ strings.\ Commands\ matching\ them\ will\ not\ be\ processed.
 Default\ is\ "--help".
 
-$_F_SHIFT
+$_FASD_SHIFT
 List\ of\ all\ commands\ that\ needs\ to\ be\ shifted,\ defaults\ to\ "sudo\ busybox".
 
-$_F_IGNORE
+$_FASD_IGNORE
 List\ of\ all\ commands\ that\ will\ be\ ignored,\ defaults\ to\ "fasd\ cd\ ls\ echo".
 
-$_F_TRACK_PWD
+$_FASD_TRACK_PWD
 f\ defaults\ to\ track\ your\ "$PWD".\ Set\ this\ to\ 0\ to\ disable\ this\ behavior.
 
-$_F_AWK
+$_FASD_AWK
 Which\ awk\ to\ use.\ fasd\ can\ detect\ and\ use\ a\ compatible\ awk.
 
-$_F_SINK
+$_FASD_SINK
 File\ to\ log\ all\ STDERR\ to,\ defaults\ to\ "/dev/null".
 
-$_F_MAX
+$_FASD_MAX
 Max\ total\ score\ /\ weight,\ defaults\ to\ 2000.
 
-$_F_SHELL
+$_FASD_SHELL
 Which\ shell\ to\ execute.\ Some\ shells\ will\ run\ faster\ than\ others.\ fasd
 is\ faster\ with\ ksh\ variants.
 
-$_F_BACKENDS
+$_FASD_BACKENDS
 Defualt\ backends.
 \f[]
 .fi
@@ -171,11 +171,12 @@ If fasd does not work as expected, please file a bug report on GitHub
 describing the unexpected behavior along with your OS version, shell
 version, awk version, sed version, and a log file.
 .PP
-You can set \f[C]_F_SINK\f[] in your \f[C].fasdrc\f[] to obtain a log.
+You can set \f[C]_FASD_SINK\f[] in your \f[C].fasdrc\f[] to obtain a
+log.
 .IP
 .nf
 \f[C]
-_F_SINK="$HOME/.f.log"
+_FASD_SINK="$HOME/.fasd.log"
 \f[]
 .fi
 .SH AUTHORS

@@ -36,22 +36,22 @@ fasd() {
       [ -s "$HOME/.fasdrc" ] && . "$HOME/.fasdrc"
 
       # set default options
-      [ -z "$_F_DATA" ] && _F_DATA="$HOME/.f"
-      [ -z "$_F_BLACKLIST" ] && _F_BLACKLIST="--help"
-      [ -z "$_F_SHIFT" ] && _F_SHIFT="sudo busybox"
-      [ -z "$_F_IGNORE" ] && _F_IGNORE="fasd cd ls echo"
-      [ -z "$_F_SINK" ] && _F_SINK=/dev/null
-      [ -z "$_F_TRACK_PWD" ] && _F_TRACK_PWD=1
-      [ -z "$_F_MAX" ] && _F_MAX=2000
-      [ -z "$_F_BACKENDS" ] && _F_BACKENDS=native
+      [ -z "$_FASD_DATA" ] && _FASD_DATA="$HOME/.fasd"
+      [ -z "$_FASD_BLACKLIST" ] && _FASD_BLACKLIST="--help"
+      [ -z "$_FASD_SHIFT" ] && _FASD_SHIFT="sudo busybox"
+      [ -z "$_FASD_IGNORE" ] && _FASD_IGNORE="fasd cd ls echo"
+      [ -z "$_FASD_SINK" ] && _FASD_SINK=/dev/null
+      [ -z "$_FASD_TRACK_PWD" ] && _FASD_TRACK_PWD=1
+      [ -z "$_FASD_MAX" ] && _FASD_MAX=2000
+      [ -z "$_FASD_BACKENDS" ] && _FASD_BACKENDS=native
 
-      if [ -z "$_F_AWK" ]; then
+      if [ -z "$_FASD_AWK" ]; then
         # awk preferences
         local awk; for awk in mawk gawk original-awk nawk awk; do
-          $awk "" && _F_AWK=$awk && break
+          $awk "" && _FASD_AWK=$awk && break
         done
       fi
-    } >> "${_F_SINK:-/dev/null}" 2>&1
+    } >> "${_FASD_SINK:-/dev/null}" 2>&1
     ;;
 
   --init-alias)
@@ -78,125 +78,125 @@ EOS
       fi
       # set default aliases
       eval "$(fasd --init-alias)"
-    } >> "$_F_SINK" 2>&1
+    } >> "$_FASD_SINK" 2>&1
     ;;
 
   --init-zsh)
     cat <<EOS
     # zsh command mode completion
-    _f_zsh_cmd_complete() {
+    _fasd_zsh_cmd_complete() {
       local compl
       read -c compl
       compstate[insert]=menu # no expand
       reply=(\${(f)"\$(fasd --complete "\$compl")"})
     }
     # enbale command mode completion
-    compctl -U -K _f_zsh_cmd_complete -V f -x 'C[-1,-*e],s[-]n[1,e]' -c -- fasd fasd_cd
+    compctl -U -K _fasd_zsh_cmd_complete -V f -x 'C[-1,-*e],s[-]n[1,e]' -c -- fasd fasd_cd
     # zsh word mode completion
-    _f_zsh_word_complete() {
-      [ "\$2" ] && local _f_cur="\$2"
-      [ -z "\$_f_cur" ] && local _f_cur="\${words[CURRENT]}"
-      local fnd="\${_f_cur//,/ }"
+    _fasd_zsh_word_complete() {
+      [ "\$2" ] && local _fasd_cur="\$2"
+      [ -z "\$_fasd_cur" ] && local _fasd_cur="\${words[CURRENT]}"
+      local fnd="\${_fasd_cur//,/ }"
       local typ=\${1:-e}
       fasd --query \$typ \$fnd | sort -nr | sed 's/^[0-9.]*[ ]*//' | while read line; do
         compadd -U -V f "\$line"
       done
       compstate[insert]=menu # no expand
     }
-    _f_zsh_word_complete_f() { _f_zsh_word_complete f ; }
-    _f_zsh_word_complete_d() { _f_zsh_word_complete d ; }
-    _f_zsh_word_complete_trigger() {
-      local _f_cur="\${words[CURRENT]}"
-      eval \$(fasd --word-complete-trigger _f_zsh_word_complete \$_f_cur)
+    _fasd_zsh_word_complete_f() { _fasd_zsh_word_complete f ; }
+    _fasd_zsh_word_complete_d() { _fasd_zsh_word_complete d ; }
+    _fasd_zsh_word_complete_trigger() {
+      local _fasd_cur="\${words[CURRENT]}"
+      eval \$(fasd --word-complete-trigger _fasd_zsh_word_complete \$_fasd_cur)
     }
     # enable word mode completion
     zstyle ':completion:*' completer _complete _ignored \
-      _f_zsh_word_complete_trigger
+      _fasd_zsh_word_complete_trigger
     # define zle widgets
-    zle -C f-complete 'menu-select' _f_zsh_word_complete
-    zle -C f-complete-f 'menu-select' _f_zsh_word_complete_f
-    zle -C f-complete-d 'menu-select' _f_zsh_word_complete_d
+    zle -C f-complete 'menu-select' _fasd_zsh_word_complete
+    zle -C f-complete-f 'menu-select' _fasd_zsh_word_complete_f
+    zle -C f-complete-d 'menu-select' _fasd_zsh_word_complete_d
     # add zsh hook
-    _f_preexec() {
-      { eval "fasd --add \$(fasd --sanitize \$3)"; } >> "$_F_SINK" 2>&1
+    _fasd_preexec() {
+      { eval "fasd --add \$(fasd --sanitize \$3)"; } >> "$_FASD_SINK" 2>&1
     }
     autoload -U add-zsh-hook
-    add-zsh-hook preexec _f_preexec
+    add-zsh-hook preexec _fasd_preexec
 EOS
     ;;
 
   --init-bash)
     cat <<EOS
     # bash command mode completion
-    _f_bash_cmd_complete() {
+    _fasd_bash_cmd_complete() {
       # complete command after "-e"
       local cur=\${COMP_WORDS[COMP_CWORD]}
       [[ \${COMP_WORDS[COMP_CWORD-1]} == -*e ]] && \
         COMPREPLY=( \$(compgen -A command \$cur) ) && return
       # get completion results using expanded aliases
       local RESULT=\$( fasd -q --complete "\$(alias -p \$COMP_WORDS \
-        2>> "$_F_SINK" | sed -n "\\\$s/^.*'\(.*\)'/\1/p") \${COMP_LINE#* }" )
+        2>> "$_FASD_SINK" | sed -n "\\\$s/^.*'\(.*\)'/\1/p") \${COMP_LINE#* }" )
       IFS=\$'\n' COMPREPLY=( \$RESULT )
     }
-    _f_bash_hook_cmd_complete() {
+    _fasd_bash_hook_cmd_complete() {
       for cmd in \$*; do
-        complete -F _f_bash_cmd_complete \$cmd
+        complete -F _fasd_bash_cmd_complete \$cmd
       done
     }
     # enable bash command mode completion
-    _f_bash_hook_cmd_complete fasd a s d f sd sf z
+    _fasd_bash_hook_cmd_complete fasd a s d f sd sf z
     # bash word mode completion
-    _f_bash_word_complete() {
-      [ "\$2" ] && local _f_cur="\$2"
-      [ "\$_f_cur" ] || local _f_cur="\${COMP_WORDS[COMP_CWORD]}"
+    _fasd_bash_word_complete() {
+      [ "\$2" ] && local _fasd_cur="\$2"
+      [ "\$_fasd_cur" ] || local _fasd_cur="\${COMP_WORDS[COMP_CWORD]}"
       local typ=\${1:-e}
-      local fnd="\${_f_cur//,/ }"
+      local fnd="\${_fasd_cur//,/ }"
       local RESULT=\$(fasd -q --query \$typ \$fnd | sed 's/^[0-9.]*[ ]*//')
       IFS=\$'\n' COMPREPLY=( \$RESULT )
     }
-    _f_bash_word_complete_trigger() {
-      [ "\$_f_cur" ] || local _f_cur="\${COMP_WORDS[COMP_CWORD]}"
-      eval "\$(fasd --word-complete-trigger _f_bash_word_complete \$_f_cur)"
+    _fasd_bash_word_complete_trigger() {
+      [ "\$_fasd_cur" ] || local _fasd_cur="\${COMP_WORDS[COMP_CWORD]}"
+      eval "\$(fasd --word-complete-trigger _fasd_bash_word_complete \$_fasd_cur)"
     }
-    _f_bash_word_complete_wrap() {
-      local _f_cur="\${COMP_WORDS[COMP_CWORD]}"
-      _f_bash_word_complete_trigger
+    _fasd_bash_word_complete_wrap() {
+      local _fasd_cur="\${COMP_WORDS[COMP_CWORD]}"
+      _fasd_bash_word_complete_trigger
       local z=\${COMP_WORDS[0]}
       # try original comp func
-      [ "\$COMPREPLY" ] || eval "\$( echo "\$_F_BASH_COMPLETE_P" | \
+      [ "\$COMPREPLY" ] || eval "\$( echo "\$_FASD_BASH_COMPLETE_P" | \
         sed -n "/ \$z\$/"'s/.*-F \(.*\) .*/\1/p' )"
       # fall back on original complete options
-      local cmd="\$(echo "\$_F_BASH_COMPLETE_P" | \
-        sed -n "/ \$z\$/"'s/complete/compgen/') \$_f_cur"
+      local cmd="\$(echo "\$_FASD_BASH_COMPLETE_P" | \
+        sed -n "/ \$z\$/"'s/complete/compgen/') \$_fasd_cur"
       [ "\$COMPREPLY" ] || COMPREPLY=( \$(eval \$cmd) )
     }
-    _f_bash_hook_word_complete_wrap_all() {
-      _F_BASH_COMPLETE_P="\$(complete -p)"
+    _fasd_bash_hook_word_complete_wrap_all() {
+      _FASD_BASH_COMPLETE_P="\$(complete -p)"
       for cmd in \$(complete -p | awk '{print \$NF}' | tr '\n' ' '); do
-        complete -o default -o bashdefault -F _f_bash_word_complete_wrap \$cmd
+        complete -o default -o bashdefault -F _fasd_bash_word_complete_wrap \$cmd
       done
       # enable word mode completion as default completion
-      complete -o default -o bashdefault -D -F _f_bash_word_complete_trigger
+      complete -o default -o bashdefault -D -F _fasd_bash_word_complete_trigger
     }
     # add bash hook
     echo \$PROMPT_COMMAND | grep -v -q "fasd --add" && \
       PROMPT_COMMAND='eval "fasd --add \$(fasd --sanitize \$(history 1 | \
-      sed -e "s/^[ ]*[0-9]*[ ]*//"))" >> "$_F_SINK" 2>&1;'"\$PROMPT_COMMAND"
+      sed -e "s/^[ ]*[0-9]*[ ]*//"))" >> "$_FASD_SINK" 2>&1;'"\$PROMPT_COMMAND"
 EOS
     ;;
 
   --init-posix)
     cat <<EOS
-    _f_ps1_func() {
+    _fasd_ps1_func() {
       { eval "fasd --add \
         \$(fasd --sanitize \$(fc -nl -0 | sed -n '\$s/\s*\(.*\)/\1/p'))"
-      } >> "$_F_SINK" 2>&1
+      } >> "$_FASD_SINK" 2>&1
     }
-    _f_ps1_install() {
-      echo "\$PS1" | grep -v -q "_f_ps1_func" && \
-      export PS1="\\\$(_f_ps1_func)\$PS1"
+    _fasd_ps1_install() {
+      echo "\$PS1" | grep -v -q "_fasd_ps1_func" && \
+      export PS1="\\\$(_fasd_ps1_func)\$PS1"
     }
-    _f_ps1_install
+    _fasd_ps1_install
 EOS
     ;;
 
@@ -211,16 +211,16 @@ EOS
     echo "$np"
     ;;
 
-  # if "$_f_cur" is a query, then eval all the arguments
+  # if "$_fasd_cur" is a query, then eval all the arguments
   --word-complete-trigger)
-    shift; [ "$2" ] && local _f_cur="$2" || return
-    case "$_f_cur" in
-      ,*) echo "$1" e "$_f_cur";;
-      f,*) echo "$1" f "${_f_cur#?}";;
-      d,*) echo "$1" d "${_f_cur#?}";;
-      *,,) echo "$1" e "$_f_cur";;
-      *,,f) echo "$1" f "${_f_cur%?}";;
-      *,,d) echo "$1" d "${_f_cur%?}";;
+    shift; [ "$2" ] && local _fasd_cur="$2" || return
+    case "$_fasd_cur" in
+      ,*) echo "$1" e "$_fasd_cur";;
+      f,*) echo "$1" f "${_fasd_cur#?}";;
+      d,*) echo "$1" d "${_fasd_cur#?}";;
+      *,,) echo "$1" e "$_fasd_cur";;
+      *,,f) echo "$1" f "${_fasd_cur%?}";;
+      *,,d) echo "$1" d "${_fasd_cur%?}";;
     esac
     ;;
 
@@ -232,27 +232,27 @@ EOS
   --add) # add entries
     shift
 
-    # stop if we don't own ~/.f (we're another user but our ENV is still set)
-    [ -f "$_F_DATA" -a ! -O "$_F_DATA" ] && return
+    # stop if we don't own ~/.fasd (we're another user but our ENV is still set)
+    [ -f "$_FASD_DATA" -a ! -O "$_FASD_DATA" ] && return
 
     # make zsh do word spliting for the for loop to work
     [ "$ZSH_VERSION" ] && emulate sh && setopt localoptions
 
     # blacklists
-    local each; for each in $_F_BLACKLIST; do
+    local each; for each in $_FASD_BLACKLIST; do
       case " $* " in *\ $each\ *) return;; esac
     done
 
     # shifts
     while true; do
-      case " $_F_SHIFT " in
+      case " $_FASD_SHIFT " in
         *\ $1\ *) shift;;
         *) break
       esac
     done
 
     # ignores
-    case " $_F_IGNORE " in
+    case " $_FASD_IGNORE " in
       *\ $1\ *) return
     esac
 
@@ -260,19 +260,19 @@ EOS
 
     local paths; while [ "$1" ]; do
       # add the adsolute path to "paths", and a separator "|"
-      paths="$paths|$(fasd --readlink "$1" 2>> "$_F_SINK")"
+      paths="$paths|$(fasd --readlink "$1" 2>> "$_FASD_SINK")"
       shift
     done
 
     # add current pwd if the option is set
-    [ "$_F_TRACK_PWD" = "1" -a "$PWD" != "$HOME" ] && paths="$paths|$PWD"
+    [ "$_FASD_TRACK_PWD" = "1" -a "$PWD" != "$HOME" ] && paths="$paths|$PWD"
 
     [ -z "${paths##\|}" ] && return # stop if we have nothing to add
 
     # maintain the file
     local tempfile
-    tempfile="$(mktemp $_F_DATA.XXXXXX)" || return
-    $_F_AWK -v list="$paths" -v now="$(date +%s)" -v max="$_F_MAX" -F"|" '
+    tempfile="$(mktemp $_FASD_DATA.XXXXXX)" || return
+    $_FASD_AWK -v list="$paths" -v now="$(date +%s)" -v max="$_FASD_MAX" -F"|" '
       BEGIN {
         split(list, files, "|")
         for(i in files) {
@@ -298,11 +298,11 @@ EOS
           for(i in rank) print i "|" 0.9*rank[i] "|" time[i] # aging
         else
           for(i in rank) print i "|" rank[i] "|" time[i]
-      }' "$_F_DATA" 2>> "$_F_SINK" >| "$tempfile"
-    if [ $? -ne 0 -a -f "$_F_DATA" ]; then
+      }' "$_FASD_DATA" 2>> "$_FASD_SINK" >| "$tempfile"
+    if [ $? -ne 0 -a -f "$_FASD_DATA" ]; then
       env rm -f "$tempfile"
     else
-      env mv -f "$tempfile" "$_F_DATA"
+      env mv -f "$tempfile" "$_FASD_DATA"
     fi
     ;;
 
@@ -318,10 +318,10 @@ EOS
     [ "$ZSH_VERSION" ] && emulate sh && setopt localoptions
 
     # cat all backends
-    local each _f_data; for each in $_F_BACKENDS; do
-      _f_data="$_f_data$(echo)$(fasd --backend $each)"
+    local each _fasd_data; for each in $_FASD_BACKENDS; do
+      _fasd_data="$_fasd_data$(echo)$(fasd --backend $each)"
     done
-    [ "$_f_data" ] || _f_data="$(cat "$_F_DATA")"
+    [ "$_fasd_data" ] || _fasd_data="$(cat "$_FASD_DATA")"
 
     # set mode specific code for calculating the prior
     case $mode in
@@ -331,9 +331,9 @@ EOS
     esac
 
     # query the database
-    echo "$_f_data" | while read line; do
+    echo "$_fasd_data" | while read line; do
       [ -${typ:-e} "${line%%\|*}" ] && echo "$line"
-    done | $_F_AWK -v t="$(date +%s)" -v q="$fnd" -F"|" '
+    done | $_FASD_AWK -v t="$(date +%s)" -v q="$fnd" -F"|" '
       function frecent(time) {
         dx = t-time
         if( dx < 3600 ) return 6
@@ -386,13 +386,13 @@ EOS
               printf "%-10s %s\n", '"$prior"' * nocase[i], '"$qts"' i '"$qts"'
           }
         }
-      }' - 2>> "$_F_SINK"
+      }' - 2>> "$_FASD_SINK"
     ;;
 
   --backend)
     case $2 in
       native)
-        cat "$_F_DATA"
+        cat "$_FASD_DATA"
         ;;
       viminfo)
         local i=100
@@ -409,7 +409,7 @@ EOS
           sed '1d;s/".*$//' | \
           tr '\n' '|' | \
           sed 's@|/@\n@g' | \
-          $_F_AWK -F'|' '{
+          $_FASD_AWK -F'|' '{
             sum = 0
             for( i=2; i<=NF; i++ ) sum += $i
             print $1 "|" sum
@@ -420,8 +420,8 @@ EOS
     ;;
 
   *) # parsing logic and processing
-    [ -f "$_F_DATA" ] || return # no db yet
-    local fnd last _F_BACKENDS="$_F_BACKENDS" _f_data
+    [ -f "$_FASD_DATA" ] || return # no db yet
+    local fnd last _FASD_BACKENDS="$_FASD_BACKENDS" _fasd_data
     while [ "$1" ]; do case "$1" in
       --complete) [ "$2" = "--" ] && shift; set -- $(echo $2); local list=1 r=r;;
       --query) fasd "$@";;
@@ -439,15 +439,15 @@ EOS
                 shift
               fi; break;;
           b*) o="${o#?}"; if [ "$o" ]; then
-                _F_BACKENDS="$o"
+                _FASD_BACKENDS="$o"
               else
-                _F_BACKENDS="${2:?"Argument needed after -B"}"
+                _FASD_BACKENDS="${2:?"Argument needed after -B"}"
                 shift
               fi; break;;
           B*) o="${o#?}"; if [ "$o" ]; then
-                _F_BACKENDS="$_F_BACKENDS $o"
+                _FASD_BACKENDS="$_FASD_BACKENDS $o"
               else
-                _F_BACKENDS="$_F_BACKENDS ${2:?"Argument needed after -b"}"
+                _FASD_BACKENDS="$_FASD_BACKENDS ${2:?"Argument needed after -b"}"
                 shift
               fi; break;;
           a*) local typ=e;;
@@ -482,12 +482,12 @@ EOS
     [ -z "$r" ] && local R=r # reverse of $r
 
     local result
-    result="$(fasd --query 2>> "$_F_SINK")" # query the database
+    result="$(fasd --query 2>> "$_FASD_SINK")" # query the database
     [ $? -gt 0 ] && return
     if [ "$interactive" ] || [ "$exec" -a -z "$fnd$list$show" -a -t 1 ]; then
       result="$(echo "$result" | sort -n${R})"
       echo "$result" | sed = | sed 'N;s/\n/	/' | sort -nr >&2; printf "> " >&2
-      local i; read i; [ 0 -lt "${i:-0}" ] 2>> "$_F_SINK" || return 1
+      local i; read i; [ 0 -lt "${i:-0}" ] 2>> "$_FASD_SINK" || return 1
       ${exec:-echo} "$(echo "$result" | sed -n "${i:-1}"'s/^[0-9.]*[ ]*//p')"
     elif [ "$list" ]; then
       echo "$result" | sort -n${r} | sed 's/^[0-9.]*[ ]*//'
@@ -509,8 +509,8 @@ fasd --init
 case $- in
   *i*) fasd --init-interactive;; # assume being sourced
   *) # assume being executed as an executable
-    if [ -x "$_F_SHELL" -a -z "$_F_SET" ]; then
-      _F_SET=1 exec $_F_SHELL "$0" "$@"
+    if [ -x "$_FASD_SHELL" -a -z "$_FASD_SET" ]; then
+      _FASD_SET=1 exec $_FASD_SHELL "$0" "$@"
       exit $?
     else
       fasd "$@"
