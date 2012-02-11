@@ -176,7 +176,8 @@ EOS
         complete -o default -o bashdefault -F _fasd_bash_word_complete_wrap \$cmd
       done
       # enable word mode completion as default completion
-      complete -o default -o bashdefault -D -F _fasd_bash_word_complete_trigger
+      complete -o default -o bashdefault -D -F _fasd_bash_word_complete_trigger \
+        >> "$_FASD_SINK" 2>&1
     }
     # add bash hook
     echo \$PROMPT_COMMAND | grep -v -q "fasd --add" && \
