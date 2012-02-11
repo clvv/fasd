@@ -82,12 +82,12 @@ line argument that starts with ","(a comma). Example:
     $ vim /etc/rc.local
 
 If you use zsh, word completion is enabled by default. There're also three zle
-widgets: "f-complete", "f-complete-f", "f-complete-d". You can bind them to
-keybindings you like:
+widgets: "fasd-complete", "fasd-complete-f", "fasd-complete-d". You can bind
+them to keybindings you like:
 
-    bindkey '^X^A' f-complete    # C-x C-a to do f-complete (fils and directories)
-    bindkey '^X^F' f-complete-f  # C-x C-f to do f-cmplete-f (only files)
-    bindkey '^X^D' f-complete-d  # C-x C-d to do f-complete-d (only directories)
+    bindkey '^X^A' fasd-complete    # C-x C-a to do fasd-complete (fils and directories)
+    bindkey '^X^F' fasd-complete-f  # C-x C-f to do fasd-cmplete-f (only files)
+    bindkey '^X^D' fasd-complete-d  # C-x C-d to do fasd-complete-d (only directories)
 
 If you use bash, you can turn on this experimental feature by calling
 `_fasd_bash_hook_word_complete_wrap_all` after sourcing `fasd` and after any bash

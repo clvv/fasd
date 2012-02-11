@@ -91,7 +91,7 @@ EOS
       reply=(\${(f)"\$(fasd --complete "\$compl")"})
     }
     # enbale command mode completion
-    compctl -U -K _fasd_zsh_cmd_complete -V f -x 'C[-1,-*e],s[-]n[1,e]' -c -- fasd fasd_cd
+    compctl -U -K _fasd_zsh_cmd_complete -V fasd -x 'C[-1,-*e],s[-]n[1,e]' -c -- fasd fasd_cd
     # zsh word mode completion
     _fasd_zsh_word_complete() {
       [ "\$2" ] && local _fasd_cur="\$2"
@@ -99,7 +99,7 @@ EOS
       local fnd="\${_fasd_cur//,/ }"
       local typ=\${1:-e}
       fasd --query \$typ \$fnd | sort -nr | sed 's/^[0-9.]*[ ]*//' | while read line; do
-        compadd -U -V f "\$line"
+        compadd -U -V fasd "\$line"
       done
       compstate[insert]=menu # no expand
     }
@@ -113,9 +113,9 @@ EOS
     zstyle ':completion:*' completer _complete _ignored \
       _fasd_zsh_word_complete_trigger
     # define zle widgets
-    zle -C f-complete 'menu-select' _fasd_zsh_word_complete
-    zle -C f-complete-f 'menu-select' _fasd_zsh_word_complete_f
-    zle -C f-complete-d 'menu-select' _fasd_zsh_word_complete_d
+    zle -C fasd-complete 'menu-select' _fasd_zsh_word_complete
+    zle -C fasd-complete-f 'menu-select' _fasd_zsh_word_complete_f
+    zle -C fasd-complete-d 'menu-select' _fasd_zsh_word_complete_d
     # add zsh hook
     _fasd_preexec() {
       { eval "fasd --add \$(fasd --sanitize \$3)"; } >> "$_FASD_SINK" 2>&1
