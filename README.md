@@ -4,8 +4,8 @@
 tools like `autojump`, `z` and `v`. `fasd` keeps track of files you have accessed,
 so that you can quickly reference them in the command line.
 
-The name `fasd` comes from the defualt suggested aliases `fasd`(files),
-`a`(files/directories), `s`(show/search), `d`(directories).
+The name `fasd` comes from the defualt suggested aliases `f`(files),
+`a`(files/directories), `s`(show/search/select), `d`(directories).
 
 `fasd` ranks files and directories by "frecency," that is, by both "frequency" and
 "recency." The term "frecency" was first coined by Mozilla and used in Firefox
@@ -40,7 +40,7 @@ magic, huh?
 
 ```sh
 alias a='fasd -a' # any
-alias s='fasd -s' # show / search
+alias s='fasd -s' # show / search / select
 alias d='fasd -d' # directory
 alias f='fasd -f' # file
 ```
@@ -128,6 +128,14 @@ completion work. For instance:
 ```bash
 _f_bash_hook_cmd_complete v m j o
 ```
+
+Fasd also offers interactive selection mode.
+
+```sh
+xdg-open `sf pdf`
+```
+
+You could select an entry in the list of matching files.
 
 # How It Works
 
@@ -265,10 +273,10 @@ If `fasd` does not work as expected, please file a bug report describing the
 unexpected behavior along with your OS version, shell version, awk version, sed
 version, and a log file.
 
-You can set `_F_SINK` to obtain a log.
+You can set `_F_SINK` in your `.fasdrc` to obtain a log.
 
 ```sh
-export _F_SINK="$HOME/.f.log"
+_F_SINK="$HOME/.f.log"
 ```
 
 # TODO
