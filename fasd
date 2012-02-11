@@ -497,8 +497,8 @@ EOS
     [ $? -gt 0 ] && return
     if [ "$interactive" ] || [ "$exec" -a -z "$fnd$list$show" -a -t 1 ]; then
       result="$(echo "$result" | sort -n${R})"
-      echo "$result" | sed = | sed 'N;s/\n/	/' | sort -nr
-      local i; printf "> "; read i; [ 0 -lt "${i:-0}" ] 2>> "$_F_SINK" || return 1
+      echo "$result" | sed = | sed 'N;s/\n/	/' | sort -nr >&2; printf "> " >&2
+      local i; read i; [ 0 -lt "${i:-0}" ] 2>> "$_F_SINK" || return 1
       ${exec:-echo} "$(echo "$result" | sed -n "${i:-1}"'s/^[0-9.]*[ ]*//p')"
     elif [ "$list" ]; then
       echo "$result" | sort -n${r} | sed 's/^[0-9.]*[ ]*//'
