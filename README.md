@@ -1,17 +1,17 @@
 # Fasd
 
-`fasd` is a tool for quick access to files for POSIX shells. It is inspired by
-tools like `autojump`, `z` and `v`. `fasd` keeps track of files you have accessed,
+Fasd is a tool for quick access to files for POSIX shells. It is inspired by
+tools like `autojump`, `z` and `v`. Fasd keeps track of files you have accessed,
 so that you can quickly reference them in the command line.
 
-The name `fasd` comes from the defualt suggested aliases `f`(files),
+The name fasd comes from the defualt suggested aliases `f`(files),
 `a`(files/directories), `s`(show/search/select), `d`(directories).
 
-`fasd` ranks files and directories by "frecency," that is, by both "frequency" and
+Fasd ranks files and directories by "frecency," that is, by both "frequency" and
 "recency." The term "frecency" was first coined by Mozilla and used in Firefox
 ([link](https://developer.mozilla.org/en/The_Places_frecency_algorithm)).
 
-`fasd` uses [Bayesian Inference](https://en.wikipedia.org/wiki/Bayesian_inference)
+Fasd uses [Bayesian Inference](https://en.wikipedia.org/wiki/Bayesian_inference)
 and [Bayesian Ranking](https://github.com/clvv/f/wiki/Bayesian-Ranking) to rank
 files and directories for a set of given matching patterns. "Frecency" is used
 as the prior probability distribution, and a simple algorithm is used to
@@ -19,13 +19,12 @@ calculate the likelihood of the given set of patterns.
 
 # Introduction
 
-If you're like me, you use your shell to navigate and launch applications.
-`fasd` helps you do that more efficiently. With `fasd`, you can open files
-regardless of which directory you are in. Just with a few key strings, `fasd`
-can find a "frecent" file or directory and open it with command you specify.
-Below are some hypothetical situations, where you can type in the command on
-the left and `fasd` will "expand" your command into the right side. Pretty
-magic, huh?
+If you're like me, you use your shell to navigate and launch applications. Fasd
+helps you do that more efficiently. With fasd, you can open files regardless of
+which directory you are in. Just with a few key strings, fasd can find
+a "frecent" file or directory and open it with command you specify. Below are
+some hypothetical situations, where you can type in the command on the left and
+fasd will "expand" your command into the right side. Pretty magic, huh?
 
 ```
   v def conf       =>     vim /some/awkward/path/to/type/default.conf
@@ -36,7 +35,7 @@ magic, huh?
   vim `f rc conf`  =>     vim /etc/rc.conf
 ```
 
-`fasd` comes with four useful aliases by default:
+Fasd comes with four useful aliases by default:
 
 ```sh
 alias a='fasd -a' # any
@@ -45,9 +44,9 @@ alias d='fasd -d' # directory
 alias f='fasd -f' # file
 ```
 
-`fasd` will smartly detect when to display a list of files or just the best
-match. For instance, when you call `fasd` in a subshell with some search
-parameters, `fasd` will only return the best match. This enables you to do:
+Fasd will smartly detect when to display a list of files or just the best
+match. For instance, when you call fasd in a subshell with some search
+parameters, fasd will only return the best match. This enables you to do:
 
 ```sh
 mv update.html `d www`
@@ -55,6 +54,21 @@ cp `f mov` .
 ```
 
 # Install
+
+Fasd is a self-contained posix shell script that can be either sourced or
+executed. A Makefile is provided to install `fasd` and `fasd.1` to desired
+places.
+
+
+System-wide install:
+
+    make install
+
+Install to $HOME:
+
+    PREFIX=$HOME make install
+
+Or alternatively you can just copy `fasd` to anywhere you like.
 
 There are two ways to get `fasd` working in your shell.
 
@@ -68,15 +82,9 @@ This will set some variable options, add default aliases to your shell as well
 as set up a prompt command to be executed after every command you type. It will
 also set up advanced tab completion if you're using zsh or bash.
 
-2. You can use `fasd` as an external executable.
+2. You can use fasd as an external executable.
 
-Put `fasd` in your $PATH, for instance:
-
-```
-ln -s /path/to/fasd ~/bin/fasd
-```
-
-Then put lines below in your shell rc depending on which shell you're using.
+Put lines below in your shell rc depending on which shell you're using.
 
 ```sh
 # .bashrc
@@ -97,10 +105,10 @@ eval "$(fasd --init-posix)"
 eval "$(fasd --init-alias)"
 ```
 
-These will setup advanced tab completion and a command hook that will be
-executed on every command.
+These will setup a command hook that executes on every command and advanced tab
+completion for zsh and bash.
 
-After you first installed `fasd`, open some files (with any program) or `cd`
+After you first installed fasd, open some files (with any program) or `cd`
 around in your shell. Then try some examples below.
 
 # Examples
@@ -113,7 +121,7 @@ f bar -e mplayer # run mplayer on the most frecent file matching bar
 d -e cd foo # cd into the most frecent directory matching foo
 ```
 
-You should add your own aliases to fully utilize the power of `fasd`. Here are
+You should add your own aliases to fully utilize the power of fasd. Here are
 some examples to get you started:
 
 ```sh
@@ -139,20 +147,20 @@ You could select an entry in the list of matching files.
 
 # How It Works
 
-When you source `fasd`, `fasd` adds a hook which will be executed whenever
-you execute a command. The hook will scan your commands' arguments and
-determine if any of them refer to existing files or directories. If yes, `fasd`
-will add them to the database.
+When you source `fasd`, fasd adds a hook which will be executed whenever you
+execute a command. The hook will scan your commands' arguments and determine if
+any of them refer to existing files or directories. If yes, fasd will add them
+to the database.
 
-When you run `fasd` with search arguments, `fasd` uses [Bayesian
+When you run `fasd` with search arguments, fasd uses [Bayesian
 Ranking](https://github.com/clvv/f/wiki/Bayesian-Ranking) to find the best
 match.
 
 # Compatibility
 
-`fasd`'s basic functionalities are POSIX compliant, meaning that you should be
-able to use `fasd` in all POSIX compliant shells. Your shell need to support
-command substitution in `$PS1` in order for `fasd` to automatically track your
+Fasd's basic functionalities are POSIX compliant, meaning that you should be
+able to use fasd in all POSIX compliant shells. Your shell need to support
+command substitution in `$PS1` in order for fasd to automatically track your
 commands and files. This feature is not specified by the POSIX standard, but
 it's nonetheless present in many POSIX compliant shells.
 
@@ -180,7 +188,7 @@ fasd [options] [query ...]
 
 # Tab Completion
 
-`fasd` offers two completion modes, command mode completion and word mode
+Fasd offers two completion modes, command mode completion and word mode
 completion.
 
 Command mode completion is just like completion for any other commands. It is
@@ -269,7 +277,7 @@ Defualt backends.
 
 # Debugging
 
-If `fasd` does not work as expected, please file a bug report describing the
+If fasd does not work as expected, please file a bug report describing the
 unexpected behavior along with your OS version, shell version, awk version, sed
 version, and a log file.
 

@@ -1,4 +1,19 @@
-There are two ways to get `fasd` working in your shell.
+Fasd is a self-contained posix shell script that can be either sourced or
+executed. A Makefile is provided to install `fasd` and `fasd.1` to desired
+places.
+
+
+System-wide install:
+
+    make install
+
+Install to $HOME:
+
+    PREFIX=$HOME make install
+
+Or alternatively you can just copy `fasd` to anywhere you like.
+
+There are two ways to get fasd working in your shell.
 
 1. You can directly source `fasd` in your POSIX complaint shell.
 
@@ -12,13 +27,7 @@ also set up advanced tab completion if you're using zsh or bash.
 
 2. You can use `fasd` as an external executable.
 
-Put `fasd` in your $PATH, for instance:
-
-```
-ln -s /path/to/fasd ~/bin/fasd
-```
-
-Then put lines below in your shell rc depending on which shell you're using.
+Put lines below in your shell rc depending on which shell you're using.
 
 ```sh
 # .bashrc
