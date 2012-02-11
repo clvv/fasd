@@ -1,35 +1,31 @@
 #!/usr/bin/env sh
-# This tool gives you quick access to your frequent/recent files
+
+# Fasd (this file) can be sourced or executed by any POSIX compatible shell.
+
+# Fasd is originally written based on code from z (https://github.com/rupa/z)
+# by rupa deadwyler under the WTFPL license. Most if not all code has been
+# rewritten.
+
+# Copyright (C) 2011, 2012 by Wei Dai. All rights reserved.
 #
-# INSTALL:
-#   Source this file somewhere in your shell rc (.bashrc or .zshrc).
-# SYNOPSIS:
+# Permission is hereby granted, free of charge, to any person obtaining
+# a copy of this software and associated documentation files (the
+# "Software"), to deal in the Software without restriction, including
+# without limitation the rights to use, copy, modify, merge, publish,
+# distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so, subject to
+# the following conditions:
 #
-#   fasd [options] [query ...]
-#     options:
-#       -s        show list of files with their ranks
-#       -l        list paths only
-#       -i        interactive mode
-#       -e <cmd>  set command to execute on the result file
-#       -b <name> only use <name> backend
-#       -B <name> add addition backend <name>
-#       -a        match files and directories
-#       -d        match directories only
-#       -f        match files only
-#       -r        match by rank only
-#       -t        match by recent access only
-#       -h        show a brief help message
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
 #
-# EXAMPLES:
-#   f foo # list recent files mathcing foo
-#   f foo bar # list recent files mathcing foo and bar
-#   f -e vim foo # run vim on the most frecent file matching foo
-#
-# TIPS:
-#   alias z="f -d -e cd"
-#   alias v="f -e vim"
-#   alias m="f -e mplayer"
-#   alias o="f -e xdg-open"
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+# IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+# CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+# TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 fasd() {
 
