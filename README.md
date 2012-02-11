@@ -42,6 +42,7 @@ alias a='fasd -a' # any
 alias s='fasd -s' # show / search / select
 alias d='fasd -d' # directory
 alias f='fasd -f' # file
+alias z='fasd_cd -d' # cd, same functionality as j in autojump
 ```
 
 Fasd will smartly detect when to display a list of files or just the best
@@ -117,8 +118,9 @@ around in your shell. Then try some examples below.
 f foo # list recent files mathcing foo
 a foo bar # list recent files and directories mathcing foo and bar
 f -e vim foo # run vim on the most frecent file matching foo
-f bar -e mplayer # run mplayer on the most frecent file matching bar
-d -e cd foo # cd into the most frecent directory matching foo
+mplayer `f bar` # run mplayer on the most frecent file matching bar
+z foo # cd into the most frecent directory matching foo
+open `sf pdf` # interactively select a file mathcing pdf and launch `open`
 ```
 
 You should add your own aliases to fully utilize the power of fasd. Here are
