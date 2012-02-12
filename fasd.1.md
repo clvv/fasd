@@ -143,6 +143,8 @@ they are present. Below are some variables you can set:
 
 # DEBUGGING
 
+Fasd is hosted on GitHub: https://github.com/clvv/fasd
+
 If fasd does not work as expected, please file a bug report on GitHub describing
 the unexpected behavior along with your OS version, shell version, awk version,
 sed version, and a log file.

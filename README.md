@@ -28,7 +28,7 @@ the latest release contains many improvements compared to old master branch of
 please update all of your f-related configurations accordingly. And don't
 forget to rename your database file:
 
-```
+```sh
 mv "$HOME/.f" "$HOME/.fasd"
 ```
 
@@ -70,6 +70,10 @@ cp `f mov` .
 ```
 
 # Install
+
+Download fasd 0.5.0 from GitHub:
+[zip](https://github.com/clvv/fasd/zipball/0.5.0),
+[tar.gz](https://github.com/clvv/fasd/tarball/0.5.0).
 
 Fasd is a self-contained posix shell script that can be either sourced or
 executed. A Makefile is provided to install `fasd` and `fasd.1` to desired
