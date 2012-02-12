@@ -437,7 +437,7 @@ EOS
           e*) o="${o#?}"; if [ "$o" ]; then # there are characters after "-e"
                 local exec="$o" # anything after "-e"
               else # use the next argument
-                local exec=${2:?"Argument needed after -e"}
+                local exec="${2:?"Argument needed after -e"}"
                 shift
               fi; break;;
           b*) o="${o#?}"; if [ "$o" ]; then
@@ -478,7 +478,7 @@ EOS
     case "$last" in
      # completions will always start with /
      /*) [ -z "$show$list" -a -${typ:-e} "$last" -a "$exec" ] \
-       && $exec "$last" && return;;
+       && eval $exec "\"$last\"" && return;;
     esac
 
     [ -z "$r" ] && local R=r # reverse of $r
@@ -490,13 +490,13 @@ EOS
       result="$(echo "$result" | sort -n${R})"
       echo "$result" | sed = | sed 'N;s/\n/	/' | sort -nr >&2; printf "> " >&2
       local i; read i; [ 0 -lt "${i:-0}" ] 2>> "$_FASD_SINK" || return 1
-      ${exec:-echo} "$(echo "$result" | sed -n "${i:-1}"'s/^[0-9.]*[ ]*//p')"
+      eval ${exec:-echo} "\"$(echo "$result" | sed -n "${i:-1}"'s/^[0-9.]*[ ]*//p')\""
     elif [ "$list" ]; then
       echo "$result" | sort -n${r} | sed 's/^[0-9.]*[ ]*//'
     elif [ "$show" ]; then
       echo "$result" | sort -n${r}
     elif [ "$fnd" -a "$exec" ]; then # exec
-      $exec "$(echo "$result" | sort -n${r} | sed -n '$s/^[0-9.]*[ ]*//p')"
+      eval $exec "\"$(echo "$result" | sort -n${r} | sed -n '$s/^[0-9.]*[ ]*//p')\""
     elif [ "$fnd" -a ! -t 1 ]; then # echo if output is not terminal
       echo "$result" | sort -n${r} | sed -n '$s/^[0-9.]*[ ]*//p'
     else # no args, show
