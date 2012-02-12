@@ -30,13 +30,13 @@ fasd [options] [query ...]
 # DESCRIPTION
 
 Fasd keeps track of files and directories you access in your shell and gives you
-quick access to them. You can use fasd to refernce files or directories by just
+quick access to them. You can use fasd to reference files or directories by just
 a few key identifying characters. You can use fasd to boost your command line
 productivity by defining your own aliases to launch programs on files or
 directories. Fasd, by default, provides some basic aliases, including a shell
 function "z" that resembles the functionality of "z" and "autojump."
 
-The name "fasd" comes from the defualt suggested aliases `fasd`(files),
+The name "fasd" comes from the default suggested aliases `fasd`(files),
 `a`(files/directories), `s`(show/search/select), `d`(directories).
 
 Fasd ranks files and directories by "frecency," that is, by both "frequency"
@@ -55,6 +55,40 @@ likelihood of the given set of patterns.
     vi `f nginx conf`
     cp update.html `d www`
     open `sf pdf`
+
+# SHELL INITIALIZATION
+
+To get fasd working in a shell, some initialization code must be run.
+
+1. You can directly source `fasd` in your POSIX complaint shell.
+
+    source `which fasd`
+
+This will set some variable options, add default aliases to your shell as well
+as set up a prompt command to be executed after every command you type. It will
+also set up advanced tab completion if you're using zsh or bash.
+
+2. You can use fasd as an external executable.
+
+Put lines below in your shell rc depending on which shell you're using.
+
+Bash:
+
+    eval "$(fasd --init-bash)"
+    eval "$(fasd --init-alias)"
+
+Zsh:
+
+    eval "$(fasd --init-zsh)"
+    eval "$(fasd --init-alias)"
+
+Other POSIX shells:
+
+    eval "$(fasd --init-posix)"
+    eval "$(fasd --init-alias)"
+
+These will setup a command hook that executes on every command and advanced tab
+completion for zsh and bash.
 
 # COMPATIBILITY
 
@@ -81,9 +115,9 @@ line argument that starts with ","(a comma). Example:
     $ vim ,rc,lo<Tab>
     $ vim /etc/rc.local
 
-If you use zsh, word completion is enabled by default. There're also three zle
-widgets: "fasd-complete", "fasd-complete-f", "fasd-complete-d". You can bind
-them to keybindings you like:
+If you use zsh, word completion is enabled by default. There are also three
+zle widgets: "fasd-complete", "fasd-complete-f", "fasd-complete-d". You can
+bind them to keybindings you like:
 
     bindkey '^X^A' fasd-complete    # C-x C-a to do fasd-complete (fils and directories)
     bindkey '^X^F' fasd-complete-f  # C-x C-f to do fasd-cmplete-f (only files)
@@ -101,7 +135,7 @@ desktop environments (like Gtk) and some editors (like Vim) keep a list of
 accessed files. Fasd can use them as additional backends if the data can be
 converted into fasd's native format. As of now, fasd supports Gtk's
 `recently-used.xbel` and Vim's `viminfo` backends. You can define your own
-backend by declaring a function by that name in your `.fasdrc`. You set defualt
+backend by declaring a function by that name in your `.fasdrc`. You set default
 backend with `_FASD_BACKENDS` variable in our `.fasdrc`.
 
 # TWEAKS
@@ -139,7 +173,7 @@ they are present. Below are some variables you can set:
     is faster with ksh variants.
 
     $_FASD_BACKENDS
-    Defualt backends.
+    Default backends.
 
 # DEBUGGING
 

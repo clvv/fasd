@@ -6,7 +6,7 @@ tools like `autojump`(https://github.com/joelthelion/autojump),
 track of files you have accessed, so that you can quickly reference them in the
 command line.
 
-The name fasd comes from the defualt suggested aliases `f`(files),
+The name fasd comes from the default suggested aliases `f`(files),
 `a`(files/directories), `s`(show/search/select), `d`(directories).
 
 Fasd ranks files and directories by "frecency," that is, by both "frequency" and
@@ -21,9 +21,9 @@ calculate the likelihood of the given set of patterns.
 
 # A Note for Early Adopters
 
-Fasd was originally named `f`. `f` was renamed to fasd for varous reasons. And
+Fasd was originally named `f`. `f` was renamed to fasd for various reasons. And
 the latest release contains many improvements compared to old master branch of
-`f`, most improtantly fasd acquired the ability to be run as an executable
+`f`, most importantly fasd acquired the ability to be run as an executable
 (instead of as a shell function, which is comparably slower). Previous f users
 please update all of your f-related configurations accordingly. And don't
 forget to rename your database file:
@@ -75,7 +75,7 @@ Download fasd 0.5.0 from GitHub:
 [zip](https://github.com/clvv/fasd/zipball/0.5.0),
 [tar.gz](https://github.com/clvv/fasd/tarball/0.5.0).
 
-Fasd is a self-contained posix shell script that can be either sourced or
+Fasd is a self-contained POSIX shell script that can be either sourced or
 executed. A Makefile is provided to install `fasd` and `fasd.1` to desired
 places.
 
@@ -139,7 +139,7 @@ a foo bar # list recent files and directories mathcing foo and bar
 f -e vim foo # run vim on the most frecent file matching foo
 mplayer `f bar` # run mplayer on the most frecent file matching bar
 z foo # cd into the most frecent directory matching foo
-open `sf pdf` # interactively select a file mathcing pdf and launch `open`
+open `sf pdf` # interactively select a file matching pdf and launch `open`
 ```
 
 You should add your own aliases to fully utilize the power of fasd. Here are
@@ -154,15 +154,7 @@ alias o='a -e xdg-open' # quick opening files with xdg-open
 If you're using bash, you have to call `_fasd_bash_hook_cmd_complete` to make
 completion work. For instance:
 
-```bash
-_fasd_bash_hook_cmd_complete v m j o
-```
-
-Fasd also offers interactive selection mode.
-
-```sh
-xdg-open `sf pdf`
-```
+```bash _fasd_bash_hook_cmd_complete v m j o ```
 
 You could select an entry in the list of matching files.
 
@@ -226,7 +218,7 @@ $ vim ,rc,lo<Tab>
 $ vim /etc/rc.local
 ```
 
-If you use zsh, word completion is enabled by default. There're also three zle
+If you use zsh, word completion is enabled by default. There are also three zle
 widgets: `fasd-complete`, `fasd-complete-f`, `fasd-complete-d`. You can bind
 them to keybindings you like:
 
@@ -248,7 +240,7 @@ desktop environments (like Gtk) and some editors (like Vim) keep a list of
 accessed files. Fasd can use them as additional backends if the data can be
 converted into fasd's native format. As of now, fasd supports Gtk's
 `recently-used.xbel` and Vim's `viminfo` backends. You can define your own
-backend by declaring a function by that name in your `.fasdrc`. You set defualt
+backend by declaring a function by that name in your `.fasdrc`. You set default
 backend with `_FASD_BACKENDS` variable in our `.fasdrc`.
 
 Fasd can mimic [v](http://github.com/rupa/v)'s behavior by this alias:
@@ -277,7 +269,7 @@ $_FASD_IGNORE
 List of all commands that will be ignored, defaults to "fasd cd ls echo".
 
 $_FASD_TRACK_PWD
-f defaults to track your "$PWD". Set this to 0 to disable this behavior.
+Fasd defaults to track your "$PWD". Set this to 0 to disable this behavior.
 
 $_FASD_AWK
 Which awk to use. f can detect and use a compatible awk.
@@ -293,7 +285,7 @@ Which shell to execute. Some shells will run faster than others. fasd
 is faster with ksh variants.
 
 $_FASD_BACKENDS
-Defualt backends.
+Default backends.
 ```
 
 # Debugging

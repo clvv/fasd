@@ -29,7 +29,7 @@ fasd [options] [query \&...]
 .PP
 Fasd keeps track of files and directories you access in your shell and
 gives you quick access to them.
-You can use fasd to refernce files or directories by just a few key
+You can use fasd to reference files or directories by just a few key
 identifying characters.
 You can use fasd to boost your command line productivity by defining
 your own aliases to launch programs on files or directories.
@@ -37,7 +37,7 @@ Fasd, by default, provides some basic aliases, including a shell
 function \[lq]z\[rq] that resembles the functionality of \[lq]z\[rq] and
 \[lq]autojump.\[rq]
 .PP
-The name \[lq]fasd\[rq] comes from the defualt suggested aliases
+The name \[lq]fasd\[rq] comes from the default suggested aliases
 \f[C]fasd\f[](files), \f[C]a\f[](files/directories),
 \f[C]s\f[](show/search/select), \f[C]d\f[](directories).
 .PP
@@ -61,6 +61,54 @@ cp\ update.html\ `d\ www`
 open\ `sf\ pdf`
 \f[]
 .fi
+.SH SHELL INITIALIZATION
+.PP
+To get fasd working in a shell, some initialization code must be run.
+.IP "1." 3
+You can directly source \f[C]fasd\f[] in your POSIX complaint shell.
+.RS 4
+.PP
+source \f[C]which\ fasd\f[]
+.RE
+.PP
+This will set some variable options, add default aliases to your shell
+as well as set up a prompt command to be executed after every command
+you type.
+It will also set up advanced tab completion if you're using zsh or bash.
+.IP "2." 3
+You can use fasd as an external executable.
+.PP
+Put lines below in your shell rc depending on which shell you're using.
+.PP
+Bash:
+.IP
+.nf
+\f[C]
+eval\ "$(fasd\ --init-bash)"
+eval\ "$(fasd\ --init-alias)"
+\f[]
+.fi
+.PP
+Zsh:
+.IP
+.nf
+\f[C]
+eval\ "$(fasd\ --init-zsh)"
+eval\ "$(fasd\ --init-alias)"
+\f[]
+.fi
+.PP
+Other POSIX shells:
+.IP
+.nf
+\f[C]
+eval\ "$(fasd\ --init-posix)"
+eval\ "$(fasd\ --init-alias)"
+\f[]
+.fi
+.PP
+These will setup a command hook that executes on every command and
+advanced tab completion for zsh and bash.
 .SH COMPATIBILITY
 .PP
 Fasd's basic functionalities are POSIX compliant, meaning that you
@@ -94,7 +142,7 @@ $\ vim\ /etc/rc.local
 .fi
 .PP
 If you use zsh, word completion is enabled by default.
-There're also three zle widgets: \[lq]fasd-complete\[rq],
+There are also three zle widgets: \[lq]fasd-complete\[rq],
 \[lq]fasd-complete-f\[rq], \[lq]fasd-complete-d\[rq].
 You can bind them to keybindings you like:
 .IP
@@ -122,7 +170,7 @@ As of now, fasd supports Gtk's \f[C]recently-used.xbel\f[] and Vim's
 \f[C]viminfo\f[] backends.
 You can define your own backend by declaring a function by that name in
 your \f[C].fasdrc\f[].
-You set defualt backend with \f[C]_FASD_BACKENDS\f[] variable in our
+You set default backend with \f[C]_FASD_BACKENDS\f[] variable in our
 \f[C].fasdrc\f[].
 .SH TWEAKS
 .PP
@@ -162,7 +210,7 @@ Which\ shell\ to\ execute.\ Some\ shells\ will\ run\ faster\ than\ others.\ fasd
 is\ faster\ with\ ksh\ variants.
 
 $_FASD_BACKENDS
-Defualt\ backends.
+Default\ backends.
 \f[]
 .fi
 .SH DEBUGGING
