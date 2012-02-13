@@ -385,7 +385,8 @@ EOS
 
     # cat all backends
     local each _fasd_data; for each in $_FASD_BACKENDS; do
-      _fasd_data="$_fasd_data$(echo)$(fasd --backend $each)"
+      _fasd_data="$_fasd_data
+$(fasd --backend $each)"
     done
     [ "$_fasd_data" ] || _fasd_data="$(cat "$_FASD_DATA")"
 
