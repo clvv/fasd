@@ -487,7 +487,7 @@ EOS
     while [ "$1" ]; do case "$1" in
       --complete) [ "$2" = "--" ] && shift; set -- $(echo $2); local list=1 r=r;;
       --query) fasd "$@";;
-      --version) echo "0.5.0"; return 0;;
+      --version) echo "0.5.1"; return 0;;
       --) while [ "$2" ]; do shift; fnd="$fnd$1 "; last="$1"; done;;
       -*) local o="${1#-}"; while [ "$o" ]; do case "$o" in
           s*) local show=1;;

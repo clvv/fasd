@@ -71,9 +71,9 @@ cp `f mov` .
 
 # Install
 
-Download fasd 0.5.0 from GitHub:
-[zip](https://github.com/clvv/fasd/zipball/0.5.0),
-[tar.gz](https://github.com/clvv/fasd/tarball/0.5.0).
+Download fasd 0.5.1 from GitHub:
+[zip](https://github.com/clvv/fasd/zipball/0.5.1),
+[tar.gz](https://github.com/clvv/fasd/tarball/0.5.1).
 
 Fasd is a self-contained POSIX shell script that can be either sourced or
 executed. A Makefile is provided to install `fasd` and `fasd.1` to desired
