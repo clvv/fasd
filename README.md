@@ -228,10 +228,10 @@ bindkey '^X^F' fasd-complete-f  # C-x C-f to do fasd-cmplete-f (only files)
 bindkey '^X^D' fasd-complete-d  # C-x C-d to do fasd-complete-d (only directories)
 ```
 
-If you use bash, you can turn on this *experimental feature* by calling
-`_fasd_bash_hook_word_complete_wrap_all` after sourcing `fasd` *and* after any
-bash completion setup. This will alter your existing completion setup, so you
-might get a *broken* completion system.
+If you use bash, you can turn on this *experimental feature* by executing
+`eval "$(fasd --init bash-wcomp bash-wcomp-install)"` after sourcing `fasd`
+*and* after any bash completion setup. This will alter your existing completion
+setup, so you might get a *broken* completion system.
 
 # Backends
 

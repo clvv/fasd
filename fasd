@@ -31,174 +31,232 @@ fasd() {
 
   case "$1" in
   --init)
-    { # source rc files if present
-      [ -s "/etc/fasdrc" ] && . "/etc/fasdrc"
-      [ -s "$HOME/.fasdrc" ] && . "$HOME/.fasdrc"
+    shift
+    while [ "$1" ]; do
+      case $1 in
+        env)
+          { # source rc files if present
+          [ -s "/etc/fasdrc" ] && . "/etc/fasdrc"
+          [ -s "$HOME/.fasdrc" ] && . "$HOME/.fasdrc"
 
-      # set default options
-      [ -z "$_FASD_DATA" ] && _FASD_DATA="$HOME/.fasd"
-      [ -z "$_FASD_BLACKLIST" ] && _FASD_BLACKLIST="--help"
-      [ -z "$_FASD_SHIFT" ] && _FASD_SHIFT="sudo busybox"
-      [ -z "$_FASD_IGNORE" ] && _FASD_IGNORE="fasd cd ls echo"
-      [ -z "$_FASD_SINK" ] && _FASD_SINK=/dev/null
-      [ -z "$_FASD_TRACK_PWD" ] && _FASD_TRACK_PWD=1
-      [ -z "$_FASD_MAX" ] && _FASD_MAX=2000
-      [ -z "$_FASD_BACKENDS" ] && _FASD_BACKENDS=native
+          # set default options
+          [ -z "$_FASD_DATA" ] && _FASD_DATA="$HOME/.fasd"
+          [ -z "$_FASD_BLACKLIST" ] && _FASD_BLACKLIST="--help"
+          [ -z "$_FASD_SHIFT" ] && _FASD_SHIFT="sudo busybox"
+          [ -z "$_FASD_IGNORE" ] && _FASD_IGNORE="fasd cd ls echo"
+          [ -z "$_FASD_SINK" ] && _FASD_SINK=/dev/null
+          [ -z "$_FASD_TRACK_PWD" ] && _FASD_TRACK_PWD=1
+          [ -z "$_FASD_MAX" ] && _FASD_MAX=2000
+          [ -z "$_FASD_BACKENDS" ] && _FASD_BACKENDS=native
 
-      if [ -z "$_FASD_AWK" ]; then
-        # awk preferences
-        local awk; for awk in mawk gawk original-awk nawk awk; do
-          $awk "" && _FASD_AWK=$awk && break
-        done
-      fi
-    } >> "${_FASD_SINK:-/dev/null}" 2>&1
+          if [ -z "$_FASD_AWK" ]; then
+            # awk preferences
+            local awk; for awk in mawk gawk original-awk nawk awk; do
+              $awk "" && _FASD_AWK=$awk && break
+            done
+          fi
+        } >> "${_FASD_SINK:-/dev/null}" 2>&1
+        ;;
+
+      auto) cat <<EOS
+{ if compctl; then # zsh
+    eval "\$(fasd --init posix-alias zsh-hook zsh-ccomp zsh-ccomp-I \
+      zsh-wcomp zsh-wcomp-I)"
+  elif complete; then # bash
+    eval "\$(fasd --init posix-alias bash-hook bash-ccomp bash-ccomp-I)"
+  else # posix shell
+    eval "\$(fasd --init posix-alias posix-hook)"
+  fi
+} >> "$_FASD_SINK" 2>&1
+
+EOS
+        ;;
+
+      posix-alias) cat <<EOS
+alias a='fasd -a'
+alias s='fasd -si'
+alias sd='fasd -sid'
+alias sf='fasd -sif'
+alias d='fasd -d'
+alias f='fasd -f'
+# function to execute built-in cd
+fasd_cd() { [ \$# -gt 1 ] && cd "\$(fasd "\$@")" || fasd "\$@"; }
+alias z='fasd_cd -d'
+
+EOS
+        ;;
+
+      zsh-hook) cat <<EOS
+# add zsh hook
+_fasd_preexec() {
+  { eval "fasd --add \$(fasd --sanitize \$3)"; } >> "$_FASD_SINK" 2>&1
+}
+autoload -U add-zsh-hook
+add-zsh-hook preexec _fasd_preexec
+
+EOS
+        ;;
+
+      bash-hook) cat <<EOS
+# add bash hook
+echo \$PROMPT_COMMAND | grep -v -q "fasd --add" && \
+  PROMPT_COMMAND='eval "fasd --add \$(fasd --sanitize \$(history 1 | \
+  sed -e "s/^[ ]*[0-9]*[ ]*//"))" >> "$_FASD_SINK" 2>&1;'"\$PROMPT_COMMAND"
+
+EOS
+        ;;
+
+      posix-hook) cat <<EOS
+_fasd_ps1_func() {
+  { eval "fasd --add \
+    \$(fasd --sanitize \$(fc -nl -0 | sed -n '\$s/\s*\(.*\)/\1/p'))"
+  } >> "$_FASD_SINK" 2>&1
+}
+echo "\$PS1" | grep -v -q "_fasd_ps1_func" && \
+export PS1="\\\$(_fasd_ps1_func)\$PS1"
+
+EOS
+        ;;
+
+      zsh-ccomp) cat <<EOS
+# zsh command mode completion
+_fasd_zsh_cmd_complete() {
+  local compl
+  read -c compl
+  compstate[insert]=menu # no expand
+  reply=(\${(f)"\$(fasd --complete "\$compl")"})
+}
+
+EOS
+        ;;
+
+      zsh-wcomp) cat <<EOS
+# zsh word mode completion
+_fasd_zsh_word_complete() {
+  [ "\$2" ] && local _fasd_cur="\$2"
+  [ -z "\$_fasd_cur" ] && local _fasd_cur="\${words[CURRENT]}"
+  local fnd="\${_fasd_cur//,/ }"
+  local typ=\${1:-e}
+  fasd --query \$typ \$fnd | sort -nr | sed 's/^[0-9.]*[ ]*//' | while read line; do
+    compadd -U -V fasd "\$line"
+  done
+  compstate[insert]=menu # no expand
+}
+_fasd_zsh_word_complete_f() { _fasd_zsh_word_complete f ; }
+_fasd_zsh_word_complete_d() { _fasd_zsh_word_complete d ; }
+_fasd_zsh_word_complete_trigger() {
+  local _fasd_cur="\${words[CURRENT]}"
+  eval \$(fasd --word-complete-trigger _fasd_zsh_word_complete \$_fasd_cur)
+}
+# define zle widgets
+zle -C fasd-complete 'menu-select' _fasd_zsh_word_complete
+zle -C fasd-complete-f 'menu-select' _fasd_zsh_word_complete_f
+zle -C fasd-complete-d 'menu-select' _fasd_zsh_word_complete_d
+
+EOS
+        ;;
+
+      zsh-ccomp-install) cat <<EOS
+# enbale command mode completion
+compctl -U -K _fasd_zsh_cmd_complete -V fasd -x 'C[-1,-*e],s[-]n[1,e]' -c -- fasd fasd_cd
+
+EOS
+        ;;
+
+      zsh-wcomp-install) cat <<EOS
+# enable word mode completion
+zstyle ':completion:*' completer _complete _ignored _fasd_zsh_word_complete_trigger
+
+EOS
+        ;;
+
+      bash-ccomp) cat <<EOS
+# bash command mode completion
+_fasd_bash_cmd_complete() {
+  # complete command after "-e"
+  local cur=\${COMP_WORDS[COMP_CWORD]}
+  [[ \${COMP_WORDS[COMP_CWORD-1]} == -*e ]] && \
+    COMPREPLY=( \$(compgen -A command \$cur) ) && return
+  # get completion results using expanded aliases
+  local RESULT=\$( fasd -q --complete "\$(alias -p \$COMP_WORDS \
+    2>> "$_FASD_SINK" | sed -n "\\\$s/^.*'\(.*\)'/\1/p") \${COMP_LINE#* }" )
+  IFS=\$'\n' COMPREPLY=( \$RESULT )
+}
+_fasd_bash_hook_cmd_complete() {
+  for cmd in \$*; do
+    complete -F _fasd_bash_cmd_complete \$cmd
+  done
+}
+
+EOS
+        ;;
+
+      bash-wcomp) cat <<EOS
+# bash word mode completion
+_fasd_bash_word_complete() {
+  [ "\$2" ] && local _fasd_cur="\$2"
+  [ "\$_fasd_cur" ] || local _fasd_cur="\${COMP_WORDS[COMP_CWORD]}"
+  local typ=\${1:-e}
+  local fnd="\${_fasd_cur//,/ }"
+  local RESULT=\$(fasd -q --query \$typ \$fnd | sed 's/^[0-9.]*[ ]*//')
+  IFS=\$'\n' COMPREPLY=( \$RESULT )
+}
+_fasd_bash_word_complete_trigger() {
+  [ "\$_fasd_cur" ] || local _fasd_cur="\${COMP_WORDS[COMP_CWORD]}"
+  eval "\$(fasd --word-complete-trigger _fasd_bash_word_complete \$_fasd_cur)"
+}
+_fasd_bash_word_complete_wrap() {
+  local _fasd_cur="\${COMP_WORDS[COMP_CWORD]}"
+  _fasd_bash_word_complete_trigger
+  local z=\${COMP_WORDS[0]}
+  # try original comp func
+  [ "\$COMPREPLY" ] || eval "\$( echo "\$_FASD_BASH_COMPLETE_P" | \
+    sed -n "/ \$z\$/"'s/.*-F \(.*\) .*/\1/p' )"
+  # fall back on original complete options
+  local cmd="\$(echo "\$_FASD_BASH_COMPLETE_P" | \
+    sed -n "/ \$z\$/"'s/complete/compgen/') \$_fasd_cur"
+  [ "\$COMPREPLY" ] || COMPREPLY=( \$(eval \$cmd) )
+}
+
+EOS
+        ;;
+
+      bash-ccomp-install) cat <<EOS
+# enable bash command mode completion
+_fasd_bash_hook_cmd_complete fasd a s d f sd sf z
+
+EOS
+        ;;
+
+      bash-wcomp-install) cat <<EOS
+_FASD_BASH_COMPLETE_P="\$(complete -p)"
+for cmd in \$(complete -p | awk '{print \$NF}' | tr '\n' ' '); do
+  complete -o default -o bashdefault -F _fasd_bash_word_complete_wrap \$cmd
+done
+# enable word mode completion as default completion
+complete -o default -o bashdefault -D -F _fasd_bash_word_complete_trigger \
+  >> "$_FASD_SINK" 2>&1
+
+EOS
+        ;;
+      esac; shift
+    done
     ;;
 
   --init-alias)
-    cat <<EOS
-    alias a='fasd -a'
-    alias s='fasd -si'
-    alias sd='fasd -sid'
-    alias sf='fasd -sif'
-    alias d='fasd -d'
-    alias f='fasd -f'
-    # function to execute built-in cd
-    fasd_cd() { [ \$# -gt 1 ] && cd "\$(fasd "\$@")" || fasd "\$@"; }
-    alias z='fasd_cd -d'
-EOS
-  ;;
-
-  --init-interactive)
-    { if compctl; then # zsh
-        eval "$(fasd --init-zsh)"
-      elif complete; then # bash
-        eval "$(fasd --init-bash)"
-      else # posix shell
-        eval "$(fasd --init-posix)"
-      fi
-      # set default aliases
-      eval "$(fasd --init-alias)"
-    } >> "$_FASD_SINK" 2>&1
+    fasd --init posix-alias
     ;;
 
   --init-zsh)
-    cat <<EOS
-    # zsh command mode completion
-    _fasd_zsh_cmd_complete() {
-      local compl
-      read -c compl
-      compstate[insert]=menu # no expand
-      reply=(\${(f)"\$(fasd --complete "\$compl")"})
-    }
-    # enbale command mode completion
-    compctl -U -K _fasd_zsh_cmd_complete -V fasd -x 'C[-1,-*e],s[-]n[1,e]' -c -- fasd fasd_cd
-    # zsh word mode completion
-    _fasd_zsh_word_complete() {
-      [ "\$2" ] && local _fasd_cur="\$2"
-      [ -z "\$_fasd_cur" ] && local _fasd_cur="\${words[CURRENT]}"
-      local fnd="\${_fasd_cur//,/ }"
-      local typ=\${1:-e}
-      fasd --query \$typ \$fnd | sort -nr | sed 's/^[0-9.]*[ ]*//' | while read line; do
-        compadd -U -V fasd "\$line"
-      done
-      compstate[insert]=menu # no expand
-    }
-    _fasd_zsh_word_complete_f() { _fasd_zsh_word_complete f ; }
-    _fasd_zsh_word_complete_d() { _fasd_zsh_word_complete d ; }
-    _fasd_zsh_word_complete_trigger() {
-      local _fasd_cur="\${words[CURRENT]}"
-      eval \$(fasd --word-complete-trigger _fasd_zsh_word_complete \$_fasd_cur)
-    }
-    # enable word mode completion
-    zstyle ':completion:*' completer _complete _ignored \
-      _fasd_zsh_word_complete_trigger
-    # define zle widgets
-    zle -C fasd-complete 'menu-select' _fasd_zsh_word_complete
-    zle -C fasd-complete-f 'menu-select' _fasd_zsh_word_complete_f
-    zle -C fasd-complete-d 'menu-select' _fasd_zsh_word_complete_d
-    # add zsh hook
-    _fasd_preexec() {
-      { eval "fasd --add \$(fasd --sanitize \$3)"; } >> "$_FASD_SINK" 2>&1
-    }
-    autoload -U add-zsh-hook
-    add-zsh-hook preexec _fasd_preexec
-EOS
+    fasd --init zsh-hook zsh-ccomp zsh-ccomp-install zsh-wcomp zsh-wcomp-install
     ;;
 
   --init-bash)
-    cat <<EOS
-    # bash command mode completion
-    _fasd_bash_cmd_complete() {
-      # complete command after "-e"
-      local cur=\${COMP_WORDS[COMP_CWORD]}
-      [[ \${COMP_WORDS[COMP_CWORD-1]} == -*e ]] && \
-        COMPREPLY=( \$(compgen -A command \$cur) ) && return
-      # get completion results using expanded aliases
-      local RESULT=\$( fasd -q --complete "\$(alias -p \$COMP_WORDS \
-        2>> "$_FASD_SINK" | sed -n "\\\$s/^.*'\(.*\)'/\1/p") \${COMP_LINE#* }" )
-      IFS=\$'\n' COMPREPLY=( \$RESULT )
-    }
-    _fasd_bash_hook_cmd_complete() {
-      for cmd in \$*; do
-        complete -F _fasd_bash_cmd_complete \$cmd
-      done
-    }
-    # enable bash command mode completion
-    _fasd_bash_hook_cmd_complete fasd a s d f sd sf z
-    # bash word mode completion
-    _fasd_bash_word_complete() {
-      [ "\$2" ] && local _fasd_cur="\$2"
-      [ "\$_fasd_cur" ] || local _fasd_cur="\${COMP_WORDS[COMP_CWORD]}"
-      local typ=\${1:-e}
-      local fnd="\${_fasd_cur//,/ }"
-      local RESULT=\$(fasd -q --query \$typ \$fnd | sed 's/^[0-9.]*[ ]*//')
-      IFS=\$'\n' COMPREPLY=( \$RESULT )
-    }
-    _fasd_bash_word_complete_trigger() {
-      [ "\$_fasd_cur" ] || local _fasd_cur="\${COMP_WORDS[COMP_CWORD]}"
-      eval "\$(fasd --word-complete-trigger _fasd_bash_word_complete \$_fasd_cur)"
-    }
-    _fasd_bash_word_complete_wrap() {
-      local _fasd_cur="\${COMP_WORDS[COMP_CWORD]}"
-      _fasd_bash_word_complete_trigger
-      local z=\${COMP_WORDS[0]}
-      # try original comp func
-      [ "\$COMPREPLY" ] || eval "\$( echo "\$_FASD_BASH_COMPLETE_P" | \
-        sed -n "/ \$z\$/"'s/.*-F \(.*\) .*/\1/p' )"
-      # fall back on original complete options
-      local cmd="\$(echo "\$_FASD_BASH_COMPLETE_P" | \
-        sed -n "/ \$z\$/"'s/complete/compgen/') \$_fasd_cur"
-      [ "\$COMPREPLY" ] || COMPREPLY=( \$(eval \$cmd) )
-    }
-    _fasd_bash_hook_word_complete_wrap_all() {
-      _FASD_BASH_COMPLETE_P="\$(complete -p)"
-      for cmd in \$(complete -p | awk '{print \$NF}' | tr '\n' ' '); do
-        complete -o default -o bashdefault -F _fasd_bash_word_complete_wrap \$cmd
-      done
-      # enable word mode completion as default completion
-      complete -o default -o bashdefault -D -F _fasd_bash_word_complete_trigger \
-        >> "$_FASD_SINK" 2>&1
-    }
-    # add bash hook
-    echo \$PROMPT_COMMAND | grep -v -q "fasd --add" && \
-      PROMPT_COMMAND='eval "fasd --add \$(fasd --sanitize \$(history 1 | \
-      sed -e "s/^[ ]*[0-9]*[ ]*//"))" >> "$_FASD_SINK" 2>&1;'"\$PROMPT_COMMAND"
-EOS
+    fasd --init bash-hook bash-ccomp bash-ccomp-install
     ;;
 
   --init-posix)
-    cat <<EOS
-    _fasd_ps1_func() {
-      { eval "fasd --add \
-        \$(fasd --sanitize \$(fc -nl -0 | sed -n '\$s/\s*\(.*\)/\1/p'))"
-      } >> "$_FASD_SINK" 2>&1
-    }
-    _fasd_ps1_install() {
-      echo "\$PS1" | grep -v -q "_fasd_ps1_func" && \
-      export PS1="\\\$(_fasd_ps1_func)\$PS1"
-    }
-    _fasd_ps1_install
-EOS
+    fasd --init posix-hook
     ;;
 
   --readlink)
@@ -506,10 +564,10 @@ EOS
   esac
 }
 
-fasd --init
+fasd --init env
 
 case $- in
-  *i*) fasd --init-interactive;; # assume being sourced
+  *i*) eval "$(fasd --init auto)";; # assume being sourced
   *) # assume being executed as an executable
     if [ -x "$_FASD_SHELL" -a -z "$_FASD_SET" ]; then
       _FASD_SET=1 exec $_FASD_SHELL "$0" "$@"
