@@ -223,7 +223,7 @@ them to keybindings you like:
 
 ```sh
 bindkey '^X^A' fasd-complete    # C-x C-a to do fasd-complete (fils and directories)
-bindkey '^X^F' fasd-complete-f  # C-x C-f to do fasd-cmplete-f (only files)
+bindkey '^X^F' fasd-complete-f  # C-x C-f to do fasd-complete-f (only files)
 bindkey '^X^D' fasd-complete-d  # C-x C-d to do fasd-complete-d (only directories)
 ```
 
@@ -302,6 +302,6 @@ _FASD_SINK="$HOME/.fasd.log"
 # COPYING
 
 Fasd is originally written based on code from [z](https://github.com/rupa/z) by
-rupa deadwyler under the WTFPL license. Most if not all code has been
+rupa deadwyler under the WTFPL license. Most if not all of the code has been
 rewritten. Fasd is licensed under the "MIT/X11" license.
 

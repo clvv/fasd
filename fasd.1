@@ -1,4 +1,4 @@
-.TH FASD 1 "Feb 11, 2012" "fasd user manual"
+.TH FASD 1 "Feb 12, 2012" "fasd user manual"
 .SH NAME
 .PP
 fasd - quick access to files and directories
@@ -38,7 +38,7 @@ function \[lq]z\[rq] that resembles the functionality of \[lq]z\[rq] and
 \[lq]autojump.\[rq]
 .PP
 The name \[lq]fasd\[rq] comes from the default suggested aliases
-\f[C]fasd\f[](files), \f[C]a\f[](files/directories),
+\f[C]f\f[](files), \f[C]a\f[](files/directories),
 \f[C]s\f[](show/search/select), \f[C]d\f[](directories).
 .PP
 Fasd ranks files and directories by \[lq]frecency,\[rq] that is, by both
@@ -145,7 +145,7 @@ You can bind them to keybindings you like:
 .nf
 \f[C]
 bindkey\ \[aq]^X^A\[aq]\ fasd-complete\ \ \ \ #\ C-x\ C-a\ to\ do\ fasd-complete\ (fils\ and\ directories)
-bindkey\ \[aq]^X^F\[aq]\ fasd-complete-f\ \ #\ C-x\ C-f\ to\ do\ fasd-cmplete-f\ (only\ files)
+bindkey\ \[aq]^X^F\[aq]\ fasd-complete-f\ \ #\ C-x\ C-f\ to\ do\ fasd-complete-f\ (only\ files)
 bindkey\ \[aq]^X^D\[aq]\ fasd-complete-d\ \ #\ C-x\ C-d\ to\ do\ fasd-complete-d\ (only\ directories)
 \f[]
 .fi
@@ -225,5 +225,11 @@ log.
 _FASD_SINK="$HOME/.fasd.log"
 \f[]
 .fi
+.SH COPYING
+.PP
+Fasd is originally written based on code from
+z(https://github.com/rupa/z) by rupa deadwyler under the WTFPL license.
+Most if not all of the code has been rewritten.
+Fasd is licensed under the \[lq]MIT/X11\[rq] license.
 .SH AUTHORS
 Wei Dai <x@wei23.net>.

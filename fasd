@@ -3,8 +3,8 @@
 # Fasd (this file) can be sourced or executed by any POSIX compatible shell.
 
 # Fasd is originally written based on code from z (https://github.com/rupa/z)
-# by rupa deadwyler under the WTFPL license. Most if not all code has been
-# rewritten.
+# by rupa deadwyler under the WTFPL license. Most if not all of the code has
+# been rewritten.
 
 # Copyright (C) 2011, 2012 by Wei Dai. All rights reserved.
 #

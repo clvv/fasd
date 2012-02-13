@@ -1,6 +1,6 @@
 % FASD(1) fasd user manual
 % Wei Dai <x@wei23.net>
-% Feb 11, 2012
+% Feb 12, 2012
 
 # NAME
 
@@ -36,7 +36,7 @@ productivity by defining your own aliases to launch programs on files or
 directories. Fasd, by default, provides some basic aliases, including a shell
 function "z" that resembles the functionality of "z" and "autojump."
 
-The name "fasd" comes from the default suggested aliases `fasd`(files),
+The name "fasd" comes from the default suggested aliases `f`(files),
 `a`(files/directories), `s`(show/search/select), `d`(directories).
 
 Fasd ranks files and directories by "frecency," that is, by both "frequency"
@@ -119,7 +119,7 @@ zle widgets: "fasd-complete", "fasd-complete-f", "fasd-complete-d". You can
 bind them to keybindings you like:
 
     bindkey '^X^A' fasd-complete    # C-x C-a to do fasd-complete (fils and directories)
-    bindkey '^X^F' fasd-complete-f  # C-x C-f to do fasd-cmplete-f (only files)
+    bindkey '^X^F' fasd-complete-f  # C-x C-f to do fasd-complete-f (only files)
     bindkey '^X^D' fasd-complete-d  # C-x C-d to do fasd-complete-d (only directories)
 
 If you use bash, you can turn on this experimental feature by executing
@@ -185,4 +185,10 @@ sed version, and a log file.
 You can set `_FASD_SINK` in your `.fasdrc` to obtain a log.
 
     _FASD_SINK="$HOME/.fasd.log"
+
+# COPYING
+
+Fasd is originally written based on code from z(https://github.com/rupa/z) by
+rupa deadwyler under the WTFPL license. Most if not all of the code has been
+rewritten. Fasd is licensed under the "MIT/X11" license.
 
