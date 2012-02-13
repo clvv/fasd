@@ -64,51 +64,47 @@ open\ `sf\ pdf`
 .SH SHELL INITIALIZATION
 .PP
 To get fasd working in a shell, some initialization code must be run.
-.IP "1." 3
-You can directly source \f[C]fasd\f[] in your POSIX complaint shell.
-.RS 4
-.PP
-source \f[C]which\ fasd\f[]
-.RE
-.PP
-This will set some variable options, add default aliases to your shell
-as well as set up a prompt command to be executed after every command
-you type.
-It will also set up advanced tab completion if you're using zsh or bash.
-.IP "2." 3
-You can use fasd as an external executable.
-.PP
-Put lines below in your shell rc depending on which shell you're using.
-.PP
-Bash:
+Put lines below in your POSIX compatible shell rc.
 .IP
 .nf
 \f[C]
-eval\ "$(fasd\ --init-bash)"
-eval\ "$(fasd\ --init-alias)"
-\f[]
-.fi
-.PP
-Zsh:
-.IP
-.nf
-\f[C]
-eval\ "$(fasd\ --init-zsh)"
-eval\ "$(fasd\ --init-alias)"
-\f[]
-.fi
-.PP
-Other POSIX shells:
-.IP
-.nf
-\f[C]
-eval\ "$(fasd\ --init-posix)"
-eval\ "$(fasd\ --init-alias)"
+eval\ "$(fasd\ --init\ auto)"
 \f[]
 .fi
 .PP
 These will setup a command hook that executes on every command and
 advanced tab completion for zsh and bash.
+.PP
+If you want more control over what gets into your shell environment, you
+can pass customized set of arguments to \f[C]fasd\ --init\f[].
+.IP
+.nf
+\f[C]
+zsh-hook\ \ \ \ \ \ \ \ \ \ \ \ \ #\ define\ _fasd_preexec\ and\ add\ it\ to\ zsh\ preexec\ array
+zsh-ccomp\ \ \ \ \ \ \ \ \ \ \ \ #\ zsh\ command\ mode\ completion\ definitions
+zsh-ccomp-install\ \ \ \ #\ setup\ command\ mode\ completion\ for\ zsh
+zsh-wcomp\ \ \ \ \ \ \ \ \ \ \ \ #\ zsh\ word\ mode\ completion\ definitions
+zsh-wcomp-install\ \ \ \ #\ setup\ word\ mode\ completioin\ for\ zsh
+bash-hook\ \ \ \ \ \ \ \ \ \ \ \ #\ add\ hook\ code\ to\ bash\ $PROMPT_COMMAND
+bash-ccomp\ \ \ \ \ \ \ \ \ \ \ #\ bash\ command\ mode\ completion\ definitions
+bash-ccomp-install\ \ \ #\ setup\ command\ mode\ completion\ for\ bash
+bash-wcomp\ \ \ \ \ \ \ \ \ \ \ #\ bash\ word\ mode\ completion\ definitions\ (experimental)
+bash-wcomp-install\ \ \ #\ setup\ word\ mode\ completion\ for\ bash\ (experimental)
+posix-alias\ \ \ \ \ \ \ \ \ \ #\ define\ alias\ that\ applies\ to\ all\ posix\ shells
+posix-hook\ \ \ \ \ \ \ \ \ \ \ #\ setup\ $PS1\ hook\ for\ shells\ that\[aq]s\ posix\ compatible
+\f[]
+.fi
+.PP
+Example for a minimal zsh setup (no tab completion):
+.IP
+.nf
+\f[C]
+eval\ "$(fasd\ --init\ posix-alias\ zsh-hook)"
+\f[]
+.fi
+.PP
+Optionally, if you can also source \f[C]fasd\f[] if you want
+\f[C]fasd\f[] to be a shell function instead of an executable.
 .SH COMPATIBILITY
 .PP
 Fasd's basic functionalities are POSIX compliant, meaning that you
@@ -154,9 +150,9 @@ bindkey\ \[aq]^X^D\[aq]\ fasd-complete-d\ \ #\ C-x\ C-d\ to\ do\ fasd-complete-d
 \f[]
 .fi
 .PP
-If you use bash, you can turn on this experimental feature by calling
-\f[C]_fasd_bash_hook_word_complete_wrap_all\f[] after sourcing
-\f[C]fasd\f[] and after any bash completion setup.
+If you use bash, you can turn on this experimental feature by executing
+\f[C]eval\ "$(fasd\ --init\ bash-wcomp\ bash-wcomp-install)"\f[] after
+sourcing \f[C]fasd\f[] and after any bash completion setup.
 This will alter your existing completion setup, so you might get a
 \f[I]broken\f[] completion system.
 .SH BACKENDS

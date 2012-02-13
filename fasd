@@ -570,7 +570,7 @@ EOS
 fasd --init env
 
 case $- in
-  *i*) eval "$(fasd --init auto)";; # assume being sourced
+  *i*) ;; # assume being sourced, do nothing
   *) # assume being executed as an executable
     if [ -x "$_FASD_SHELL" -a -z "$_FASD_SET" ]; then
       _FASD_SET=1 exec $_FASD_SHELL "$0" "$@"

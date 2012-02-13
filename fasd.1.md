@@ -58,37 +58,36 @@ likelihood of the given set of patterns.
 
 # SHELL INITIALIZATION
 
-To get fasd working in a shell, some initialization code must be run.
+To get fasd working in a shell, some initialization code must be run. Put
+lines below in your POSIX compatible shell rc.
 
-1. You can directly source `fasd` in your POSIX complaint shell.
-
-    source `which fasd`
-
-This will set some variable options, add default aliases to your shell as well
-as set up a prompt command to be executed after every command you type. It will
-also set up advanced tab completion if you're using zsh or bash.
-
-2. You can use fasd as an external executable.
-
-Put lines below in your shell rc depending on which shell you're using.
-
-Bash:
-
-    eval "$(fasd --init-bash)"
-    eval "$(fasd --init-alias)"
-
-Zsh:
-
-    eval "$(fasd --init-zsh)"
-    eval "$(fasd --init-alias)"
-
-Other POSIX shells:
-
-    eval "$(fasd --init-posix)"
-    eval "$(fasd --init-alias)"
+    eval "$(fasd --init auto)"
 
 These will setup a command hook that executes on every command and advanced tab
 completion for zsh and bash.
+
+If you want more control over what gets into your shell environment, you can
+pass customized set of arguments to `fasd --init`.
+
+    zsh-hook             # define _fasd_preexec and add it to zsh preexec array
+    zsh-ccomp            # zsh command mode completion definitions
+    zsh-ccomp-install    # setup command mode completion for zsh
+    zsh-wcomp            # zsh word mode completion definitions
+    zsh-wcomp-install    # setup word mode completioin for zsh
+    bash-hook            # add hook code to bash $PROMPT_COMMAND
+    bash-ccomp           # bash command mode completion definitions
+    bash-ccomp-install   # setup command mode completion for bash
+    bash-wcomp           # bash word mode completion definitions (experimental)
+    bash-wcomp-install   # setup word mode completion for bash (experimental)
+    posix-alias          # define alias that applies to all posix shells
+    posix-hook           # setup $PS1 hook for shells that's posix compatible
+
+Example for a minimal zsh setup (no tab completion):
+
+    eval "$(fasd --init posix-alias zsh-hook)"
+
+Optionally, if you can also source `fasd` if you want `fasd` to be a shell
+function instead of an executable.
 
 # COMPATIBILITY
 
@@ -123,10 +122,10 @@ bind them to keybindings you like:
     bindkey '^X^F' fasd-complete-f  # C-x C-f to do fasd-cmplete-f (only files)
     bindkey '^X^D' fasd-complete-d  # C-x C-d to do fasd-complete-d (only directories)
 
-If you use bash, you can turn on this experimental feature by calling
-`_fasd_bash_hook_word_complete_wrap_all` after sourcing `fasd` and after any bash
-completion setup. This will alter your existing completion setup, so you might
-get a *broken* completion system.
+If you use bash, you can turn on this experimental feature by executing
+`eval "$(fasd --init bash-wcomp bash-wcomp-install)"` after sourcing `fasd`
+and after any bash completion setup. This will alter your existing completion
+setup, so you might get a *broken* completion system.
 
 # BACKENDS
 
