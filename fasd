@@ -265,18 +265,6 @@ EOS
     fasd --init posix-hook
     ;;
 
-  --readlink)
-    shift; local p np
-    case "$1" in
-      /*) p="$1";;
-      *) p="$PWD/$1";;
-    esac
-    np="$(echo "$p" | sed 's@/\(\./\)\+@/@g
-    : 0;s@\([^/]\+/\+\|^/*\)\.\.\(/\|$\)@@;t 0;s@/\+@/@g;s@/\.\?$@@')"
-    [ -e "${np:=/}" ] || return 1
-    echo "$np"
-    ;;
-
   # if "$_fasd_cur" is a query, then eval all the arguments
   --word-complete-trigger)
     shift; [ "$2" ] && local _fasd_cur="$2" || return
@@ -324,11 +312,15 @@ EOS
 
     shift # shift out the command itself
 
-    local paths; while [ "$1" ]; do
-      # add the adsolute path to "paths", and a separator "|"
-      paths="$paths|$(fasd --readlink "$1" 2>> "$_FASD_SINK")"
-      shift
-    done
+    # find all valid path arguments, convert them to simpliest absolute form
+    local paths="$(while [ "$1" ]; do
+      [ -e "$1" ] && echo "$1"; shift
+    done | sed '/^[^/]/s@^@'"$PWD"'/@
+    s@/\.\.$@/\.\./@
+    s@/\(\./\)\{1,\}@/@g
+    : 0;s@[^/][^/]*//*\.\./@/@;t 0
+    s@^/*\.\./@/@
+    s@//*@/@g;s@/\.\{0,1\}$@@;s@^$@/@' | tr '\n' '|')"
 
     # add current pwd if the option is set
     [ "$_FASD_TRACK_PWD" = "1" -a "$PWD" != "$HOME" ] && paths="$paths|$PWD"
