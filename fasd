@@ -279,8 +279,8 @@ EOS
     ;;
 
   --sanitize)
-    shift; echo "$@" | sed 's/\(^\| \).\?[<>|&]\+/ /g
-    s/&$//;s/\(\$(\|`\)//g;s/\([^\\]\)[`);]/\1/g'
+    shift; echo "$@" | sed 's/^.\?[<>|&]\{1,\}/ /;s/ .\?[<>|&]\{1,\}/ /g;
+      s/&$//;s/\([^\]\)$(\([^)]\))/\1\2/g;s/\([^\]\)[`;]\{1,\}/\1/g'
     ;;
 
   --add) # add entries
@@ -464,7 +464,7 @@ $(fasd --backend $each)"
       recently-used)
         tr -d '\n' \
           < "$HOME/.local/share/recently-used.xbel" | \
-          sed 's@\(file:/\|count="\)@\n@g' | \
+          sed 's@file:/@\n@g;s@count="@\n@g' | \
           sed '1d;s/".*$//' | \
           tr '\n' '|' | \
           sed 's@|/@\n@g' | \
