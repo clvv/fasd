@@ -14,7 +14,7 @@ Fasd ranks files and directories by "frecency," that is, by both "frequency" and
 ([link](https://developer.mozilla.org/en/The_Places_frecency_algorithm)).
 
 Fasd uses [Bayesian Inference](https://en.wikipedia.org/wiki/Bayesian_inference)
-and [Bayesian Ranking](https://github.com/clvv/f/wiki/Bayesian-Ranking) to rank
+and [Bayesian Ranking](https://github.com/clvv/fasd/wiki/Bayesian-Ranking) to rank
 files and directories for a set of given matching patterns. "Frecency" is used
 as the prior probability distribution, and a simple algorithm is used to
 calculate the likelihood of the given set of patterns.
@@ -71,6 +71,12 @@ cp `f mov` .
 
 # Install
 
+Fasd is available in various package managers. Please check
+[the wiki page](https://github.com/clvv/fasd/wiki/Installing-via-Package-Managers)
+for an up-to-date list.
+
+You can also manually obtain a copy of fasd.
+
 Download fasd 0.5.3 from GitHub:
 [zip](https://github.com/clvv/fasd/zipball/0.5.3),
 [tar.gz](https://github.com/clvv/fasd/tarball/0.5.3).
@@ -78,7 +84,6 @@ Download fasd 0.5.3 from GitHub:
 Fasd is a self-contained POSIX shell script that can be either sourced or
 executed. A Makefile is provided to install `fasd` and `fasd.1` to desired
 places.
-
 
 System-wide install:
 
@@ -88,7 +93,8 @@ Install to $HOME:
 
     PREFIX=$HOME make install
 
-Or alternatively you can just copy `fasd` to anywhere you like.
+Or alternatively you can just copy `fasd` to anywhere you like (preferably
+under some directory in `$PATH`).
 
 To get fasd working in a shell, some initialization code must be run. Put the
 line below in your shell rc.
@@ -165,7 +171,7 @@ any of them refer to existing files or directories. If yes, fasd will add them
 to the database.
 
 When you run `fasd` with search arguments, fasd uses [Bayesian
-Ranking](https://github.com/clvv/f/wiki/Bayesian-Ranking) to find the best
+Ranking](https://github.com/clvv/fasd/wiki/Bayesian-Ranking) to find the best
 match.
 
 # Compatibility
