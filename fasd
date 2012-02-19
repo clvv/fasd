@@ -535,16 +535,19 @@ $(fasd --backend $each)"
       echo "$result" | sed = | sed 'N;s/\n/	/' | sort -nr >&2; printf "> " >&2
       local i; read i; [ 0 -lt "${i:-0}" ] 2>> "$_FASD_SINK" || return 1
       result="$(echo "$result" | sed -n "${i:-1}"'s/^[0-9.]*[ ]*//p')"
-      [ "$result" ] && eval ${exec:-echo} "\"$result\"" || return 1
+      if [ "$result" ]; then
+        fasd --add "$result"; eval ${exec:-echo} "\"$result\""
+      fi
     elif [ "$lst" ]; then
       echo "$result" | sort -n${r} | sed 's/^[0-9.]*[ ]*//'
     elif [ "$show" ]; then
       echo "$result" | sort -n
     elif [ "$fnd" -a "$exec" ]; then # exec
-      eval $exec \
-        "\"$(echo "$result" | sort -n | sed -n '$s/^[0-9.]*[ ]*//p')\""
+      result="$(echo "$result" | sort -n | sed -n '$s/^[0-9.]*[ ]*//p')"
+      fasd --add "$result"; eval $exec "\"$result\""
     elif [ "$fnd" -a ! -t 1 ]; then # echo if output is not terminal
-      echo "$result" | sort -n | sed -n '$s/^[0-9.]*[ ]*//p'
+      result="$(echo "$result" | sort -n | sed -n '$s/^[0-9.]*[ ]*//p')"
+      fasd --add "$result"; echo "$result"
     else # no args, show
       echo "$result" | sort -n
     fi
