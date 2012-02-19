@@ -159,7 +159,7 @@ alias o='a -e xdg-open' # quick opening files with xdg-open
 If you're using bash, you have to call `_fasd_bash_hook_cmd_complete` to make
 completion work. For instance:
 
-```bash _fasd_bash_hook_cmd_complete v m j o ```
+    _fasd_bash_hook_cmd_complete v m j o
 
 You could select an entry in the list of matching files.
 
