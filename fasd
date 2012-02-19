@@ -385,7 +385,7 @@ $(fasd --backend $each)"
     # set mode specific code for calculating the prior
     case $mode in
       rank) local prior='times[i]';;
-      recent) local prior='(t-la[i])';;
+      recent) local prior='sqrt(100000/(1+t-la[i]))';;
       *) local prior='times[i] * frecent(la[i])';;
     esac
 
@@ -491,7 +491,7 @@ $(fasd --backend $each)"
           l*) local lst=1;;
           i*) local interactive=1 show=1;;
           r*) local mode=rank;;
-          t*) local mode=recent r=r;;
+          t*) local mode=recent;;
           e*) o="${o#?}"; if [ "$o" ]; then # there are characters after "-e"
                 local exec="$o" # anything after "-e"
               else # use the next argument
@@ -539,13 +539,11 @@ $(fasd --backend $each)"
        && eval $exec "\"$last\"" && return;;
     esac
 
-    [ -z "$r" ] && local R=r # reverse of $r
-
     local result
     result="$(fasd --query 2>> "$_FASD_SINK")" # query the database
     [ $? -gt 0 ] && return
     if [ "$interactive" ] || [ "$exec" -a -z "$fnd$lst$show" -a -t 1 ]; then
-      result="$(echo "$result" | sort -n${R})"
+      result="$(echo "$result" | sort -nr)"
       echo "$result" | sed = | sed 'N;s/\n/	/' | sort -nr >&2; printf "> " >&2
       local i; read i; [ 0 -lt "${i:-0}" ] 2>> "$_FASD_SINK" || return 1
       result="$(echo "$result" | sed -n "${i:-1}"'s/^[0-9.]*[ ]*//p')"
@@ -553,14 +551,14 @@ $(fasd --backend $each)"
     elif [ "$lst" ]; then
       echo "$result" | sort -n${r} | sed 's/^[0-9.]*[ ]*//'
     elif [ "$show" ]; then
-      echo "$result" | sort -n${r}
+      echo "$result" | sort -n
     elif [ "$fnd" -a "$exec" ]; then # exec
       eval $exec \
-        "\"$(echo "$result" | sort -n${r} | sed -n '$s/^[0-9.]*[ ]*//p')\""
+        "\"$(echo "$result" | sort -n | sed -n '$s/^[0-9.]*[ ]*//p')\""
     elif [ "$fnd" -a ! -t 1 ]; then # echo if output is not terminal
-      echo "$result" | sort -n${r} | sed -n '$s/^[0-9.]*[ ]*//p'
+      echo "$result" | sort -n | sed -n '$s/^[0-9.]*[ ]*//p'
     else # no args, show
-      echo "$result" | sort -n${r}
+      echo "$result" | sort -n
     fi
 
   esac
