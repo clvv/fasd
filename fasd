@@ -450,25 +450,18 @@ $(fasd --backend $each)"
 
   --backend)
     case $2 in
-      native)
-        cat "$_FASD_DATA"
-        ;;
+      native) cat "$_FASD_DATA";;
       viminfo)
         local t="$(date +%s)"
         < "$HOME/.viminfo" sed -n '/^>/{s@~@'"$HOME"'@;p}' | \
           while IFS=" " read line; do
-            t=$((t-60))
-            echo "${line#??}|1|$t"
+            t=$((t-60)); echo "${line#??}|1|$t"
           done
         ;;
       recently-used)
-        tr -d '\n' \
-          < "$HOME/.local/share/recently-used.xbel" | \
-          sed 's@file:/@\n@g;s@count="@\n@g' | \
-          sed '1d;s/".*$//' | \
-          tr '\n' '|' | \
-          sed 's@|/@\n@g' | \
-          $_FASD_AWK -F'|' '{
+        tr -d '\n' < "$HOME/.local/share/recently-used.xbel" | \
+          sed 's@file:/@\n@g;s@count="@\n@g' | sed '1d;s/".*$//' | \
+          tr '\n' '|' | sed 's@|/@\n@g' | $_FASD_AWK -F'|' '{
             sum = 0
             for( i=2; i<=NF; i++ ) sum += $i
             print $1 "|" sum
@@ -571,7 +564,6 @@ case $- in
   *) # assume being executed as an executable
     if [ -x "$_FASD_SHELL" -a -z "$_FASD_SET" ]; then
       _FASD_SET=1 exec $_FASD_SHELL "$0" "$@"
-      exit $?
     else
       fasd "$@"
     fi
