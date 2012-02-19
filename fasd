@@ -89,8 +89,8 @@ EOS
       zsh-hook) cat <<EOS
 # add zsh hook
 _fasd_preexec() {
-  eval "fasd --add \$(fasd --sanitize \$3)"
-} >> "$_FASD_SINK" 2>&1
+  { eval "fasd --add \$(fasd --sanitize \$3)"; } >> "$_FASD_SINK" 2>&1
+}
 autoload -U add-zsh-hook
 add-zsh-hook preexec _fasd_preexec
 
@@ -108,9 +108,9 @@ EOS
 
       posix-hook) cat <<EOS
 _fasd_ps1_func() {
-  eval "fasd --add \
-    \$(fasd --sanitize \$(fc -nl -0 | sed -n '\$s/\s*\(.*\)/\1/p'))"
-} >> "$_FASD_SINK" 2>&1
+  { eval "fasd --add \$(fasd --sanitize \
+      \$(fc -nl -0 | sed -n '\$s/\s*\(.*\)/\1/p'))"; } >> "$_FASD_SINK" 2>&1
+}
 echo "\$PS1" | grep -v -q "_fasd_ps1_func" && \
 export PS1="\\\$(_fasd_ps1_func)\$PS1"
 
