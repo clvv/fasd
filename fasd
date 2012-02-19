@@ -89,8 +89,8 @@ EOS
       zsh-hook) cat <<EOS
 # add zsh hook
 _fasd_preexec() {
-  { eval "fasd --add \$(fasd --sanitize \$3)"; } >> "$_FASD_SINK" 2>&1
-}
+  eval "fasd --add \$(fasd --sanitize \$3)"
+} >> "$_FASD_SINK" 2>&1
 autoload -U add-zsh-hook
 add-zsh-hook preexec _fasd_preexec
 
@@ -108,10 +108,9 @@ EOS
 
       posix-hook) cat <<EOS
 _fasd_ps1_func() {
-  { eval "fasd --add \
+  eval "fasd --add \
     \$(fasd --sanitize \$(fc -nl -0 | sed -n '\$s/\s*\(.*\)/\1/p'))"
-  } >> "$_FASD_SINK" 2>&1
-}
+} >> "$_FASD_SINK" 2>&1
 echo "\$PS1" | grep -v -q "_fasd_ps1_func" && \
 export PS1="\\\$(_fasd_ps1_func)\$PS1"
 
@@ -197,21 +196,19 @@ EOS
       bash-wcomp) cat <<EOS
 # bash word mode completion
 _fasd_bash_word_complete() {
-  { [ "\$2" ] && local _fasd_cur="\$2"
+  [ "\$2" ] && local _fasd_cur="\$2"
   [ "\$_fasd_cur" ] || local _fasd_cur="\${COMP_WORDS[COMP_CWORD]}"
   local typ=\${1:-e}
   local fnd="\${_fasd_cur//,/ }"
   local RESULT=\$(fasd -q --query \$typ \$fnd | sed 's/^[0-9.]*[ ]*//')
   IFS=\$'\n' COMPREPLY=( \$RESULT )
-  } >> "$_FASD_SINK" 2>&1
-}
+} >> "$_FASD_SINK" 2>&1
 _fasd_bash_word_complete_trigger() {
-  { [ "\$_fasd_cur" ] || local _fasd_cur="\${COMP_WORDS[COMP_CWORD]}"
+  [ "\$_fasd_cur" ] || local _fasd_cur="\${COMP_WORDS[COMP_CWORD]}"
   eval "\$(fasd --word-complete-trigger _fasd_bash_word_complete \$_fasd_cur)"
-  } >> "$_FASD_SINK" 2>&1
-}
+} >> "$_FASD_SINK" 2>&1
 _fasd_bash_word_complete_wrap() {
-  { local _fasd_cur="\${COMP_WORDS[COMP_CWORD]}"
+  local _fasd_cur="\${COMP_WORDS[COMP_CWORD]}"
   _fasd_bash_word_complete_trigger
   local z=\${COMP_WORDS[0]}
   # try original comp func
@@ -221,8 +218,7 @@ _fasd_bash_word_complete_wrap() {
   local cmd="\$(echo "\$_FASD_BASH_COMPLETE_P" | \
     sed -n "/ \$z\$/"'s/complete/compgen/') \$_fasd_cur"
   [ "\$COMPREPLY" ] || COMPREPLY=( \$(eval \$cmd) )
-  } >> "$_FASD_SINK" 2>&1
-}
+} >> "$_FASD_SINK" 2>&1
 
 EOS
         ;;
