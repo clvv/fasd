@@ -89,7 +89,7 @@ EOS
       zsh-hook) cat <<EOS
 # add zsh hook
 _fasd_preexec() {
-  { eval "fasd --add \$(fasd --sanitize \$3)"; } >> "$_FASD_SINK" 2>&1
+  { eval "fasd --proc \$(fasd --sanitize \$3)"; } >> "$_FASD_SINK" 2>&1
 }
 autoload -U add-zsh-hook
 add-zsh-hook preexec _fasd_preexec
@@ -99,8 +99,8 @@ EOS
 
       bash-hook) cat <<EOS
 # add bash hook
-echo \$PROMPT_COMMAND | grep -v -q "fasd --add" && \
-  PROMPT_COMMAND='eval "fasd --add \$(fasd --sanitize \$(history 1 | \
+echo \$PROMPT_COMMAND | grep -v -q "fasd --proc" && \
+  PROMPT_COMMAND='eval "fasd --proc \$(fasd --sanitize \$(history 1 | \
   sed -e "s/^[ ]*[0-9]*[ ]*//"))" >> "$_FASD_SINK" 2>&1;'"\$PROMPT_COMMAND"
 
 EOS
@@ -108,7 +108,7 @@ EOS
 
       posix-hook) cat <<EOS
 _fasd_ps1_func() {
-  { eval "fasd --add \$(fasd --sanitize \
+  { eval "fasd --proc \$(fasd --sanitize \
       \$(fc -nl -0 | sed -n '\$s/\s*\(.*\)/\1/p'))"; } >> "$_FASD_SINK" 2>&1
 }
 echo "\$PS1" | grep -v -q "_fasd_ps1_func" && \
@@ -279,13 +279,13 @@ EOS
       s/&$//;s/\([^\]\)$(\([^)]\))/\1\2/g;s/\([^\]\)[`;]\{1,\}/\1/g'
     ;;
 
-  --add) # add entries
+  --proc) # process commands
     shift
 
     # stop if we don't own ~/.fasd (we're another user but our ENV is still set)
     [ -f "$_FASD_DATA" -a ! -O "$_FASD_DATA" ] && return
 
-    # make zsh do word spliting for the for loop to work
+    # make zsh do word splitting for the for loop to work
     [ "$ZSH_VERSION" ] && emulate sh && setopt localoptions
 
     # blacklists
@@ -306,17 +306,16 @@ EOS
       *\ $1\ *) return
     esac
 
-    shift # shift out the command itself
+    shift; fasd --add "$@" # add all arguments except command
+    ;;
 
-    # find all valid path arguments, convert them to simpliest absolute form
+  --add) # add entries
+    # find all valid path arguments, convert them to simplest absolute form
     local paths="$(while [ "$1" ]; do
       [ -e "$1" ] && echo "$1"; shift
     done | sed '/^[^/]/s@^@'"$PWD"'/@
-    s@/\.\.$@/\.\./@
-    s@/\(\./\)\{1,\}@/@g
-    : 0;s@[^/][^/]*//*\.\./@/@;t 0
-    s@^/*\.\./@/@
-    s@//*@/@g;s@/\.\{0,1\}$@@;s@^$@/@' | tr '\n' '|')"
+      s@/\.\.$@/\.\./@;s@/\(\./\)\{1,\}@/@g;: 0;s@[^/][^/]*//*\.\./@/@;t 0
+      s@^/*\.\./@/@;s@//*@/@g;s@/\.\{0,1\}$@@;s@^$@/@' | tr '\n' '|')"
 
     # add current pwd if the option is set
     [ "$_FASD_TRACK_PWD" = "1" -a "$PWD" != "$HOME" ] && paths="$paths|$PWD"
