@@ -454,11 +454,11 @@ $(fasd --backend $each)"
         cat "$_FASD_DATA"
         ;;
       viminfo)
-        local i=100
+        local t="$(date +%s)"
         < "$HOME/.viminfo" sed -n '/^>/{s@~@'"$HOME"'@;p}' | \
           while IFS=" " read line; do
-            i=$((i-1))
-            echo "${line#??}|$i"
+            t=$((t-60))
+            echo "${line#??}|1|$t"
           done
         ;;
       recently-used)
