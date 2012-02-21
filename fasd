@@ -158,8 +158,8 @@ EOS
 
       zsh-ccomp-install) cat <<EOS
 # enbale command mode completion
-compctl -U -K _fasd_zsh_cmd_complete -V fasd -x 'C[-1,-*e],s[-]n[1,e]' -c -- \
-  fasd fasd_cd
+compctl -U -K _fasd_zsh_cmd_complete -V fasd -x 'C[-1,-*e],s[-]n[1,e]' -c - \
+  'c[-1,-A][-1,-D]' -f -- fasd fasd_cd
 
 EOS
         ;;
@@ -179,6 +179,10 @@ _fasd_bash_cmd_complete() {
   local cur=\${COMP_WORDS[COMP_CWORD]}
   [[ \${COMP_WORDS[COMP_CWORD-1]} == -*e ]] && \
     COMPREPLY=( \$(compgen -A command \$cur) ) && return
+  # complete using default readline complete after "-A" or "-D"
+  case \${COMP_WORDS[COMP_CWORD-1]} in
+    -A|-D) COMPREPLY=( \$(compgen -o default \$cur) ) && return
+  esac
   # get completion results using expanded aliases
   local RESULT=\$( fasd -q --complete "\$(alias -p \$COMP_WORDS \
     2>> "$_FASD_SINK" | sed -n "\\\$s/^.*'\(.*\)'/\1/p") \${COMP_LINE#* }" )
@@ -357,6 +361,26 @@ EOS
     fi
     ;;
 
+  --delete|-D) shift # delete entries
+    # turn valid arguments into entry-deleting sed commands
+    local sed_cmd="$(while [ "$1" ]; do echo "$1"; shift; done | \
+      sed '/^[^/]/s@^@'"$PWD"'/@;s@/\.\.$@/\.\./@;s@/\(\./\)\{1,\}@/@g
+        : 0;s@[^/][^/]*//*\.\./@/@;t 0;s@^/*\.\./@/@;s@//*@/@g;s@/\.\{0,1\}$@@
+        s@^$@/@;s@\([.[/*^$]\)@\\\1@g;s@^\(.*\)$@/^\1|/d@')"
+
+    # maintain the file
+    local tempfile
+    tempfile="$(mktemp "$_FASD_DATA".XXXXXX)" || return
+
+    sed -e "$sed_cmd" "$_FASD_DATA" 2>> "$_FASD_SINK" >| "$tempfile"
+
+    if [ $? -ne 0 -a -f "$_FASD_DATA" ]; then
+      env rm -f "$tempfile"
+    else
+      env mv -f "$tempfile" "$_FASD_DATA"
+    fi
+    ;;
+
   --query) shift # query the db, --query [$typ ["$fnd" [$mode [$quote]]]]
     [ "$1" ] && local typ="$1"
     [ "$2" ] && local fnd="$2"
@@ -468,7 +492,7 @@ $(fasd --backend $each)"
     local fnd last _FASD_BACKENDS="$_FASD_BACKENDS" _fasd_data
     while [ "$1" ]; do case "$1" in
       --complete) [ "$2" = "--" ] && shift; set -- $(echo $2); local lst=1 r=r;;
-      --query) fasd "$@";;
+      --query|--add|--delete|-A|-D) fasd "$@"; return $?;;
       --version) echo "0.5.3"; return 0;;
       --) while [ "$2" ]; do shift; fnd="$fnd$1 "; last="$1"; done;;
       -*) local o="${1#-}"; while [ "$o" ]; do case "$o" in
