@@ -382,6 +382,7 @@ EOS
     ;;
 
   --query) shift # query the db, --query [$typ ["$fnd" [$mode [$quote]]]]
+    [ -f "$_FASD_DATA" ] || return # no db yet
     [ "$1" ] && local typ="$1"
     [ "$2" ] && local fnd="$2"
     [ "$3" ] && local mode="$3"
@@ -488,7 +489,6 @@ $(fasd --backend $each)"
     ;;
 
   *) # parsing logic and processing
-    [ -f "$_FASD_DATA" ] || return # no db yet
     local fnd last _FASD_BACKENDS="$_FASD_BACKENDS" _fasd_data
     while [ "$1" ]; do case "$1" in
       --complete) [ "$2" = "--" ] && shift; set -- $(echo $2); local lst=1 r=r;;
