@@ -524,19 +524,24 @@ $(fasd --backend $each)"
           f*) local typ=f;;
           q*) local quote=1;;
           h*) echo "fasd [options] [query ...]
+[f|a|s|d|z] [opions] [query ...]
   options:
-    -s        show list of files with their ranks
-    -l        list paths only
-    -i        interactive mode
-    -e <cmd>  set command to execute on the result file
-    -b <name> only use <name> backend
-    -B <name> add addition backend <name>
-    -a        match files and directories
-    -d        match directories only
-    -f        match files only
-    -r        match by rank only
-    -t        match by recent access only
-    -h        show a brief help message" >&2; return;;
+    -s         show list of files with their ranks
+    -l         list paths only
+    -i         interactive mode
+    -e <cmd>   set command to execute on the result file
+    -b <name>  only use <name> backend
+    -b <name>  add additional backend <name>
+    -a         match files and directories
+    -d         match directories only
+    -f         match files only
+    -r         match by rank only
+    -t         match by recent access only
+    -h         show a brief help message
+
+fasd [-A|-D] [paths ...]
+    -A    add paths
+    -D    delete paths" >&2; return;;
         esac; o="${o#?}"; done;;
       *) fnd="$fnd $1"; last="$1";;
     esac; shift; done

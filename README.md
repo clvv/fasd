@@ -103,7 +103,7 @@ line below in your shell rc.
 eval "$(fasd --init auto)"
 ```
 
-These will setup a command hook that executes on every command and advanced tab
+This will setup a command hook that executes on every command and advanced tab
 completion for zsh and bash.
 
 If you want more control over what gets into your shell environment, you can
@@ -132,6 +132,13 @@ eval "$(fasd --init posix-alias zsh-hook)"
 
 Optionally, if you can also source `fasd` if you want `fasd` to be a shell
 function instead of an executable.
+
+You can tweak initialization code. For instance, if you want to use "c"
+instead of "z" to do directory jumping. You run the code below:
+
+    # function to execute built-in cd
+    fasd_cd() { [ $# -gt 1 ] && cd "$(fasd -e echo "$@")" || fasd "$@"; }
+    alias c='fasd_cd -d' # `-d' option present for bash completion
 
 After you first installed fasd, open some files (with any program) or `cd`
 around in your shell. Then try some examples below.
@@ -180,29 +187,30 @@ Fasd's basic functionalities are POSIX compliant, meaning that you should be
 able to use fasd in all POSIX compliant shells. Your shell need to support
 command substitution in `$PS1` in order for fasd to automatically track your
 commands and files. This feature is not specified by the POSIX standard, but
-it's nonetheless present in many POSIX compliant shells.
+it's nonetheless present in many POSIX compliant shells. In shells without
+prompt command or prompt command substitution (tcsh for instance), you can add
+entries manually with `fasd -A`. You are very welcomed to contribute shell
+initialization code for not yet supported shells.
 
 Fasd has been tested on the following shells: bash, zsh, mksh, pdksh, dash,
 busybox ash, FreeBSD 9 /bin/sh and OpenBSD /bin/sh.
 
 # Synopsis
 
-```
-fasd [options] [query ...]
-  options:
-    -s        show list of files with their ranks
-    -l        list paths only
-    -i        interactive mode
-    -e <cmd>  set command to execute on the result file
-    -b <name> only use <name> backend
-    -B <name> add addition backend <name>
-    -a        match files and directories
-    -d        match directories only
-    -f        match files only
-    -r        match by rank only
-    -t        match by recent access only
-    -h        show a brief help message
-```
+    fasd [options] [query ...]
+      options:
+        -s         show list of files with their ranks
+        -l         list paths only
+        -i         interactive mode
+        -e <cmd>   set command to execute on the result file
+        -b <name>  only use <name> backend
+        -B <name>  add additional backend <name>
+        -a         match files and directories
+        -d         match directories only
+        -f         match files only
+        -r         match by rank only
+        -t         match by recent access only
+        -h         show a brief help message
 
 # Tab Completion
 
@@ -214,14 +222,16 @@ triggered when you hit tab on a `fasd` command or its aliases. Under this mode
 your queries can be separated by a space. Tip: if you find that the completion
 result overwrites your queries, type an extra space before you hit tab.
 
-Word mode completion can be triggered on *any* command. This can be a powerful
-feature if you make good use of it. Word completion is triggered by any command
-line argument that starts with `,`(a comma). Example:
+Word mode completion can be triggered on *any* command. Word completion is
+triggered by any command line argument that starts with `,` (all), `f,`
+(files), or `d,` (directories), or that ends with `,,` (all), `,,f` (files), or
+`,,d` (directories). Examples:
 
-```sh
-$ vim ,rc,lo<Tab>
-$ vim /etc/rc.local
-```
+    $ vim ,rc,lo<Tab>
+    $ vim /etc/rc.local
+
+    $ mv index.html d,www<Tab>
+    $ mv index.html /var/www/
 
 If you use zsh, word completion is enabled by default. There are also three zle
 widgets: `fasd-complete`, `fasd-complete-f`, `fasd-complete-d`. You can bind
@@ -261,7 +271,7 @@ in `$HOME/.fasdrc`
 
 ```
 $_FASD_DATA
-Path to the f data file, default "$HOME/.fasd".
+Path to the fasd data file, default "$HOME/.fasd".
 
 $_FASD_BLACKLIST
 List of blacklisted strings. Commands matching them will not be processed.
@@ -277,7 +287,7 @@ $_FASD_TRACK_PWD
 Fasd defaults to track your "$PWD". Set this to 0 to disable this behavior.
 
 $_FASD_AWK
-Which awk to use. f can detect and use a compatible awk.
+Which awk to use. Fasd can detect and use a compatible awk.
 
 $_FASD_SINK
 File to log all STDERR to, defaults to "/dev/null".

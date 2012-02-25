@@ -18,7 +18,7 @@ line below in your shell rc.
 
     eval "$(fasd --init auto)"
 
-These will setup a command hook that executes on every command and advanced tab
+This will setup a command hook that executes on every command and advanced tab
 completion for zsh and bash.
 
 If you want more control over what gets into your shell environment, you can
@@ -43,4 +43,11 @@ Example for a minimal zsh setup (no tab completion):
 
 Optionally, if you can also source `fasd` if you want `fasd` to be a shell
 function instead of an executable.
+
+You can tweak initialization code. For instance, if you want to use "c"
+instead of "z" to do directory jumping. You run the code below:
+
+    # function to execute built-in cd
+    fasd_cd() { [ $# -gt 1 ] && cd "$(fasd -e echo "$@")" || fasd "$@"; }
+    alias c='fasd_cd -d' # `-d' option present for bash completion
 
