@@ -136,9 +136,11 @@ function instead of an executable.
 You can tweak initialization code. For instance, if you want to use "c"
 instead of "z" to do directory jumping. You run the code below:
 
-    # function to execute built-in cd
-    fasd_cd() { [ $# -gt 1 ] && cd "$(fasd -e echo "$@")" || fasd "$@"; }
-    alias c='fasd_cd -d' # `-d' option present for bash completion
+```sh
+# function to execute built-in cd
+fasd_cd() { [ $# -gt 1 ] && cd "$(fasd -e echo "$@")" || fasd "$@"; }
+alias c='fasd_cd -d' # `-d' option present for bash completion
+```
 
 After you first installed fasd, open some files (with any program) or `cd`
 around in your shell. Then try some examples below.
