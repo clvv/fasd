@@ -36,6 +36,8 @@ pass customized set of arguments to `fasd --init`.
     bash-wcomp-install   # setup word mode completion for bash (experimental)
     posix-alias          # define alias that applies to all posix shells
     posix-hook           # setup $PS1 hook for shells that's posix compatible
+    tcsh-alias           # define aliases for tcsh
+    tcsh-hook            # setup tcsh precmd alias
 
 Example for a minimal zsh setup (no tab completion):
 
