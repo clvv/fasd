@@ -200,6 +200,7 @@ busybox ash, FreeBSD 9 /bin/sh and OpenBSD /bin/sh.
 # Synopsis
 
     fasd [options] [query ...]
+    [f|a|s|d|z] [options] [query ...]
       options:
         -s         show list of files with their ranks
         -l         list paths only
@@ -213,6 +214,10 @@ busybox ash, FreeBSD 9 /bin/sh and OpenBSD /bin/sh.
         -r         match by rank only
         -t         match by recent access only
         -h         show a brief help message
+
+    fasd [-A|-D] [paths ...]
+        -A    add paths
+        -D    delete paths
 
 # Tab Completion
 
