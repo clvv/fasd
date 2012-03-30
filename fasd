@@ -86,6 +86,17 @@ alias z='fasd_cd -d'
 EOS
         ;;
 
+      tcsh-alias) cat <<EOS
+;alias a 'fasd -a';
+alias s 'fasd -si';
+alias sd 'fasd -sid';
+alias sf 'fasd -sif';
+alias d 'fasd -d';
+alias f 'fasd -f';
+alias z 'cd "\`fasd -d -e echo \\!*\`" >& /dev/null || fasd -d';
+EOS
+        ;;
+
       zsh-hook) cat <<EOS
 # add zsh hook
 _fasd_preexec() {
@@ -115,6 +126,14 @@ echo "\$PS1" | grep -v -q "_fasd_ps1_func" && \
 export PS1="\\\$(_fasd_ps1_func)\$PS1"
 
 EOS
+        ;;
+
+      tcsh-hook) cat <<EOS
+;alias fasd-prev-cmd 'fasd --sanitize \`history -h 1\` >& /dev/null';
+set pprecmd="\`alias precmd\`";
+alias precmd '\$pprecmd; fasd --proc \`fasd-prev-cmd\` >& /dev/null';
+EOS
+
         ;;
 
       zsh-ccomp) cat <<EOS
