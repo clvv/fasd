@@ -168,9 +168,17 @@ _fasd_zsh_word_complete_trigger() {
   eval \$(fasd --word-complete-trigger _fasd_zsh_word_complete \$_fasd_cur)
 }
 # define zle widgets
-zle -C fasd-complete 'menu-select' _fasd_zsh_word_complete
-zle -C fasd-complete-f 'menu-select' _fasd_zsh_word_complete_f
-zle -C fasd-complete-d 'menu-select' _fasd_zsh_word_complete_d
+zle -C fasd-complete complete-word _generic
+zstyle ':completion:fasd-complete:*' completer _fasd_zsh_word_complete
+zstyle ':completion:fasd-complete:*' menu-select
+
+zle -C fasd-complete-f complete-word _generic
+zstyle ':completion:fasd-complete-f:*' completer _fasd_zsh_word_complete_f
+zstyle ':completion:fasd-complete-f:*' menu-select
+
+zle -C fasd-complete-d complete-word _generic
+zstyle ':completion:fasd-complete-d:*' completer _fasd_zsh_word_complete_d
+zstyle ':completion:fasd-complete-d:*' menu-select
 
 EOS
         ;;
