@@ -270,7 +270,7 @@ backend with `_FASD_BACKENDS` variable in our `.fasdrc`.
 Fasd can mimic [v](http://github.com/rupa/v)'s behavior by this alias:
 
 ```sh
-alias v='f -e vim -b viminfo'
+alias v='f -t -e vim -b viminfo'
 ```
 
 # Tweaks
