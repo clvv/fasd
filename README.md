@@ -310,6 +310,10 @@ is faster with ksh variants.
 
 $_FASD_BACKENDS
 Default backends.
+
+$_FASD_NOSAVE
+If set to any non-empty string, no new entries will be saved. You can set and
+export this variable from command line.
 ```
 
 # Debugging

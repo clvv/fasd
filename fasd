@@ -339,6 +339,7 @@ EOS
     ;;
 
   --add|-A) shift # add entries
+    [ "$_FASD_NOSAVE" ] && return
     # find all valid path arguments, convert them to simplest absolute form
     local paths="$(while [ "$1" ]; do
       [ -e "$1" ] && echo "$1"; shift
