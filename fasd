@@ -231,7 +231,14 @@ _fasd_bash_word_complete() {
   [ "\$_fasd_cur" ] || local _fasd_cur="\${COMP_WORDS[COMP_CWORD]}"
   local typ=\${1:-e}
   local fnd="\${_fasd_cur//,/ }"
-  local RESULT=\$(fasd -q --query \$typ \$fnd | sed 's/^[0-9.]*[ ]*//')
+  local RESULT=\$(fasd --query \$typ "\$fnd" | sed 's/^[0-9.]*[ ]*//' | \
+    while read line; do
+      if quote_readline >/dev/null; then
+        echo "\$(quote_readline "\$line")"
+      else
+        echo "\$(printf %q "\$line")"
+      fi
+    done)
   IFS=\$'\n' COMPREPLY=( \$RESULT )
 } >> "$_FASD_SINK" 2>&1
 _fasd_bash_word_complete_trigger() {
