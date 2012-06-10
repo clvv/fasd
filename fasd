@@ -428,8 +428,6 @@ EOS
     [ "$1" ] && local typ="$1"
     [ "$2" ] && local fnd="$2"
     [ "$3" ] && local mode="$3"
-    [ "$4" ] && local quote="$4"
-    [ "$quote" ] && local qts='"\""' || local qts=
 
     # make zsh do word spliting for the for loop to work
     [ "$ZSH_VERSION" ] && emulate sh && setopt localoptions
@@ -496,12 +494,12 @@ $(fasd --backend $each)"
         if(cx) {
           for(i in wcase) {
             if(wcase[i])
-              printf "%-10s %s\n", '"$prior"' * wcase[i], '"$qts"' i '"$qts"'
+              printf "%-10s %s\n", '"$prior"' * wcase[i], i
           }
         } else if(ncx) {
           for(i in nocase) {
             if(nocase[i])
-              printf "%-10s %s\n", '"$prior"' * nocase[i], '"$qts"' i '"$qts"'
+              printf "%-10s %s\n", '"$prior"' * nocase[i], i
           }
         }
       }' - 2>> "$_FASD_SINK"
@@ -564,7 +562,6 @@ $(fasd --backend $each)"
           a*) local typ=e;;
           d*) local typ=d;;
           f*) local typ=f;;
-          q*) local quote=1;;
           R*) local r=r;;
           h*) echo "fasd [options] [query ...]
 [f|a|s|d|z] [opions] [query ...]
