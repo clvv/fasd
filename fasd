@@ -43,7 +43,7 @@ fasd() {
           [ -z "$_FASD_DATA" ] && _FASD_DATA="$HOME/.fasd"
           [ -z "$_FASD_BLACKLIST" ] && _FASD_BLACKLIST="--help"
           [ -z "$_FASD_SHIFT" ] && _FASD_SHIFT="sudo busybox"
-          [ -z "$_FASD_IGNORE" ] && _FASD_IGNORE="fasd cd ls echo"
+          [ -z "$_FASD_IGNORE" ] && _FASD_IGNORE="fasd ls echo"
           [ -z "$_FASD_SINK" ] && _FASD_SINK=/dev/null
           [ -z "$_FASD_TRACK_PWD" ] && _FASD_TRACK_PWD=1
           [ -z "$_FASD_MAX" ] && _FASD_MAX=2000
