@@ -214,7 +214,7 @@ _fasd_bash_cmd_complete() {
   local RESULT=\$( fasd --complete "\$(alias -p \$COMP_WORDS \
     2>> "$_FASD_SINK" | sed -n "\\\$s/^.*'\(.*\)'/\1/p") \${COMP_LINE#* }" |
     while read line; do
-      if quote_readline >/dev/null; then
+      if quote_readline >/dev/null 2>&1; then
         echo "\$(quote_readline "\$line")"
       else
         echo "\$(printf %q "\$line")"
@@ -240,7 +240,7 @@ _fasd_bash_word_complete() {
   local fnd="\${_fasd_cur//,/ }"
   local RESULT=\$(fasd --query \$typ "\$fnd" | sed 's/^[^ ]*[ ]*//' | \
     while read line; do
-      if quote_readline >/dev/null; then
+      if quote_readline >/dev/null 2>&1; then
         echo "\$(quote_readline "\$line")"
       else
         echo "\$(printf %q "\$line")"
