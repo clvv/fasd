@@ -601,21 +601,19 @@ fasd [-A|-D] [paths ...]
       echo "$result" | sed = | sed 'N;s/\n/	/' | sort -nr >&2; printf "> " >&2
       local i; read i; [ 0 -lt "${i:-0}" ] 2>> "$_FASD_SINK" || return 1
       result="$(echo "$result" | sed -n "${i:-1}"'s/^[^ ]*[ ]*//p')"
-      if [ "$result" ]; then
-        fasd --add "$result"; eval ${exec:-echo} "\"$result\""
-      fi
+      [ "$result" ] && fasd --add "$result" && eval ${exec:-echo} "\"$result\""
     elif [ "$lst" ]; then
-      echo "$result" | sort -n${r} | sed 's/^[^ ]*[ ]*//'
+      [ "$result" ] && echo "$result" | sort -n${r} | sed 's/^[^ ]*[ ]*//'
     elif [ "$show" ]; then
-      echo "$result" | sort -n${r}
+      [ "$result" ] && echo "$result" | sort -n${r}
     elif [ "$fnd" -a "$exec" ]; then # exec
       result="$(echo "$result" | sort -n | sed -n '$s/^[^ ]*[ ]*//p')"
-      fasd --add "$result"; eval $exec "\"$result\""
+      [ "$result" ] && fasd --add "$result" && eval $exec "\"$result\""
     elif [ "$fnd" -a ! -t 1 ]; then # echo if output is not terminal
       result="$(echo "$result" | sort -n | sed -n '$s/^[^ ]*[ ]*//p')"
-      fasd --add "$result"; echo "$result"
+      [ "$result" ] && fasd --add "$result" && echo "$result"
     else # no args, show
-      echo "$result" | sort -n${r}
+      [ "$result" ] && echo "$result" | sort -n${r}
     fi
 
   esac
