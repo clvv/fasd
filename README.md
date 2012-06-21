@@ -118,8 +118,6 @@ zsh-wcomp-install    # setup word mode completioin for zsh
 bash-hook            # add hook code to bash $PROMPT_COMMAND
 bash-ccomp           # bash command mode completion definitions
 bash-ccomp-install   # setup command mode completion for bash
-bash-wcomp           # bash word mode completion definitions (experimental)
-bash-wcomp-install   # setup word mode completion for bash (experimental)
 posix-alias          # define aliases that applies to all posix shells
 posix-hook           # setup $PS1 hook for shells that's posix compatible
 tcsh-alias           # define aliases for tcsh
@@ -224,7 +222,8 @@ busybox ash, FreeBSD 9 /bin/sh and OpenBSD /bin/sh.
 # Tab Completion
 
 Fasd offers two completion modes, command mode completion and word mode
-completion.
+completion. Command mode completioin works in bash and zsh. Word mode
+completion only works in zsh.
 
 Command mode completion is just like completion for any other commands. It is
 triggered when you hit tab on a `fasd` command or its aliases. Under this mode
@@ -242,20 +241,14 @@ triggered by any command line argument that starts with `,` (all), `f,`
     $ mv index.html d,www<Tab>
     $ mv index.html /var/www/
 
-If you use zsh, word completion is enabled by default. There are also three zle
-widgets: `fasd-complete`, `fasd-complete-f`, `fasd-complete-d`. You can bind
-them to keybindings you like:
+There are also three zle widgets: `fasd-complete`, `fasd-complete-f`,
+`fasd-complete-d`. You can bind them to keybindings you like:
 
 ```sh
 bindkey '^X^A' fasd-complete    # C-x C-a to do fasd-complete (fils and directories)
 bindkey '^X^F' fasd-complete-f  # C-x C-f to do fasd-complete-f (only files)
 bindkey '^X^D' fasd-complete-d  # C-x C-d to do fasd-complete-d (only directories)
 ```
-
-If you use bash, you can turn on this *experimental feature* by executing
-`eval "$(fasd --init bash-wcomp bash-wcomp-install)"` after sourcing `fasd`
-*and* after any bash completion setup. This will alter your existing completion
-setup, so you might get a *broken* completion system.
 
 # Backends
 

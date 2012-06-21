@@ -4,11 +4,11 @@
 fasd - quick access to files and directories
 .SH SYNOPSIS
 .PP
-fasd [options] [query \&...]
+fasd [options] [query ...]
 .PP
-[f|a|s|d|z] [options] [query \&...]
+[f|a|s|d|z] [options] [query ...]
 .PP
-fasd [-A|-D] [paths \&...]
+fasd [-A|-D] [paths ...]
 .SH OPTIONS
 .IP
 .nf
@@ -36,21 +36,20 @@ identifying characters.
 You can use fasd to boost your command line productivity by defining
 your own aliases to launch programs on files or directories.
 Fasd, by default, provides some basic aliases, including a shell
-function \[lq]z\[rq] that resembles the functionality of \[lq]z\[rq] and
-\[lq]autojump.\[rq]
+function "z" that resembles the functionality of "z" and "autojump."
 .PP
-The name \[lq]fasd\[rq] comes from the default suggested aliases
+The name "fasd" comes from the default suggested aliases
 \f[C]f\f[](files), \f[C]a\f[](files/directories),
 \f[C]s\f[](show/search/select), \f[C]d\f[](directories).
 .PP
-Fasd ranks files and directories by \[lq]frecency,\[rq] that is, by both
-\[lq]frequency\[rq] and \[lq]recency.\[rq] The term \[lq]frecency\[rq]
-was first coined by Mozilla and used in Firefox.
+Fasd ranks files and directories by "frecency," that is, by both
+"frequency" and "recency." The term "frecency" was first coined by
+Mozilla and used in Firefox.
 .PP
 Fasd uses Bayesian Inference and Bayesian Ranking to rank files and
 directories for a set of given matching patterns.
-\[lq]Frecency\[rq] is used as the prior probability distribution, and a
-simple algorithm is used to calculate the likelihood of the given set of
+"Frecency" is used as the prior probability distribution, and a simple
+algorithm is used to calculate the likelihood of the given set of
 patterns.
 .SH EXAMPLES
 .IP
@@ -90,8 +89,6 @@ zsh-wcomp-install\ \ \ \ #\ setup\ word\ mode\ completioin\ for\ zsh
 bash-hook\ \ \ \ \ \ \ \ \ \ \ \ #\ add\ hook\ code\ to\ bash\ $PROMPT_COMMAND
 bash-ccomp\ \ \ \ \ \ \ \ \ \ \ #\ bash\ command\ mode\ completion\ definitions
 bash-ccomp-install\ \ \ #\ setup\ command\ mode\ completion\ for\ bash
-bash-wcomp\ \ \ \ \ \ \ \ \ \ \ #\ bash\ word\ mode\ completion\ definitions\ (experimental)
-bash-wcomp-install\ \ \ #\ setup\ word\ mode\ completion\ for\ bash\ (experimental)
 posix-alias\ \ \ \ \ \ \ \ \ \ #\ define\ aliases\ that\ applies\ to\ all\ posix\ shells
 posix-hook\ \ \ \ \ \ \ \ \ \ \ #\ setup\ $PS1\ hook\ for\ shells\ that\[aq]s\ posix\ compatible
 tcsh-alias\ \ \ \ \ \ \ \ \ \ \ #\ define\ aliases\ for\ tcsh
@@ -111,8 +108,8 @@ Optionally, if you can also source \f[C]fasd\f[] if you want
 \f[C]fasd\f[] to be a shell function instead of an executable.
 .PP
 You can tweak initialization code.
-For instance, if you want to use \[lq]c\[rq] instead of \[lq]z\[rq] to
-do directory jumping.
+For instance, if you want to use "c" instead of "z" to do directory
+jumping.
 You run the code below:
 .IP
 .nf
@@ -124,20 +121,22 @@ alias\ c=\[aq]fasd_cd\ -d\[aq]\ #\ `-d\[aq]\ option\ present\ for\ bash\ complet
 .fi
 .SH COMPATIBILITY
 .PP
-Fasd's basic functionalities are POSIX compliant, meaning that you
+Fasd\[aq]s basic functionalities are POSIX compliant, meaning that you
 should be able to use fasd in all POSIX compliant shells.
 Your shell need to support command substitution in $PS1 in order for
 fasd to automatically track your commands and files.
-This feature is not specified by the POSIX standard, but it's
+This feature is not specified by the POSIX standard, but it\[aq]s
 nonetheless present in many POSIX compliant shells.
 In shells without prompt command or prompt command substitution (tcsh
-for instance), you can add entries manually with \[lq]fasd -A\[rq].
+for instance), you can add entries manually with "fasd -A".
 You are very welcomed to contribute shell initialization code for not
 yet supported shells.
 .SH TAB COMPLETION
 .PP
 Fasd offers two completion modes, command mode completion and word mode
 completion.
+Command mode completioin works in bash and zsh.
+Word mode completion only works in zsh.
 .PP
 Command mode completion is just like completion for any other commands.
 It is triggered when you hit tab on a fasd command or its aliases.
@@ -147,9 +146,8 @@ type an extra space before you hit tab.
 .PP
 Word mode completion can be triggered on \f[I]any\f[] command.
 Word completion is triggered by any command line argument that starts
-with \[lq],\[rq] (all), \[lq]f,\[rq] (files), or \[lq]d,\[rq]
-(directories), or that ends with \[lq],,\[rq] (all), \[lq],,f\[rq]
-(files), or \[lq],,d\[rq] (directories).
+with "," (all), "f," (files), or "d," (directories), or that ends with
+",," (all), ",,f" (files), or ",,d" (directories).
 Examples:
 .IP
 .nf
@@ -162,9 +160,8 @@ $\ mv\ index.html\ /var/www/
 \f[]
 .fi
 .PP
-If you use zsh, word completion is enabled by default.
-There are also three zle widgets: \[lq]fasd-complete\[rq],
-\[lq]fasd-complete-f\[rq], \[lq]fasd-complete-d\[rq].
+There are also three zle widgets: "fasd-complete", "fasd-complete-f",
+"fasd-complete-d".
 You can bind them to keybindings you like:
 .IP
 .nf
@@ -174,29 +171,23 @@ bindkey\ \[aq]^X^F\[aq]\ fasd-complete-f\ \ #\ C-x\ C-f\ to\ do\ fasd-complete-f
 bindkey\ \[aq]^X^D\[aq]\ fasd-complete-d\ \ #\ C-x\ C-d\ to\ do\ fasd-complete-d\ (only\ directories)
 \f[]
 .fi
-.PP
-If you use bash, you can turn on this experimental feature by executing
-\f[C]eval\ "$(fasd\ --init\ bash-wcomp\ bash-wcomp-install)"\f[] after
-sourcing \f[C]fasd\f[] and after any bash completion setup.
-This will alter your existing completion setup, so you might get a
-broken completion system.
 .SH BACKENDS
 .PP
 Fasd can take advantage of different sources of recent / frequent files.
 Most desktop environments (like Gtk) and some editors (like Vim) keep a
 list of accessed files.
 Fasd can use them as additional backends if the data can be converted
-into fasd's native format.
-As of now, fasd supports Gtk's \f[C]recently-used.xbel\f[] and Vim's
-\f[C]viminfo\f[] backends.
+into fasd\[aq]s native format.
+As of now, fasd supports Gtk\[aq]s \f[C]recently-used.xbel\f[] and
+Vim\[aq]s \f[C]viminfo\f[] backends.
 You can define your own backend by declaring a function by that name in
-your \f[C].fasdrc\f[].
+your \f[C]\&.fasdrc\f[].
 You set default backend with \f[C]_FASD_BACKENDS\f[] variable in our
-\f[C].fasdrc\f[].
+\f[C]\&.fasdrc\f[].
 .SH TWEAKS
 .PP
-Upon every execution, fasd will source \[lq]/etc/fasdrc\[rq] and
-\[lq]$HOME/.fasdrc\[rq] if they are present.
+Upon every execution, fasd will source "/etc/fasdrc" and "$HOME/.fasdrc"
+if they are present.
 Below are some variables you can set:
 .IP
 .nf
@@ -246,7 +237,7 @@ If fasd does not work as expected, please file a bug report on GitHub
 describing the unexpected behavior along with your OS version, shell
 version, awk version, sed version, and a log file.
 .PP
-You can set \f[C]_FASD_SINK\f[] in your \f[C].fasdrc\f[] to obtain a
+You can set \f[C]_FASD_SINK\f[] in your \f[C]\&.fasdrc\f[] to obtain a
 log.
 .IP
 .nf
@@ -259,6 +250,6 @@ _FASD_SINK="$HOME/.fasd.log"
 Fasd is originally written based on code from z
 (https://github.com/rupa/z) by rupa deadwyler under the WTFPL license.
 Most if not all of the code has been rewritten.
-Fasd is licensed under the \[lq]MIT/X11\[rq] license.
+Fasd is licensed under the "MIT/X11" license.
 .SH AUTHORS
 Wei Dai <x@wei23.net>.

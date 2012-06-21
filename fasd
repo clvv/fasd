@@ -231,58 +231,9 @@ _fasd_bash_hook_cmd_complete() {
 EOS
         ;;
 
-      bash-wcomp) cat <<EOS
-# bash word mode completion
-_fasd_bash_word_complete() {
-  [ "\$2" ] && local _fasd_cur="\$2"
-  [ "\$_fasd_cur" ] || local _fasd_cur="\${COMP_WORDS[COMP_CWORD]}"
-  local typ=\${1:-e}
-  local fnd="\${_fasd_cur//,/ }"
-  local RESULT=\$(fasd --query \$typ "\$fnd" | sed 's/^[^ ]*[ ]*//' | \
-    while read line; do
-      if quote_readline >/dev/null 2>&1; then
-        echo "\$(quote_readline "\$line")"
-      else
-        echo "\$(printf %q "\$line")"
-      fi
-    done)
-  IFS=\$'\n' COMPREPLY=( \$RESULT )
-} >> "$_FASD_SINK" 2>&1
-_fasd_bash_word_complete_trigger() {
-  [ "\$_fasd_cur" ] || local _fasd_cur="\${COMP_WORDS[COMP_CWORD]}"
-  eval "\$(fasd --word-complete-trigger _fasd_bash_word_complete \$_fasd_cur)"
-} >> "$_FASD_SINK" 2>&1
-_fasd_bash_word_complete_wrap() {
-  local _fasd_cur="\${COMP_WORDS[COMP_CWORD]}"
-  _fasd_bash_word_complete_trigger
-  local z=\${COMP_WORDS[0]}
-  # try original comp func
-  [ "\$COMPREPLY" ] || eval "\$( echo "\$_FASD_BASH_COMPLETE_P" | \
-    sed -n "/ \$z\$/"'s/.*-F \(.*\) .*/\1/p' )"
-  # fall back on original complete options
-  local cmd="\$(echo "\$_FASD_BASH_COMPLETE_P" | \
-    sed -n "/ \$z\$/"'s/complete/compgen/') \$_fasd_cur"
-  [ "\$COMPREPLY" ] || COMPREPLY=( \$(eval \$cmd) )
-} >> "$_FASD_SINK" 2>&1
-
-EOS
-        ;;
-
       bash-ccomp-install) cat <<EOS
 # enable bash command mode completion
 _fasd_bash_hook_cmd_complete fasd a s d f sd sf z
-
-EOS
-        ;;
-
-      bash-wcomp-install) cat <<EOS
-_FASD_BASH_COMPLETE_P="\$(complete -p)"
-for cmd in \$(complete -p | awk '{print \$NF}' | tr '\n' ' '); do
-  complete -o default -o bashdefault -F _fasd_bash_word_complete_wrap \$cmd
-done
-# enable word mode completion as default completion
-complete -o default -o bashdefault -D -F _fasd_bash_word_complete_trigger \
-  >> "$_FASD_SINK" 2>&1
 
 EOS
         ;;

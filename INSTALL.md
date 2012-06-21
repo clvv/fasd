@@ -32,8 +32,6 @@ pass customized set of arguments to `fasd --init`.
     bash-hook            # add hook code to bash $PROMPT_COMMAND
     bash-ccomp           # bash command mode completion definitions
     bash-ccomp-install   # setup command mode completion for bash
-    bash-wcomp           # bash word mode completion definitions (experimental)
-    bash-wcomp-install   # setup word mode completion for bash (experimental)
     posix-alias          # define alias that applies to all posix shells
     posix-hook           # setup $PS1 hook for shells that's posix compatible
     tcsh-alias           # define aliases for tcsh
