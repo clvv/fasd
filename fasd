@@ -129,7 +129,7 @@ EOS
         ;;
 
       tcsh-hook) cat <<EOS
-;alias fasd-prev-cmd 'fasd --sanitize \`history -h 1\` >& /dev/null';
+;alias fasd-prev-cmd 'fasd --sanitize \`history -h 1\`';
 set pprecmd="\`alias precmd\`";
 alias precmd '\$pprecmd; fasd --proc \`fasd-prev-cmd\` >& /dev/null';
 EOS
