@@ -119,8 +119,8 @@ EOS
 
       posix-hook) cat <<EOS
 _fasd_ps1_func() {
-  { eval "fasd --proc \$(fasd --sanitize \
-      \$(fc -nl -0 | sed -n '\$s/\s*\(.*\)/\1/p'))"; } >> "$_FASD_SINK" 2>&1
+  { eval "fasd --proc \$(fasd --sanitize \$(fc -nl -1))"; } \
+    >> "$_FASD_SINK" 2>&1
 }
 echo "\$PS1" | grep -v -q "_fasd_ps1_func" && \
 export PS1="\\\$(_fasd_ps1_func)\$PS1"
