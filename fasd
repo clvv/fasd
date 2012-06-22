@@ -464,10 +464,13 @@ $(fasd --backend $each)"
       native) cat "$_FASD_DATA";;
       viminfo)
         local t="$(date +%s)"
-        < "$HOME/.viminfo" sed -n '/^>/s@~@'"$HOME"'@;/^>/p' | \
-          while IFS=" " read line; do
-            t=$((t-60)); echo "${line#??}|1|$t"
-          done
+        < "$HOME/.viminfo" sed -n '/^>/{s@~@'"$HOME"'@
+          s/^..//
+          p
+          }' | $_FASD_AWK -v t="$t" '{
+            t -= 60
+            print $0 "|1|" t
+          }'
         ;;
       recently-used)
         tr -d '\n' < "$HOME/.local/share/recently-used.xbel" | \
