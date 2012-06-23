@@ -193,8 +193,16 @@ EOS
 
       zsh-wcomp-install) cat <<EOS
 # enable word mode completion
-zstyle ':completion:*' completer _complete _ignored \
-  _fasd_zsh_word_complete_trigger
+orig_comp="\$(zstyle -L ':completion:\\*' completer 2>> "$_FASD_SINK")"
+if [ "\$orig_comp" ]; then
+  case "\$orig_comp" in
+    *_fasd_zsh_word_complete_trigger*);;
+    *) eval "\$orig_comp _fasd_zsh_word_complete_trigger";;
+  esac
+else
+  zstyle ':completion:*' completer _complete _fasd_zsh_word_complete_trigger
+fi
+unset orig_comp
 
 EOS
         ;;
