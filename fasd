@@ -102,7 +102,7 @@ EOS
 _fasd_preexec() {
   { eval "fasd --proc \$(fasd --sanitize \$3)"; } >> "$_FASD_SINK" 2>&1
 }
-autoload -U add-zsh-hook
+autoload -Uz add-zsh-hook
 add-zsh-hook preexec _fasd_preexec
 
 EOS
