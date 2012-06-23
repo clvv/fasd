@@ -473,7 +473,7 @@ $(fasd --backend $each)"
           }'
         ;;
       recently-used)
-        local nl="$(printf \\\\nX)"; nl="${nl%X}" # slash newline for sed
+        local nl="$(printf '\\\nX')"; nl="${nl%X}" # slash newline for sed
         tr -d '\n' < "$HOME/.local/share/recently-used.xbel" | \
           sed 's@file:/@'"$nl"'@g;s@count="@'"$nl"'@g' | sed '1d;s/".*$//' | \
           tr '\n' '|' | sed 's@|/@'"$nl"'@g' | $_FASD_AWK -F'|' '{
