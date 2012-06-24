@@ -177,7 +177,7 @@ able to use fasd in all POSIX compliant shells. Your shell need to support
 command substitution in `$PS1` in order for fasd to automatically track your
 commands and files. This feature is not specified by the POSIX standard, but
 it's nonetheless present in many POSIX compliant shells. In shells without
-prompt command or prompt command substitution (tcsh for instance), you can add
+prompt command or prompt command substitution (csh for instance), you can add
 entries manually with `fasd -A`. You are very welcomed to contribute shell
 initialization code for not yet supported shells.
 
