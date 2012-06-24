@@ -28,6 +28,7 @@ fasd [-A|-D] [paths ...]
     -r         match by rank only
     -t         match by recent access only
     -h         show a brief help message
+    -[0-9]     select the nth entry
 
 # DESCRIPTION
 

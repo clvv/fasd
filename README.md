@@ -214,6 +214,7 @@ busybox ash, FreeBSD 9 /bin/sh and OpenBSD /bin/sh.
         -r         match by rank only
         -t         match by recent access only
         -h         show a brief help message
+        -[0-9]     select the nth entry
 
     fasd [-A|-D] [paths ...]
         -A    add paths
