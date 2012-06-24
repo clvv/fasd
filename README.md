@@ -213,6 +213,7 @@ busybox ash, FreeBSD 9 /bin/sh and OpenBSD /bin/sh.
         -f         match files only
         -r         match by rank only
         -t         match by recent access only
+        -R         reverse listing order
         -h         show a brief help message
         -[0-9]     select the nth entry
 
