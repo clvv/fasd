@@ -249,22 +249,6 @@ EOS
     done
     ;;
 
-  --init-alias)
-    fasd --init posix-alias
-    ;;
-
-  --init-zsh)
-    fasd --init zsh-hook zsh-ccomp zsh-ccomp-install zsh-wcomp zsh-wcomp-install
-    ;;
-
-  --init-bash)
-    fasd --init bash-hook bash-ccomp bash-ccomp-install
-    ;;
-
-  --init-posix)
-    fasd --init posix-hook
-    ;;
-
   # if "$_fasd_cur" is a query, then eval all the arguments
   --word-complete-trigger)
     shift; [ "$2" ] && local _fasd_cur="$2" || return
