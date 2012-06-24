@@ -1,6 +1,6 @@
 % FASD(1) fasd user manual
 % Wei Dai <x@wei23.net>
-% Feb 12, 2012
+% Jun 23, 2012
 
 # NAME
 
@@ -166,7 +166,7 @@ they are present. Below are some variables you can set:
     List of all commands that needs to be shifted, defaults to "sudo busybox".
 
     $_FASD_IGNORE
-    List of all commands that will be ignored, defaults to "fasd cd ls echo".
+    List of all commands that will be ignored, defaults to "fasd ls echo".
 
     $_FASD_TRACK_PWD
     Fasd defaults to track your "$PWD". Set this to 0 to disable this behavior.
@@ -182,7 +182,7 @@ they are present. Below are some variables you can set:
 
     $_FASD_SHELL
     Which shell to execute. Some shells will run faster than others. fasd
-    is faster with ksh variants.
+    runs faster with dash and ksh variants.
 
     $_FASD_BACKENDS
     Default backends.

@@ -19,19 +19,6 @@ files and directories for a set of given matching patterns. "Frecency" is used
 as the prior probability distribution, and a simple algorithm is used to
 calculate the likelihood of the given set of patterns.
 
-# A Note for Early Adopters
-
-Fasd was originally named `f`. `f` was renamed to fasd for various reasons. And
-the latest release contains many improvements compared to old master branch of
-`f`, most importantly fasd acquired the ability to be run as an executable
-(instead of as a shell function, which is comparably slower). Previous f users
-please update all of your f-related configurations accordingly. And don't
-forget to rename your database file:
-
-```sh
-mv "$HOME/.f" "$HOME/.fasd"
-```
-
 # Introduction
 
 If you're like me, you use your shell to navigate and launch applications. Fasd
@@ -285,7 +272,7 @@ $_FASD_SHIFT
 List of all commands that needs to be shifted, defaults to "sudo busybox".
 
 $_FASD_IGNORE
-List of all commands that will be ignored, defaults to "fasd cd ls echo".
+List of all commands that will be ignored, defaults to "fasd ls echo".
 
 $_FASD_TRACK_PWD
 Fasd defaults to track your "$PWD". Set this to 0 to disable this behavior.
@@ -301,7 +288,7 @@ Max total score / weight, defaults to 2000.
 
 $_FASD_SHELL
 Which shell to execute. Some shells will run faster than others. fasd
-is faster with ksh variants.
+runs faster with dash and ksh variants.
 
 $_FASD_BACKENDS
 Default backends.
