@@ -47,11 +47,6 @@ Fasd ranks files and directories by "frecency," that is, by both "frequency"
 and "recency." The term "frecency" was first coined by Mozilla and used in
 Firefox.
 
-Fasd uses Bayesian Inference and Bayesian Ranking to rank files and directories
-for a set of given matching patterns. "Frecency" is used as the prior
-probability distribution, and a simple algorithm is used to calculate the
-likelihood of the given set of patterns.
-
 # EXAMPLES
 
     z bundle
@@ -198,6 +193,11 @@ they are present. Below are some variables you can set:
     $_FASD_RO
     If set to any non-empty string, fasd will not add or delete entries from
     database. You can set and export this variable from command line.
+
+    $_FASD_FUZZY
+    Level of "fuzziness" when doing fuzzy matching. More precisely, the number of
+    characters that can be skipped to generate a match. Set to empty or 0 to
+    disable fuzzy matching. Default value is 2.
 
 # DEBUGGING
 

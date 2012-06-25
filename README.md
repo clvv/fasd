@@ -13,12 +13,6 @@ Fasd ranks files and directories by "frecency," that is, by both "frequency" and
 "recency." The term "frecency" was first coined by Mozilla and used in Firefox
 ([link](https://developer.mozilla.org/en/The_Places_frecency_algorithm)).
 
-Fasd uses [Bayesian Inference](https://en.wikipedia.org/wiki/Bayesian_inference)
-and [Bayesian Ranking](https://github.com/clvv/fasd/wiki/Bayesian-Ranking) to rank
-files and directories for a set of given matching patterns. "Frecency" is used
-as the prior probability distribution, and a simple algorithm is used to
-calculate the likelihood of the given set of patterns.
-
 # Introduction
 
 If you're like me, you use your shell to navigate and launch applications. Fasd
@@ -177,10 +171,6 @@ execute a command. The hook will scan your commands' arguments and determine if
 any of them refer to existing files or directories. If yes, fasd will add them
 to the database.
 
-When you run `fasd` with search arguments, fasd uses [Bayesian
-Ranking](https://github.com/clvv/fasd/wiki/Bayesian-Ranking) to find the best
-match.
-
 # Compatibility
 
 Fasd's basic functionalities are POSIX compliant, meaning that you should be
@@ -307,6 +297,11 @@ Default backends.
 $_FASD_RO
 If set to any non-empty string, fasd will not add or delete entries from
 database. You can set and export this variable from command line.
+
+$_FASD_FUZZY
+Level of "fuzziness" when doing fuzzy matching. More precisely, the number of
+characters that can be skipped to generate a match. Set to empty or 0 to
+disable fuzzy matching. Default value is 2.
 ```
 
 # Debugging

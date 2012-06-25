@@ -237,6 +237,11 @@ Default\ backends.
 $_FASD_RO
 If\ set\ to\ any\ non-empty\ string,\ fasd\ will\ not\ add\ or\ delete\ entries\ from
 database.\ You\ can\ set\ and\ export\ this\ variable\ from\ command\ line.
+
+$_FASD_FUZZY
+Level\ of\ "fuzziness"\ when\ doing\ fuzzy\ matching.\ More\ precisely,\ the\ number\ of
+characters\ that\ can\ be\ skipped\ to\ generate\ a\ match.\ Set\ to\ empty\ or\ 0\ to
+disable\ fuzzy\ matching.\ Default\ value\ is\ 2.
 \f[]
 .fi
 .SH DEBUGGING

@@ -48,6 +48,7 @@ fasd() {
           [ -z "$_FASD_TRACK_PWD" ] && _FASD_TRACK_PWD=1
           [ -z "$_FASD_MAX" ] && _FASD_MAX=2000
           [ -z "$_FASD_BACKENDS" ] && _FASD_BACKENDS=native
+          [ -z "$_FASD_FUZZY" ] && _FASD_FUZZY=2
 
           if [ -z "$_FASD_AWK" ]; then
             # awk preferences
@@ -409,10 +410,40 @@ $(fasd --backend $each)"
       *) local prior='times[i] * frecent(la[i])';;
     esac
 
+    if [ "$fnd" ]; then # dafault matching
+      local bre="$(echo "$fnd" | sed 's@ @[^|]*@g')"
+      local _ret="$(echo "$_fasd_data" | grep "$bre"'[^|/]*|')"
+      [ "$_ret" ] && _ret="$(echo "$_ret" | while read line; do
+        [ -${typ:-e} "${line%%\|*}" ] && echo "$line"
+      done)"
+      if [ "$_ret" ]; then
+        _fasd_data="$_ret"
+      else # no case mathcing
+        _ret="$(echo "$_fasd_data" | grep -i "$bre"'[^|/]*|')"
+        [ "$_ret" ] && _ret="$(echo "$_ret" | while read line; do
+          [ -${typ:-e} "${line%%\|*}" ] && echo "$line"
+        done)"
+        if [ "$_ret" ]; then
+          _fasd_data="$_ret"
+        elif [ "${_FASD_FUZZY:-0}" -gt 0 ]; then # fuzzy matching
+          local fuzzy_bre="$(echo "$fnd" | \
+            sed 's@\([^ ]\)@\1[^|/]\\{0,'"$_FASD_FUZZY"'\\}@g;s@ @[^|]*@g')"
+          _ret="$(echo "$_fasd_data" | grep -i "$fuzzy_bre"'[^|/]*|')"
+          [ "$_ret" ] && _ret="$(echo "$_ret" | while read line; do
+            [ -${typ:-e} "${line%%\|*}" ] && echo "$line"
+          done)"
+          [ "$_ret" ] && _fasd_data="$_ret" || _fasd_data=
+        fi
+      fi
+    else # no query arugments
+      _fasd_data="$(echo "$_fasd_data" | while read line; do
+        [ -${typ:-e} "${line%%\|*}" ] && echo "$line"
+      done)"
+    fi
+
     # query the database
-    echo "$_fasd_data" | while read line; do
-      [ -${typ:-e} "${line%%\|*}" ] && echo "$line"
-    done | $_FASD_AWK -v t="$(date +%s)" -v q="$fnd" -F"|" '
+    [ "$_fasd_data" ] && echo "$_fasd_data" | \
+      $_FASD_AWK -v t="$(date +%s)" -F"|" '
       function frecent(time) {
         dx = t-time
         if( dx < 3600 ) return 6
@@ -420,51 +451,18 @@ $(fasd --backend $each)"
         if( dx < 604800 ) return 2
         return 1
       }
-      function likelihood(pattern, path) {
-        m = gsub("/+", "/", path)
-        r = 1
-        for(i in pattern) {
-          tmp = path
-          gsub(".*" pattern[i], "", tmp)
-          n = gsub("/+", "/", tmp)
-          if(n == m)
-            return 0
-          else if(n == 0)
-            r *= 20 # F
-          else
-            r *= 1 - (n / m)
-        }
-        return r
-      }
-      BEGIN {
-        split(q, pattern, " ")
-        for(i in pattern) pattern_lower[i] = tolower(pattern[i]) # nocase
-      }
       {
-        if(!wcase[$1]) {
+        if(!paths[$1]) {
           times[$1] = $2
           la[$1] = $3
-          wcase[$1] = likelihood(pattern, $1)
-          if(!cx) nocase[$1] = likelihood(pattern_lower, tolower($1))
+          paths[$1] = 1
         } else {
           times[$1] += $2
           if($3 > la[$1]) la[$1] = $3
         }
-        cx = cx || wcase[$1]
-        ncx = ncx || nocase[$1]
       }
       END {
-        if(cx) {
-          for(i in wcase) {
-            if(wcase[i])
-              printf "%-10s %s\n", '"$prior"' * wcase[i], i
-          }
-        } else if(ncx) {
-          for(i in nocase) {
-            if(nocase[i])
-              printf "%-10s %s\n", '"$prior"' * nocase[i], i
-          }
-        }
+        for(i in paths) printf "%-10s %s\n", '"$prior"', i
       }' - 2>> "$_FASD_SINK"
     ;;
 
@@ -563,6 +561,7 @@ fasd [-A|-D] [paths ...]
     esac
 
     local R; [ -z "$r" ] && R=r || R= # let $R be the opposite of $r
+    fnd="${fnd# }"
 
     local res
     res="$(fasd --query 2>> "$_FASD_SINK")" # query the database
