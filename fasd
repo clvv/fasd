@@ -382,7 +382,7 @@ EOS
     fi
     ;;
 
-  --query) shift # query the db, --query [$typ ["$fnd" [$mode [$quote]]]]
+  --query) shift # query the db, --query [$typ ["$fnd" [$mode]]]
     [ -f "$_FASD_DATA" ] || return # no db yet
     [ "$1" ] && local typ="$1"
     [ "$2" ] && local fnd="$2"
