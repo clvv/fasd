@@ -89,6 +89,7 @@ fasd_cd() {
   fi
 }
 alias z='fasd_cd -d'
+alias zz='fasd_cd -d -i'
 
 EOS
         ;;
