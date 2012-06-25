@@ -118,11 +118,11 @@ You run the code below:
 \f[C]
 #\ function\ to\ execute\ built-in\ cd
 fasd_cd()\ {
-\ \ if\ [\ $#\ -le\ 1\ \ ];\ then
+\ \ if\ [\ $#\ -le\ 1\ ];\ then
 \ \ \ \ fasd\ "$\@"
 \ \ else
 \ \ \ \ local\ _fasd_ret="$(fasd\ -e\ echo\ "$\@")"
-\ \ \ \ [\ -d\ "$_fasd_ret"\ \ ]\ &&\ cd\ "$_fasd_ret"\ ||\ echo\ "$_fasd_ret"
+\ \ \ \ [\ -d\ "$_fasd_ret"\ ]\ &&\ cd\ "$_fasd_ret"\ ||\ echo\ "$_fasd_ret"
 \ \ fi
 }
 alias\ c=\[aq]fasd_cd\ -d\[aq]\ #\ `-d\[aq]\ option\ present\ for\ bash\ completion

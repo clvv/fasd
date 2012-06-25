@@ -49,11 +49,11 @@ instead of "z" to do directory jumping. You run the code below:
 
     # function to execute built-in cd
     fasd_cd() {
-      if [ $# -le 1  ]; then
+      if [ $# -le 1 ]; then
         fasd "$@"
       else
         local _fasd_ret="$(fasd -e echo "$@")"
-        [ -d "$_fasd_ret"  ] && cd "$_fasd_ret" || echo "$_fasd_ret"
+        [ -d "$_fasd_ret" ] && cd "$_fasd_ret" || echo "$_fasd_ret"
       fi
     }
     alias c='fasd_cd -d' # `-d' option present for bash completion
