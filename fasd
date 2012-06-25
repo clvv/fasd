@@ -416,32 +416,27 @@ $(fasd --backend $each)"
         if( dx < 604800 ) return 2
         return 1
       }
-      function likelihood(pattern, path) {
-        m = gsub("/+", "/", path)
-        r = 1
-        for(i in pattern) {
-          tmp = path
-          gsub(".*" pattern[i], "", tmp)
-          n = gsub("/+", "/", tmp)
-          if(n == m)
-            return 0
-          else if(n == 0)
-            r *= 20 # F
-          else
-            r *= 1 - (n / m)
-        }
-        return r
-      }
       BEGIN {
-        split(q, pattern, " ")
-        for(i in pattern) pattern_lower[i] = tolower(pattern[i]) # nocase
+        gsub(" +", ".*", q)
+        pattern = "^.*" q "[^/]*$"
+        pattern_lower = tolower(pattern) # nocase
       }
       {
         if(!wcase[$1]) {
           times[$1] = $2
           la[$1] = $3
-          wcase[$1] = likelihood(pattern, $1)
-          if(!cx) nocase[$1] = likelihood(pattern_lower, tolower($1))
+          if($1 ~ pattern) {
+            wcase[$1] = 1
+          } else {
+            wcase[$1] = 0
+          }
+          if(!cx) {
+            if(tolower($1) ~ pattern_lower) {
+              nocase[$1] = 1
+            } else {
+              nocase[$1] = 0
+            }
+          }
         } else {
           times[$1] += $2
           if($3 > la[$1]) la[$1] = $3
