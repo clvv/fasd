@@ -80,7 +80,14 @@ alias sf='fasd -sif'
 alias d='fasd -d'
 alias f='fasd -f'
 # function to execute built-in cd
-fasd_cd() { [ \$# -gt 1 ] && cd "\$(fasd -e echo "\$@")" || fasd "\$@"; }
+fasd_cd() {
+  if [ \$# -le 1 ]; then
+    fasd "\$@"
+  else
+    local _fasd_ret="\$(fasd -e echo "\$@")"
+    [ -d "\$_fasd_ret" ] && cd "\$_fasd_ret" || echo "\$_fasd_ret"
+  fi
+}
 alias z='fasd_cd -d'
 
 EOS
