@@ -187,9 +187,9 @@ they are present. Below are some variables you can set:
     $_FASD_BACKENDS
     Default backends.
 
-    $_FASD_NOSAVE
-    If set to any non-empty string, no new entries will be saved. You can
-    set and export this variable from command line.
+    $_FASD_RO
+    If set to any non-empty string, fasd will not add or delete entries from
+    database. You can set and export this variable from command line.
 
 # DEBUGGING
 

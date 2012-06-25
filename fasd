@@ -249,7 +249,7 @@ EOS
     done
     ;;
 
-  # if "$_fasd_cur" is a query, then eval all the arguments
+  # if "$_fasd_cur" or "$2" is a query, then output shell code to be eval'd
   --word-complete-trigger)
     shift; [ "$2" ] && local _fasd_cur="$2" || return
     case "$_fasd_cur" in
@@ -262,14 +262,13 @@ EOS
     esac
     ;;
 
-  --sanitize)
-    shift; echo "$@" | \
+  --sanitize) shift; echo "$@" | \
       sed 's/\([^\]\)$([^ ]*\([^)]*\)))*/\1\2/g;s/\([^\]\)[|&;<>$`]\{1,\}/\1 /g'
     ;;
 
   --proc) shift # process commands
-    # stop if we don't own ~/.fasd (we're another user but our ENV is still set)
-    [ -f "$_FASD_DATA" -a ! -O "$_FASD_DATA" ] && return
+    # stop if we don't own $_FASD_DATA or $_FASD_RO is set
+    [ -f "$_FASD_DATA" -a ! -O "$_FASD_DATA" ] || [ "$_FASD_RO" ] && return
 
     # make zsh do word splitting for the for loop to work
     [ "$ZSH_VERSION" ] && emulate sh && setopt localoptions
@@ -296,7 +295,9 @@ EOS
     ;;
 
   --add|-A) shift # add entries
-    [ "$_FASD_NOSAVE" ] && return
+    # stop if we don't own $_FASD_DATA or $_FASD_RO is set
+    [ -f "$_FASD_DATA" -a ! -O "$_FASD_DATA" ] || [ "$_FASD_RO" ] && return
+
     # find all valid path arguments, convert them to simplest absolute form
     local paths="$(while [ "$1" ]; do
       [ -e "$1" ] && echo "$1"; shift
@@ -349,6 +350,9 @@ EOS
     ;;
 
   --delete|-D) shift # delete entries
+    # stop if we don't own $_FASD_DATA or $_FASD_RO is set
+    [ -f "$_FASD_DATA" -a ! -O "$_FASD_DATA" ] || [ "$_FASD_RO" ] && return
+
     # turn valid arguments into entry-deleting sed commands
     local sed_cmd="$(while [ "$1" ]; do echo "$1"; shift; done | \
       sed '/^[^/]/s@^@'"$PWD"'/@;s@/\.\.$@/../@;s@/\(\./\)\{1,\}@/@g;:0
