@@ -53,6 +53,7 @@ instead of "z" to do directory jumping. You run the code below:
         fasd "$@"
       else
         local _fasd_ret="$(fasd -e echo "$@")"
+        [ -z "$_fasd_ret" ] && return
         [ -d "$_fasd_ret" ] && cd "$_fasd_ret" || echo "$_fasd_ret"
       fi
     }
