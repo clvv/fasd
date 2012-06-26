@@ -341,7 +341,7 @@ EOS
       }
       $2 >= 1 {
         if($1 in paths) {
-          rank[$1] = $2 + 1
+          rank[$1] = $2 + 1 / $2
           time[$1] = now
         } else {
           rank[$1] = $2
