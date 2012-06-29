@@ -119,9 +119,11 @@ EOS
 
       bash-hook) cat <<EOS
 # add bash hook
-echo \$PROMPT_COMMAND | grep -v -q "fasd --proc" && \
-  PROMPT_COMMAND='eval "fasd --proc \$(fasd --sanitize \$(history 1 | \
-  sed -e "s/^[ ]*[0-9]*[ ]*//"))" >> "$_FASD_SINK" 2>&1;'"\$PROMPT_COMMAND"
+case \$PROMPT_COMMAND in
+  *fasd*) ;;
+  *) PROMPT_COMMAND='eval "fasd --proc \$(fasd --sanitize \$(history 1 | \
+     sed "s/^[ ]*[0-9]*[ ]*//"))" >> "$_FASD_SINK" 2>&1;'"\$PROMPT_COMMAND";;
+esac
 
 EOS
         ;;
@@ -131,8 +133,10 @@ _fasd_ps1_func() {
   { eval "fasd --proc \$(fasd --sanitize \$(fc -nl -1))"; } \
     >> "$_FASD_SINK" 2>&1
 }
-echo "\$PS1" | grep -v -q "_fasd_ps1_func" && \
-export PS1="\\\$(_fasd_ps1_func)\$PS1"
+case \$PS1 in
+  *_fasd_ps1_func*) ;;
+  *) export PS1="\\\$(_fasd_ps1_func)\$PS1";;
+esac
 
 EOS
         ;;
