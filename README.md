@@ -104,7 +104,7 @@ zsh-hook             # define _fasd_preexec and add it to zsh preexec array
 zsh-ccomp            # zsh command mode completion definitions
 zsh-ccomp-install    # setup command mode completion for zsh
 zsh-wcomp            # zsh word mode completion definitions
-zsh-wcomp-install    # setup word mode completioin for zsh
+zsh-wcomp-install    # setup word mode completion for zsh
 bash-hook            # add hook code to bash $PROMPT_COMMAND
 bash-ccomp           # bash command mode completion definitions
 bash-ccomp-install   # setup command mode completion for bash
@@ -222,7 +222,7 @@ busybox ash, FreeBSD 9 /bin/sh and OpenBSD /bin/sh.
 # Tab Completion
 
 Fasd offers two completion modes, command mode completion and word mode
-completion. Command mode completioin works in bash and zsh. Word mode
+completion. Command mode completion works in bash and zsh. Word mode
 completion only works in zsh.
 
 Command mode completion is just like completion for any other commands. It is
