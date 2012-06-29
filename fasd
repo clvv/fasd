@@ -377,7 +377,7 @@ EOS
     local tempfile
     tempfile="$(mktemp "$_FASD_DATA".XXXXXX)" || return
 
-    sed -e "$sed_cmd" "$_FASD_DATA" 2>> "$_FASD_SINK" >| "$tempfile"
+    sed "$sed_cmd" "$_FASD_DATA" 2>> "$_FASD_SINK" >| "$tempfile"
 
     if [ $? -ne 0 -a -f "$_FASD_DATA" ]; then
       env rm -f "$tempfile"
