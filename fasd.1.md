@@ -1,6 +1,6 @@
 % FASD(1) fasd user manual
 % Wei Dai <x@wei23.net>
-% Jun 23, 2012
+% Jun 29, 2012
 
 # NAME
 
