@@ -305,7 +305,12 @@ characters that can be skipped to generate a match. Set to empty or 0 to
 disable fuzzy matching. Default value is 2.
 
 $_FASD_VIMINFO
-Location of .viminfo file if not located in "$HOME/.viminfo"
+Path to .viminfo file for viminfo backend, defaults to "$HOME/.viminfo"
+
+$_FASD_RECENTLY_USED_XBEL
+Path to XDG recently-used.xbel file for recently-used backend, defaults to
+"$HOME/.local/share/recently-used.xbel"
+
 ```
 
 # Debugging
