@@ -49,6 +49,7 @@ fasd() {
           [ -z "$_FASD_MAX" ] && _FASD_MAX=2000
           [ -z "$_FASD_BACKENDS" ] && _FASD_BACKENDS=native
           [ -z "$_FASD_FUZZY" ] && _FASD_FUZZY=2
+          [ -z "$_FASD_VIMINFO" ] && _FASD_VIMINFO="$HOME/.viminfo"
 
           if [ -z "$_FASD_AWK" ]; then
             # awk preferences
@@ -470,7 +471,7 @@ $(fasd --backend $each)"
     case $2 in
       native) cat "$_FASD_DATA";;
       viminfo)
-        < "$HOME/.viminfo" sed -n '/^>/{s@~@'"$HOME"'@
+        < "$_FASD_VIMINFO" sed -n '/^>/{s@~@'"$HOME"'@
           s/^..//
           p
           }' | $_FASD_AWK -v t="$(date +%s)" '{
