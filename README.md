@@ -303,6 +303,9 @@ $_FASD_FUZZY
 Level of "fuzziness" when doing fuzzy matching. More precisely, the number of
 characters that can be skipped to generate a match. Set to empty or 0 to
 disable fuzzy matching. Default value is 2.
+
+$_FASD_VIMINFO
+Location of .viminfo file if not located in "$HOME/.viminfo"
 ```
 
 # Debugging
