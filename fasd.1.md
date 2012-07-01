@@ -199,6 +199,9 @@ they are present. Below are some variables you can set:
     characters that can be skipped to generate a match. Set to empty or 0 to
     disable fuzzy matching. Default value is 2.
 
+    $_FASD_VIMINFO
+    Location of .viminfo file if not located in "$HOME/.viminfo"
+
 # DEBUGGING
 
 Fasd is hosted on GitHub: https://github.com/clvv/fasd
