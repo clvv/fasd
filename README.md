@@ -141,8 +141,8 @@ around in your shell. Then try some examples below.
 # Examples
 
 ```sh
-f foo # list recent files mathcing foo
-a foo bar # list recent files and directories mathcing foo and bar
+f foo # list recent files matching foo
+a foo bar # list recent files and directories matching foo and bar
 f -e vim foo # run vim on the most frecent file matching foo
 mplayer `f bar` # run mplayer on the most frecent file matching bar
 z foo # cd into the most frecent directory matching foo
