@@ -29,9 +29,8 @@
 
 fasd() {
 
-  case "$1" in
-  --init)
-    shift
+  case $1 in
+  --init) shift
     while [ "$1" ]; do
       case $1 in
         env)
@@ -212,7 +211,7 @@ EOS
 # enable word mode completion
 orig_comp="\$(zstyle -L ':completion:\\*' completer 2>> "$_FASD_SINK")"
 if [ "\$orig_comp" ]; then
-  case "\$orig_comp" in
+  case \$orig_comp in
     *_fasd_zsh_word_complete_trigger*);;
     *) eval "\$orig_comp _fasd_zsh_word_complete_trigger";;
   esac
@@ -233,7 +232,7 @@ _fasd_bash_cmd_complete() {
     COMPREPLY=( \$(compgen -A command \$cur) ) && return
   # complete using default readline complete after "-A" or "-D"
   case \${COMP_WORDS[COMP_CWORD-1]} in
-    -A|-D) COMPREPLY=( \$(compgen -o default \$cur) ) && return
+    -A|-D) COMPREPLY=( \$(compgen -o default \$cur) ) && return;;
   esac
   # get completion results using expanded aliases
   local RESULT=\$( fasd --complete "\$(alias -p \$COMP_WORDS \
@@ -269,7 +268,7 @@ EOS
   # if "$_fasd_cur" or "$2" is a query, then output shell code to be eval'd
   --word-complete-trigger)
     shift; [ "$2" ] && local _fasd_cur="$2" || return
-    case "$_fasd_cur" in
+    case $_fasd_cur in
       ,*) echo "$1" e "$_fasd_cur";;
       f,*) echo "$1" f "${_fasd_cur#?}";;
       d,*) echo "$1" d "${_fasd_cur#?}";;
@@ -299,13 +298,13 @@ EOS
     while true; do
       case " $_FASD_SHIFT " in
         *\ $1\ *) shift;;
-        *) break
+        *) break;;
       esac
     done
 
     # ignores
     case " $_FASD_IGNORE " in
-      *\ $1\ *) return
+      *\ $1\ *) return;;
     esac
 
     shift; fasd --add "$@" # add all arguments except command
@@ -497,12 +496,12 @@ $(fasd --backend $each)"
 
   *) # parsing logic and processing
     local fnd last _FASD_BACKENDS="$_FASD_BACKENDS" _fasd_data
-    while [ "$1" ]; do case "$1" in
+    while [ "$1" ]; do case $1 in
       --complete) [ "$2" = "--" ] && shift; set -- $(echo $2); local lst=1 r=r;;
       --query|--add|--delete|-A|-D) fasd "$@"; return $?;;
       --version) echo "0.7.0"; return 0;;
       --) while [ "$2" ]; do shift; fnd="$fnd $1"; last="$1"; done;;
-      -*) local o="${1#-}"; while [ "$o" ]; do case "$o" in
+      -*) local o="${1#-}"; while [ "$o" ]; do case $o in
           s*) local show=1;;
           l*) local lst=1;;
           i*) local interactive=1 show=1;;
@@ -557,7 +556,7 @@ fasd [-A|-D] [paths ...]
     esac; shift; done
 
     # if we hit enter on a completion just execute
-    case "$last" in
+    case $last in
      # completions will always start with /
      /*) [ -z "$show$lst" -a -${typ:-e} "$last" -a "$exec" ] \
        && eval $exec "\"$last\"" && return;;
@@ -604,6 +603,6 @@ case $- in
       _FASD_SET=1 exec $_FASD_SHELL "$0" "$@"
     else
       fasd "$@"
-    fi
+    fi;;
 esac
 
