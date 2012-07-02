@@ -41,6 +41,17 @@ Example for a minimal zsh setup (no tab completion):
 
     eval "$(fasd --init posix-alias zsh-hook)"
 
+Note that this method will slightly increase your shell start-up time, since
+calling binaries has overhead. You can cache fasd init code if you want minimal
+overhead. Example code for bash (to be put into .bashrc):
+
+    fasd_cache="$HOME/.fasd-init-bash"
+    if [ "$(command -v fasd)" -nt "$fasd_cache" -o ! -s "$fasd_cache" ]; then
+      fasd --init posix-alias bash-hook bash-ccomp bash-ccomp-install >| "$fasd_cache"
+    fi
+    source "$fasd_cache"
+    unset fasd_cache
+
 Optionally, if you can also source `fasd` if you want `fasd` to be a shell
 function instead of an executable.
 

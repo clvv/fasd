@@ -1,4 +1,4 @@
-.TH FASD 1 "Jun 29, 2012" "fasd user manual"
+.TH FASD 1 "Jul 01, 2012" "fasd user manual"
 .SH NAME
 .PP
 fasd - quick access to files and directories
@@ -97,6 +97,22 @@ Example for a minimal zsh setup (no tab completion):
 .nf
 \f[C]
 eval\ "$(fasd\ --init\ posix-alias\ zsh-hook)"
+\f[]
+.fi
+.PP
+Note that this method will slightly increase your shell start-up time,
+since calling binaries has overhead.
+You can cache fasd init code if you want minimal overhead.
+Example code for bash (to be put into .bashrc):
+.IP
+.nf
+\f[C]
+fasd_cache="$HOME/.fasd-init-bash"
+if\ [\ "$(command\ -v\ fasd)"\ -nt\ "$fasd_cache"\ -o\ !\ -s\ "$fasd_cache"\ ];\ then
+\ \ fasd\ --init\ posix-alias\ bash-hook\ bash-ccomp\ bash-ccomp-install\ >|\ "$fasd_cache"
+fi
+source\ "$fasd_cache"
+unset\ fasd_cache
 \f[]
 .fi
 .PP

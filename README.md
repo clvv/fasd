@@ -1,6 +1,6 @@
 # Fasd
 
-Fasd ("pronounced similar to 'fast'") is a command-line productivity booster.
+Fasd (pronounced similar to "fast") is a command-line productivity booster.
 Fasd offers quick access to files and directories for POSIX shells. It is
 inspired by tools like [autojump](https://github.com/joelthelion/autojump),
 [z](http://github.com/rupa/z) and [v](https://github.com/rupa/v). Fasd keeps
@@ -16,12 +16,12 @@ Fasd ranks files and directories by "frecency," that is, by both "frequency" and
 
 # Introduction
 
-If you're like me, you use your shell to navigate and launch applications. Fasd
-helps you do that more efficiently. With fasd, you can open files regardless of
-which directory you are in. Just with a few key strings, fasd can find
-a "frecent" file or directory and open it with command you specify. Below are
-some hypothetical situations, where you can type in the command on the left and
-fasd will "expand" your command into the right side. Pretty magic, huh?
+If you use your shell to navigate and launch applications, fasd can help you do
+it more efficiently. With fasd, you can open files regardless of which
+directory you are in. Just with a few key strings, fasd can find a "frecent"
+file or directory and open it with command you specify. Below are some
+hypothetical situations, where you can type in the command on the left and fasd
+will "expand" your command into the right side. Pretty magic, huh?
 
 ```
   v def conf       =>     vim /some/awkward/path/to/type/default.conf
@@ -115,6 +115,19 @@ Example for a minimal zsh setup (no tab completion):
 eval "$(fasd --init posix-alias zsh-hook)"
 ```
 
+Note that this method will slightly increase your shell start-up time, since
+calling binaries has overhead. You can cache fasd init code if you want minimal
+overhead. Example code for bash (to be put into .bashrc):
+
+```sh
+fasd_cache="$HOME/.fasd-init-bash"
+if [ "$(command -v fasd)" -nt "$fasd_cache" -o ! -s "$fasd_cache" ]; then
+  fasd --init posix-alias bash-hook bash-ccomp bash-ccomp-install >| "$fasd_cache"
+fi
+source "$fasd_cache"
+unset fasd_cache
+```
+
 Optionally, if you can also source `fasd` if you want `fasd` to be a shell
 function instead of an executable.
 
@@ -167,10 +180,10 @@ You could select an entry in the list of matching files.
 
 # How It Works
 
-When you source `fasd`, fasd adds a hook which will be executed whenever you
-execute a command. The hook will scan your commands' arguments and determine if
-any of them refer to existing files or directories. If yes, fasd will add them
-to the database.
+When you run fasd init code or source `fasd`, fasd adds a hook which will be
+executed whenever you execute a command. The hook will scan your commands'
+arguments and determine if any of them refer to existing files or directories.
+If yes, fasd will add them to the database.
 
 # Compatibility
 
