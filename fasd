@@ -157,7 +157,7 @@ EOS
 _fasd_zsh_cmd_complete() {
   local compl
   read -c compl
-  compstate[insert]=menu # no expand
+  (( $+compstate )) && compstate[insert]=menu # no expand if compsys loaded
   reply=(\${(f)"\$(fasd --complete "\$compl")"})
 }
 
@@ -165,36 +165,38 @@ EOS
         ;;
 
       zsh-wcomp) cat <<EOS
-# zsh word mode completion
-_fasd_zsh_word_complete() {
-  [ "\$2" ] && local _fasd_cur="\$2"
-  [ -z "\$_fasd_cur" ] && local _fasd_cur="\${words[CURRENT]}"
-  local fnd="\${_fasd_cur//,/ }"
-  local typ=\${1:-e}
-  fasd --query \$typ "\$fnd" | sort -nr | sed 's/^[^ ]*[ ]*//' | \
-    while read line; do
-      compadd -U -V fasd "\$line"
-    done
-  compstate[insert]=menu # no expand
-}
-_fasd_zsh_word_complete_f() { _fasd_zsh_word_complete f ; }
-_fasd_zsh_word_complete_d() { _fasd_zsh_word_complete d ; }
-_fasd_zsh_word_complete_trigger() {
-  local _fasd_cur="\${words[CURRENT]}"
-  eval \$(fasd --word-complete-trigger _fasd_zsh_word_complete \$_fasd_cur)
-}
-# define zle widgets
-zle -C fasd-complete complete-word _generic
-zstyle ':completion:fasd-complete:*' completer _fasd_zsh_word_complete
-zstyle ':completion:fasd-complete:*' menu-select
+(( $+functions[compdef] )) && {
+  # zsh word mode completion
+  _fasd_zsh_word_complete() {
+    [ "\$2" ] && local _fasd_cur="\$2"
+    [ -z "\$_fasd_cur" ] && local _fasd_cur="\${words[CURRENT]}"
+    local fnd="\${_fasd_cur//,/ }"
+    local typ=\${1:-e}
+    fasd --query \$typ "\$fnd" | sort -nr | sed 's/^[^ ]*[ ]*//' | \
+      while read line; do
+        compadd -U -V fasd "\$line"
+      done
+    compstate[insert]=menu # no expand
+  }
+  _fasd_zsh_word_complete_f() { _fasd_zsh_word_complete f ; }
+  _fasd_zsh_word_complete_d() { _fasd_zsh_word_complete d ; }
+  _fasd_zsh_word_complete_trigger() {
+    local _fasd_cur="\${words[CURRENT]}"
+    eval \$(fasd --word-complete-trigger _fasd_zsh_word_complete \$_fasd_cur)
+  }
+  # define zle widgets
+  zle -C fasd-complete complete-word _generic
+  zstyle ':completion:fasd-complete:*' completer _fasd_zsh_word_complete
+  zstyle ':completion:fasd-complete:*' menu-select
 
-zle -C fasd-complete-f complete-word _generic
-zstyle ':completion:fasd-complete-f:*' completer _fasd_zsh_word_complete_f
-zstyle ':completion:fasd-complete-f:*' menu-select
+  zle -C fasd-complete-f complete-word _generic
+  zstyle ':completion:fasd-complete-f:*' completer _fasd_zsh_word_complete_f
+  zstyle ':completion:fasd-complete-f:*' menu-select
 
-zle -C fasd-complete-d complete-word _generic
-zstyle ':completion:fasd-complete-d:*' completer _fasd_zsh_word_complete_d
-zstyle ':completion:fasd-complete-d:*' menu-select
+  zle -C fasd-complete-d complete-word _generic
+  zstyle ':completion:fasd-complete-d:*' completer _fasd_zsh_word_complete_d
+  zstyle ':completion:fasd-complete-d:*' menu-select
+}
 
 EOS
         ;;
@@ -208,17 +210,19 @@ EOS
         ;;
 
       zsh-wcomp-install) cat <<EOS
-# enable word mode completion
-orig_comp="\$(zstyle -L ':completion:\\*' completer 2>> "$_FASD_SINK")"
-if [ "\$orig_comp" ]; then
-  case \$orig_comp in
-    *_fasd_zsh_word_complete_trigger*);;
-    *) eval "\$orig_comp _fasd_zsh_word_complete_trigger";;
-  esac
-else
-  zstyle ':completion:*' completer _complete _fasd_zsh_word_complete_trigger
-fi
-unset orig_comp
+(( $+functions[compdef] )) && {
+  # enable word mode completion
+  orig_comp="\$(zstyle -L ':completion:\\*' completer 2>> "$_FASD_SINK")"
+  if [ "\$orig_comp" ]; then
+    case \$orig_comp in
+      *_fasd_zsh_word_complete_trigger*);;
+      *) eval "\$orig_comp _fasd_zsh_word_complete_trigger";;
+    esac
+  else
+    zstyle ':completion:*' completer _complete _fasd_zsh_word_complete_trigger
+  fi
+  unset orig_comp
+}
 
 EOS
         ;;
