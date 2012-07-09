@@ -51,6 +51,7 @@ Firefox.
 
     z bundle
     f -e vim nginx conf
+    f -i rc$
     vi `f nginx conf`
     cp update.html `d www`
     open `sf pdf`
@@ -113,6 +114,27 @@ instead of "z" to do directory jumping. You run the code below:
       fi
     }
     alias c='fasd_cd -d' # `-d' option present for bash completion
+
+# MATCHING
+
+Fasd has three matching modes: default, case-insensitive, and fuzzy.
+
+For a given set of queries (the set of command-line arguments passed to fasd),
+A path is a match if and only if:
+
+1. Queries match the path in order.
+2. The last query matches the last segment of the path.
+
+If no match is found, fasd will try the same process ignoring case. If still no
+match is found, fasd will allow extra characters to be placed between query
+characters for fuzzy matching.
+
+Tips:
+
+* If you want your last query not to match the last segment of the path, append
+  `/' as the last query.
+* If you want your last query to match the end of the filename, append `$' to
+  the last query.
 
 # COMPATIBILITY
 

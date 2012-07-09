@@ -154,12 +154,13 @@ around in your shell. Then try some examples below.
 # Examples
 
 ```sh
-f foo # list recent files matching foo
-a foo bar # list recent files and directories matching foo and bar
-f -e vim foo # run vim on the most frecent file matching foo
+f foo           # list frecent files matching foo
+a foo bar       # list frecent files and directories matching foo and bar
+f js$           # list frecent files that ends in js
+f -e vim foo    # run vim on the most frecent file matching foo
 mplayer `f bar` # run mplayer on the most frecent file matching bar
-z foo # cd into the most frecent directory matching foo
-open `sf pdf` # interactively select a file matching pdf and launch `open`
+z foo           # cd into the most frecent directory matching foo
+open `sf pdf`   # interactively select a file matching pdf and launch `open`
 ```
 
 You should add your own aliases to fully utilize the power of fasd. Here are
@@ -177,6 +178,27 @@ completion work. For instance:
     _fasd_bash_hook_cmd_complete v m j o
 
 You could select an entry in the list of matching files.
+
+# Matching
+
+Fasd has three matching modes: default, case-insensitive, and fuzzy.
+
+For a given set of queries (the set of command-line arguments passed to fasd),
+A path is a match if and only if:
+
+1. Queries match the path *in order*.
+2. The last query matches the *last segment* of the path.
+
+If no match is found, fasd will try the same process ignoring case. If still no
+match is found, fasd will allow extra characters to be placed between query
+characters for fuzzy matching.
+
+Tips:
+
+* If you want your last query not to match the last segment of the path, append
+  `/` as the last query.
+* If you want your last query to match the end of the filename, append `$` to
+  the last query.
 
 # How It Works
 
