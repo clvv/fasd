@@ -421,15 +421,17 @@ $(fasd --backend $each)"
     esac
 
     if [ "$fnd" ]; then # dafault matching
-      local bre="$(echo "$fnd" | sed 's@ @[^|]*@g')"
-      local _ret="$(echo "$_fasd_data" | grep '^[^|]*'"$bre"'[^|/]*|')"
+      local bre="$(echo "$fnd" | sed 's/\([*\.\\\[]\)/\\\1/g
+        s@ @[^|]*@g;s/\$$/|/')"
+      bre='^[^|]*'"$bre"'[^|/]*|'
+      local _ret="$(echo "$_fasd_data" | grep "$bre")"
       [ "$_ret" ] && _ret="$(echo "$_ret" | while read line; do
         [ -${typ:-e} "${line%%\|*}" ] && echo "$line"
       done)"
       if [ "$_ret" ]; then
         _fasd_data="$_ret"
       else # no case mathcing
-        _ret="$(echo "$_fasd_data" | grep -i '^[^|]*'"$bre"'[^|/]*|')"
+        _ret="$(echo "$_fasd_data" | grep -i "$bre")"
         [ "$_ret" ] && _ret="$(echo "$_ret" | while read line; do
           [ -${typ:-e} "${line%%\|*}" ] && echo "$line"
         done)"
@@ -437,8 +439,11 @@ $(fasd --backend $each)"
           _fasd_data="$_ret"
         elif [ "${_FASD_FUZZY:-0}" -gt 0 ]; then # fuzzy matching
           local fuzzy_bre="$(echo "$fnd" | \
-            sed 's@\([^ ]\)@\1[^|/]\\{0,'"$_FASD_FUZZY"'\\}@g;s@ @[^|]*@g')"
-          _ret="$(echo "$_fasd_data" | grep -i '^[^|]*'"$fuzzy_bre"'[^|/]*|')"
+            sed 's/\([*\.\\\[]\)/\\\1/g;s/\$$/|/
+              s@\(\\\{0,1\}[^ ]\)@\1[^|/]\\{0,'"$_FASD_FUZZY"'\\}@g
+              s@ @[^|]*@g')"
+          fuzzy_bre='^[^|]*'"$fuzzy_bre"'[^|/]*|'
+          _ret="$(echo "$_fasd_data" | grep -i "$fuzzy_bre")"
           [ "$_ret" ] && _ret="$(echo "$_ret" | while read line; do
             [ -${typ:-e} "${line%%\|*}" ] && echo "$line"
           done)"
