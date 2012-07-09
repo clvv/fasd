@@ -63,7 +63,7 @@ fasd() {
 
       auto) cat <<EOS
 { if [ "\$ZSH_VERSION" ] && compctl; then # zsh
-    eval "\$(fasd --init posix-alias zsh-hook zsh-ccomp zsh-ccomp-install \
+    eval "\$(fasd --init posix-alias zsh-hook zsh-ccomp zsh-ccomp-install \\
       zsh-wcomp zsh-wcomp-install)"
   elif [ "\$BASH_VERSION" ] && complete; then # bash
     eval "\$(fasd --init posix-alias bash-hook bash-ccomp bash-ccomp-install)"
@@ -122,7 +122,7 @@ EOS
 
       bash-hook) cat <<EOS
 _fasd_prompt_func() {
-  eval "fasd --proc \$(fasd --sanitize \$(history 1 | \
+  eval "fasd --proc \$(fasd --sanitize \$(history 1 | \\
     sed "s/^[ ]*[0-9]*[ ]*//"))" >> "$_FASD_SINK" 2>&1
 }
 
@@ -137,7 +137,7 @@ EOS
 
       posix-hook) cat <<EOS
 _fasd_ps1_func() {
-  { eval "fasd --proc \$(fasd --sanitize \$(fc -nl -1))"; } \
+  { eval "fasd --proc \$(fasd --sanitize \$(fc -nl -1))"; } \\
     >> "$_FASD_SINK" 2>&1
 }
 case \$PS1 in
@@ -176,7 +176,7 @@ EOS
     [ -z "\$_fasd_cur" ] && local _fasd_cur="\${words[CURRENT]}"
     local fnd="\${_fasd_cur//,/ }"
     local typ=\${1:-e}
-    fasd --query \$typ "\$fnd" | sort -nr | sed 's/^[^ ]*[ ]*//' | \
+    fasd --query \$typ "\$fnd" | sort -nr | sed 's/^[^ ]*[ ]*//' | \\
       while read line; do
         compadd -U -V fasd "\$line"
       done
@@ -207,7 +207,7 @@ EOS
 
       zsh-ccomp-install) cat <<EOS
 # enbale command mode completion
-compctl -U -K _fasd_zsh_cmd_complete -V fasd -x 'C[-1,-*e],s[-]n[1,e]' -c - \
+compctl -U -K _fasd_zsh_cmd_complete -V fasd -x 'C[-1,-*e],s[-]n[1,e]' -c - \\
   'c[-1,-A][-1,-D]' -f -- fasd fasd_cd
 
 EOS
@@ -236,14 +236,14 @@ EOS
 _fasd_bash_cmd_complete() {
   # complete command after "-e"
   local cur=\${COMP_WORDS[COMP_CWORD]}
-  [[ \${COMP_WORDS[COMP_CWORD-1]} == -*e ]] && \
+  [[ \${COMP_WORDS[COMP_CWORD-1]} == -*e ]] && \\
     COMPREPLY=( \$(compgen -A command \$cur) ) && return
   # complete using default readline complete after "-A" or "-D"
   case \${COMP_WORDS[COMP_CWORD-1]} in
     -A|-D) COMPREPLY=( \$(compgen -o default \$cur) ) && return;;
   esac
   # get completion results using expanded aliases
-  local RESULT=\$( fasd --complete "\$(alias -p \$COMP_WORDS \
+  local RESULT=\$( fasd --complete "\$(alias -p \$COMP_WORDS \\
     2>> "$_FASD_SINK" | sed -n "\\\$s/^.*'\\(.*\\)'/\\1/p") \${COMP_LINE#* }" |
     while read line; do
       if quote_readline >/dev/null 2>&1; then
