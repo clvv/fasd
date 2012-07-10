@@ -552,7 +552,7 @@ $(fasd --backend $each)"
     -i         interactive mode
     -e <cmd>   set command to execute on the result file
     -b <name>  only use <name> backend
-    -b <name>  add additional backend <name>
+    -B <name>  add additional backend <name>
     -a         match files and directories
     -d         match directories only
     -f         match files only
