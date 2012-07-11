@@ -247,15 +247,13 @@ _fasd_bash_cmd_complete() {
   esac
   # get completion results using expanded aliases
   local RESULT=\$( fasd --complete "\$(alias -p \$COMP_WORDS \\
-    2>> "$_FASD_SINK" | sed -n "\\\$s/^.*'\\(.*\\)'/\\1/p") \${COMP_LINE#* }" |
-    while read line; do
-      if quote_readline >/dev/null 2>&1; then
-        echo "\$(quote_readline "\$line")"
-      else
-        echo "\$(printf %q "\$line")"
-      fi
+    2>> "$_FASD_SINK" | sed -n "\\\$s/^.*'\\\\(.*\\\\)'/\\\\1/p")
+    \${COMP_LINE#* }" | while read line; do
+      quote_readline "\$line" 2>/dev/null || \\
+        printf %q "\$line" 2>/dev/null  && \\
+        printf \\\\n
     done)
-  IFS=\$'\\n' COMPREPLY=( \$RESULT )
+  local IFS=\$'\\n'; COMPREPLY=( \$RESULT )
 }
 _fasd_bash_hook_cmd_complete() {
   for cmd in \$*; do
