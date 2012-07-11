@@ -29,6 +29,9 @@
 
 fasd() {
 
+  # make zsh do word splitting inside this function
+  [ "$ZSH_VERSION" ] && emulate sh && setopt localoptions
+
   case $1 in
   --init) shift
     while [ "$1" ]; do
@@ -112,7 +115,7 @@ EOS
       zsh-hook) cat <<EOS
 # add zsh hook
 _fasd_preexec() {
-  { eval "fasd --proc \$(fasd --sanitize \$3)"; } >> "$_FASD_SINK" 2>&1
+  { eval "fasd --proc \$(fasd --sanitize \$1)"; } >> "$_FASD_SINK" 2>&1
 }
 autoload -Uz add-zsh-hook
 add-zsh-hook preexec _fasd_preexec
@@ -161,7 +164,7 @@ EOS
 _fasd_zsh_cmd_complete() {
   local compl
   read -c compl
-  (( $+compstate )) && compstate[insert]=menu # no expand if compsys loaded
+  (( \$+compstate )) && compstate[insert]=menu # no expand if compsys loaded
   reply=(\${(f)"\$(fasd --complete "\$compl")"})
 }
 
@@ -169,7 +172,7 @@ EOS
         ;;
 
       zsh-wcomp) cat <<EOS
-(( $+functions[compdef] )) && {
+(( \$+functions[compdef] )) && {
   # zsh word mode completion
   _fasd_zsh_word_complete() {
     [ "\$2" ] && local _fasd_cur="\$2"
@@ -214,7 +217,7 @@ EOS
         ;;
 
       zsh-wcomp-install) cat <<EOS
-(( $+functions[compdef] )) && {
+(( \$+functions[compdef] )) && {
   # enable word mode completion
   orig_comp="\$(zstyle -L ':completion:\\*' completer 2>> "$_FASD_SINK")"
   if [ "\$orig_comp" ]; then
@@ -287,15 +290,13 @@ EOS
     ;;
 
   --sanitize) shift; echo "$@" | \
-      sed 's/\([^\]\)$([^ ]*\([^)]*\)))*/\1\2/g;s/\([^\]\)[|&;<>$`]\{1,\}/\1 /g'
+      sed 's/\([^\]\)$( *[^ ]* *\([^)]*\)))*/\1\2/g
+        s/\([^\]\)[|&;<>$`{}]\{1,\}/\1 /g'
     ;;
 
   --proc) shift # process commands
     # stop if we don't own $_FASD_DATA or $_FASD_RO is set
     [ -f "$_FASD_DATA" -a ! -O "$_FASD_DATA" ] || [ "$_FASD_RO" ] && return
-
-    # make zsh do word splitting for the for loop to work
-    [ "$ZSH_VERSION" ] && emulate sh && setopt localoptions
 
     # blacklists
     local each; for each in $_FASD_BLACKLIST; do
@@ -402,9 +403,6 @@ EOS
     [ "$1" ] && local typ="$1"
     [ "$2" ] && local fnd="$2"
     [ "$3" ] && local mode="$3"
-
-    # make zsh do word spliting for the for loop to work
-    [ "$ZSH_VERSION" ] && emulate sh && setopt localoptions
 
     # cat all backends
     local each _fasd_data; for each in $_FASD_BACKENDS; do
