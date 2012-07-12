@@ -1,4 +1,4 @@
-.TH FASD 1 "Jul 01, 2012" "fasd user manual"
+.TH FASD 1 "Jul 11, 2012" "fasd user manual"
 .SH NAME
 .PP
 fasd - quick access to files and directories
@@ -122,22 +122,13 @@ Optionally, if you can also source \f[C]fasd\f[] if you want
 .PP
 You can tweak initialization code.
 For instance, if you want to use "c" instead of "z" to do directory
-jumping.
-You run the code below:
+jumping, you can use the alias below:
 .IP
 .nf
 \f[C]
-#\ function\ to\ execute\ built-in\ cd
-fasd_cd()\ {
-\ \ if\ [\ $#\ -le\ 1\ ];\ then
-\ \ \ \ fasd\ "$\@"
-\ \ else
-\ \ \ \ local\ _fasd_ret="$(fasd\ -e\ echo\ "$\@")"
-\ \ \ \ [\ -z\ "$_fasd_ret"\ ]\ &&\ return
-\ \ \ \ [\ -d\ "$_fasd_ret"\ ]\ &&\ cd\ "$_fasd_ret"\ ||\ echo\ "$_fasd_ret"
-\ \ fi
-}
-alias\ c=\[aq]fasd_cd\ -d\[aq]\ #\ `-d\[aq]\ option\ present\ for\ bash\ completion
+alias\ c=\[aq]fasd_cd\ -d\[aq]
+#\ `-d\[aq]\ option\ present\ for\ bash\ completion
+#\ function\ fasd_cd\ is\ defined\ in\ posix-alias
 \f[]
 .fi
 .SH MATCHING

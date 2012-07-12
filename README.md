@@ -132,20 +132,12 @@ Optionally, if you can also source `fasd` if you want `fasd` to be a shell
 function instead of an executable.
 
 You can tweak initialization code. For instance, if you want to use "c"
-instead of "z" to do directory jumping. You run the code below:
+instead of "z" to do directory jumping, you can use the alias below:
 
 ```sh
-# function to execute built-in cd
-fasd_cd() {
-  if [ $# -le 1 ]; then
-    fasd "$@"
-  else
-    local _fasd_ret="$(fasd -e echo "$@")"
-    [ -z "$_fasd_ret" ] && return
-    [ -d "$_fasd_ret" ] && cd "$_fasd_ret" || echo "$_fasd_ret"
-  fi
-}
-alias c='fasd_cd -d' # `-d' option present for bash completion
+alias c='fasd_cd -d'
+# `-d` option present for bash completion
+# function fasd_cd is defined in posix-alias
 ```
 
 After you first installed fasd, open some files (with any program) or `cd`
