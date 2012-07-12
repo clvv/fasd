@@ -108,7 +108,7 @@ alias sd 'fasd -sid';
 alias sf 'fasd -sif';
 alias d 'fasd -d';
 alias f 'fasd -f';
-alias z 'cd "\`fasd -d -e 'printf %s' \\!*\`" >& /dev/null || fasd -d';
+alias z 'cd "\`fasd -d -e printf\\ %s \\!*\`" >& /dev/null || fasd -d';
 EOS
         ;;
 
