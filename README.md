@@ -62,9 +62,9 @@ for an up-to-date list.
 
 You can also manually obtain a copy of fasd.
 
-Download fasd 0.7.0 from GitHub:
-[zip](https://github.com/clvv/fasd/zipball/0.7.0),
-[tar.gz](https://github.com/clvv/fasd/tarball/0.7.0).
+Download fasd 0.7.1 from GitHub:
+[zip](https://github.com/clvv/fasd/zipball/0.7.1),
+[tar.gz](https://github.com/clvv/fasd/tarball/0.7.1).
 
 Fasd is a self-contained POSIX shell script that can be either sourced or
 executed. A Makefile is provided to install `fasd` and `fasd.1` to desired
