@@ -1,6 +1,6 @@
 % FASD(1) fasd user manual
 % Wei Dai <x@wei23.net>
-% Jul 11, 2012
+% Jul 16, 2012
 
 # NAME
 
@@ -112,7 +112,7 @@ instead of "z" to do directory jumping, you can use the alias below:
 Fasd has three matching modes: default, case-insensitive, and fuzzy.
 
 For a given set of queries (the set of command-line arguments passed to fasd),
-A path is a match if and only if:
+a path is a match if and only if:
 
 1. Queries match the path in order.
 2. The last query matches the last segment of the path.

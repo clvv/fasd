@@ -564,13 +564,12 @@ fasd [-A|-D] [paths ...]
       *) fnd="$fnd $1"; last="$1";;
     esac; shift; done
 
-    # if we hit enter on a completion just execute
+    # guess whether the last query is selected from tab completion
     case $last in
-     # completions will always start with /
-     /*) if [ -z "$show$lst" -a -${typ:-e} "$last" -a "$exec" ]; then
-           $exec "$last"
-           return
-         fi;;
+      /?*) if [ -z "$show$lst" -a -${typ:-e} "$last" -a "$exec" ]; then
+             $exec "$last"
+             return
+           fi;;
     esac
 
     local R; [ -z "$r" ] && R=r || R= # let $R be the opposite of $r

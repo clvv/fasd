@@ -176,7 +176,7 @@ You could select an entry in the list of matching files.
 Fasd has three matching modes: default, case-insensitive, and fuzzy.
 
 For a given set of queries (the set of command-line arguments passed to fasd),
-A path is a match if and only if:
+a path is a match if and only if:
 
 1. Queries match the path *in order*.
 2. The last query matches the *last segment* of the path.
