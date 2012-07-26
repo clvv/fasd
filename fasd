@@ -508,7 +508,7 @@ $(fasd --backend $each)"
     while [ "$1" ]; do case $1 in
       --complete) [ "$2" = "--" ] && shift; set -- $2; local lst=1 r=r comp=1;;
       --query|--add|--delete|-A|-D) fasd "$@"; return $?;;
-      --version) [ -z "$comp" ] && echo "0.7.1" && return;;
+      --version) [ -z "$comp" ] && echo "1.0.0" && return;;
       --) while [ "$2" ]; do shift; fnd="$fnd $1"; last="$1"; done;;
       -*) local o="${1#-}"; while [ "$o" ]; do case $o in
           s*) local show=1;;
