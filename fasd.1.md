@@ -16,8 +16,8 @@ fasd [-A|-D] [paths ...]
 
 # OPTIONS
 
-    -s         show list of files with their ranks
-    -l         list paths only
+    -s         list paths with ranks
+    -l         list paths without ranks
     -i         interactive mode
     -e <cmd>   set command to execute on the result file
     -b <name>  only use <name> backend

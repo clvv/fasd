@@ -542,8 +542,8 @@ $(fasd --backend $each)"
           h*) [ -z "$comp" ] && echo "fasd [options] [query ...]
 [f|a|s|d|z] [opions] [query ...]
   options:
-    -s         show list of files with their ranks
-    -l         list paths only
+    -s         list paths with scores
+    -l         list paths without scores
     -i         interactive mode
     -e <cmd>   set command to execute on the result file
     -b <name>  only use <name> backend

@@ -36,7 +36,7 @@ Fasd comes with some useful aliases by default:
 
 ```sh
 alias a='fasd -a'        # any
-alias s='fasd -s'        # show / search / select
+alias s='fasd -si'       # show / search / select
 alias d='fasd -d'        # directory
 alias f='fasd -f'        # file
 alias sd='fasd -sid'     # interactive directory selection
@@ -218,8 +218,8 @@ busybox ash, FreeBSD 9 /bin/sh and OpenBSD /bin/sh.
     fasd [options] [query ...]
     [f|a|s|d|z] [options] [query ...]
       options:
-        -s         show list of files with their ranks
-        -l         list paths only
+        -s         list paths with scores
+        -l         list paths without scores
         -i         interactive mode
         -e <cmd>   set command to execute on the result file
         -b <name>  only use <name> backend

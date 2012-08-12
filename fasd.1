@@ -13,8 +13,8 @@ fasd [-A|-D] [paths ...]
 .IP
 .nf
 \f[C]
--s\ \ \ \ \ \ \ \ \ show\ list\ of\ files\ with\ their\ ranks
--l\ \ \ \ \ \ \ \ \ list\ paths\ only
+-s\ \ \ \ \ \ \ \ \ list\ paths\ with\ ranks
+-l\ \ \ \ \ \ \ \ \ list\ paths\ without\ ranks
 -i\ \ \ \ \ \ \ \ \ interactive\ mode
 -e\ <cmd>\ \ \ set\ command\ to\ execute\ on\ the\ result\ file
 -b\ <name>\ \ only\ use\ <name>\ backend
@@ -215,9 +215,9 @@ into fasd\[aq]s native format.
 As of now, fasd supports Gtk\[aq]s \f[C]recently-used.xbel\f[] and
 Vim\[aq]s \f[C]viminfo\f[] backends.
 You can define your own backend by declaring a function by that name in
-your \f[C]\&.fasdrc\f[].
+your \f[C].fasdrc\f[].
 You set default backend with \f[C]_FASD_BACKENDS\f[] variable in our
-\f[C]\&.fasdrc\f[].
+\f[C].fasdrc\f[].
 .SH TWEAKS
 .PP
 Upon every execution, fasd will source "/etc/fasdrc" and "$HOME/.fasdrc"
@@ -283,7 +283,7 @@ If fasd does not work as expected, please file a bug report on GitHub
 describing the unexpected behavior along with your OS version, shell
 version, awk version, sed version, and a log file.
 .PP
-You can set \f[C]_FASD_SINK\f[] in your \f[C]\&.fasdrc\f[] to obtain a
+You can set \f[C]_FASD_SINK\f[] in your \f[C].fasdrc\f[] to obtain a
 log.
 .IP
 .nf
