@@ -179,8 +179,8 @@ EOS
     [ -z "\$_fasd_cur" ] && local _fasd_cur="\${words[CURRENT]}"
     local fnd="\${_fasd_cur//,/ }"
     local typ=\${1:-e}
-    fasd --query \$typ "\$fnd" | sort -nr | sed 's/^[^ ]*[ ]*//' | \\
-      while read -r line; do
+    fasd --query \$typ "\$fnd" 2>> "$_FASD_SINK" | \\
+      sort -nr | sed 's/^[^ ]*[ ]*//' | while read -r line; do
         compadd -U -V fasd "\$line"
       done
     compstate[insert]=menu # no expand
