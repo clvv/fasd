@@ -231,6 +231,10 @@ they are present. Below are some variables you can set:
     Path to XDG recently-used.xbel file for recently-used backend, defaults to
     "$HOME/.local/share/recently-used.xbel"
 
+    $_FASD_INTERACTIVE_FUNC
+    Interactive function name used for processing lists in interactive mode,
+    defaults to "_fasd_interactive_func".
+
 # DEBUGGING
 
 Fasd is hosted on GitHub: https://github.com/clvv/fasd
