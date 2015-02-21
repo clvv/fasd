@@ -334,6 +334,10 @@ disable fuzzy matching. Default value is 2.
 $_FASD_VIMINFO
 Path to .viminfo file for viminfo backend, defaults to "$HOME/.viminfo"
 
+$_FASD_RESOLVE_SYMLINKS
+Set this option to 1 if you want fasd to resolve symbolic links. This is useful
+to prevent duplicates in the entry list. Defaults to 0.
+
 $_FASD_RECENTLY_USED_XBEL
 Path to XDG recently-used.xbel file for recently-used backend, defaults to
 "$HOME/.local/share/recently-used.xbel"
