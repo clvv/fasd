@@ -1,32 +1,32 @@
-.TH FASD 1 "Jul 16, 2012" "fasd user manual"
+.TH "FASD" "1" "Jul 16, 2012" "fasd user manual" ""
 .SH NAME
 .PP
-fasd - quick access to files and directories
+fasd \- quick access to files and directories
 .SH SYNOPSIS
 .PP
 fasd [options] [query ...]
 .PP
 [f|a|s|d|z] [options] [query ...]
 .PP
-fasd [-A|-D] [paths ...]
+fasd [\-A|\-D] [paths ...]
 .SH OPTIONS
 .IP
 .nf
 \f[C]
--s\ \ \ \ \ \ \ \ \ list\ paths\ with\ ranks
--l\ \ \ \ \ \ \ \ \ list\ paths\ without\ ranks
--i\ \ \ \ \ \ \ \ \ interactive\ mode
--e\ <cmd>\ \ \ set\ command\ to\ execute\ on\ the\ result\ file
--b\ <name>\ \ only\ use\ <name>\ backend
--B\ <name>\ \ add\ additional\ backend\ <name>
--a\ \ \ \ \ \ \ \ \ match\ files\ and\ directories
--d\ \ \ \ \ \ \ \ \ match\ directories\ only
--f\ \ \ \ \ \ \ \ \ match\ files\ only
--r\ \ \ \ \ \ \ \ \ match\ by\ rank\ only
--t\ \ \ \ \ \ \ \ \ match\ by\ recent\ access\ only
--R\ \ \ \ \ \ \ \ \ reverse\ listing\ order
--h\ \ \ \ \ \ \ \ \ show\ a\ brief\ help\ message
--[0-9]\ \ \ \ \ select\ the\ nth\ entry
+\-s\ \ \ \ \ \ \ \ \ list\ paths\ with\ ranks
+\-l\ \ \ \ \ \ \ \ \ list\ paths\ without\ ranks
+\-i\ \ \ \ \ \ \ \ \ interactive\ mode
+\-e\ <cmd>\ \ \ set\ command\ to\ execute\ on\ the\ result\ file
+\-b\ <name>\ \ only\ use\ <name>\ backend
+\-B\ <name>\ \ add\ additional\ backend\ <name>
+\-a\ \ \ \ \ \ \ \ \ match\ files\ and\ directories
+\-d\ \ \ \ \ \ \ \ \ match\ directories\ only
+\-f\ \ \ \ \ \ \ \ \ match\ files\ only
+\-r\ \ \ \ \ \ \ \ \ match\ by\ rank\ only
+\-t\ \ \ \ \ \ \ \ \ match\ by\ recent\ access\ only
+\-R\ \ \ \ \ \ \ \ \ reverse\ listing\ order
+\-h\ \ \ \ \ \ \ \ \ show\ a\ brief\ help\ message
+\-[0\-9]\ \ \ \ \ select\ the\ nth\ entry
 \f[]
 .fi
 .SH DESCRIPTION
@@ -52,8 +52,8 @@ Mozilla and used in Firefox.
 .nf
 \f[C]
 z\ bundle
-f\ -e\ vim\ nginx\ conf
-f\ -i\ rc$
+f\ \-e\ vim\ nginx\ conf
+f\ \-i\ rc$
 vi\ `f\ nginx\ conf`
 cp\ update.html\ `d\ www`
 open\ `sf\ pdf`
@@ -66,7 +66,7 @@ Put lines below in your POSIX compatible shell rc.
 .IP
 .nf
 \f[C]
-eval\ "$(fasd\ --init\ auto)"
+eval\ "$(fasd\ \-\-init\ auto)"
 \f[]
 .fi
 .PP
@@ -74,22 +74,22 @@ This will setup a command hook that executes on every command and
 advanced tab completion for zsh and bash.
 .PP
 If you want more control over what gets into your shell environment, you
-can pass customized set of arguments to \f[C]fasd\ --init\f[].
+can pass customized set of arguments to \f[C]fasd\ \-\-init\f[].
 .IP
 .nf
 \f[C]
-zsh-hook\ \ \ \ \ \ \ \ \ \ \ \ \ #\ define\ _fasd_preexec\ and\ add\ it\ to\ zsh\ preexec\ array
-zsh-ccomp\ \ \ \ \ \ \ \ \ \ \ \ #\ zsh\ command\ mode\ completion\ definitions
-zsh-ccomp-install\ \ \ \ #\ setup\ command\ mode\ completion\ for\ zsh
-zsh-wcomp\ \ \ \ \ \ \ \ \ \ \ \ #\ zsh\ word\ mode\ completion\ definitions
-zsh-wcomp-install\ \ \ \ #\ setup\ word\ mode\ completion\ for\ zsh
-bash-hook\ \ \ \ \ \ \ \ \ \ \ \ #\ add\ hook\ code\ to\ bash\ $PROMPT_COMMAND
-bash-ccomp\ \ \ \ \ \ \ \ \ \ \ #\ bash\ command\ mode\ completion\ definitions
-bash-ccomp-install\ \ \ #\ setup\ command\ mode\ completion\ for\ bash
-posix-alias\ \ \ \ \ \ \ \ \ \ #\ define\ aliases\ that\ applies\ to\ all\ posix\ shells
-posix-hook\ \ \ \ \ \ \ \ \ \ \ #\ setup\ $PS1\ hook\ for\ shells\ that\[aq]s\ posix\ compatible
-tcsh-alias\ \ \ \ \ \ \ \ \ \ \ #\ define\ aliases\ for\ tcsh
-tcsh-hook\ \ \ \ \ \ \ \ \ \ \ \ #\ setup\ tcsh\ precmd\ alias
+zsh\-hook\ \ \ \ \ \ \ \ \ \ \ \ \ #\ define\ _fasd_preexec\ and\ add\ it\ to\ zsh\ preexec\ array
+zsh\-ccomp\ \ \ \ \ \ \ \ \ \ \ \ #\ zsh\ command\ mode\ completion\ definitions
+zsh\-ccomp\-install\ \ \ \ #\ setup\ command\ mode\ completion\ for\ zsh
+zsh\-wcomp\ \ \ \ \ \ \ \ \ \ \ \ #\ zsh\ word\ mode\ completion\ definitions
+zsh\-wcomp\-install\ \ \ \ #\ setup\ word\ mode\ completion\ for\ zsh
+bash\-hook\ \ \ \ \ \ \ \ \ \ \ \ #\ add\ hook\ code\ to\ bash\ $PROMPT_COMMAND
+bash\-ccomp\ \ \ \ \ \ \ \ \ \ \ #\ bash\ command\ mode\ completion\ definitions
+bash\-ccomp\-install\ \ \ #\ setup\ command\ mode\ completion\ for\ bash
+posix\-alias\ \ \ \ \ \ \ \ \ \ #\ define\ aliases\ that\ applies\ to\ all\ posix\ shells
+posix\-hook\ \ \ \ \ \ \ \ \ \ \ #\ setup\ $PS1\ hook\ for\ shells\ that\[aq]s\ posix\ compatible
+tcsh\-alias\ \ \ \ \ \ \ \ \ \ \ #\ define\ aliases\ for\ tcsh
+tcsh\-hook\ \ \ \ \ \ \ \ \ \ \ \ #\ setup\ tcsh\ precmd\ alias
 \f[]
 .fi
 .PP
@@ -97,20 +97,20 @@ Example for a minimal zsh setup (no tab completion):
 .IP
 .nf
 \f[C]
-eval\ "$(fasd\ --init\ posix-alias\ zsh-hook)"
+eval\ "$(fasd\ \-\-init\ posix\-alias\ zsh\-hook)"
 \f[]
 .fi
 .PP
-Note that this method will slightly increase your shell start-up time,
+Note that this method will slightly increase your shell start\-up time,
 since calling binaries has overhead.
 You can cache fasd init code if you want minimal overhead.
 Example code for bash (to be put into .bashrc):
 .IP
 .nf
 \f[C]
-fasd_cache="$HOME/.fasd-init-bash"
-if\ [\ "$(command\ -v\ fasd)"\ -nt\ "$fasd_cache"\ -o\ !\ -s\ "$fasd_cache"\ ];\ then
-\ \ fasd\ --init\ posix-alias\ bash-hook\ bash-ccomp\ bash-ccomp-install\ >|\ "$fasd_cache"
+fasd_cache="$HOME/.fasd\-init\-bash"
+if\ [\ "$(command\ \-v\ fasd)"\ \-nt\ "$fasd_cache"\ \-o\ !\ \-s\ "$fasd_cache"\ ];\ then
+\ \ fasd\ \-\-init\ posix\-alias\ bash\-hook\ bash\-ccomp\ bash\-ccomp\-install\ >|\ "$fasd_cache"
 fi
 source\ "$fasd_cache"
 unset\ fasd_cache
@@ -126,16 +126,16 @@ jumping, you can use the alias below:
 .IP
 .nf
 \f[C]
-alias\ c=\[aq]fasd_cd\ -d\[aq]
-#\ `-d\[aq]\ option\ present\ for\ bash\ completion
-#\ function\ fasd_cd\ is\ defined\ in\ posix-alias
+alias\ c=\[aq]fasd_cd\ \-d\[aq]
+#\ `\-d\[aq]\ option\ present\ for\ bash\ completion
+#\ function\ fasd_cd\ is\ defined\ in\ posix\-alias
 \f[]
 .fi
 .SH MATCHING
 .PP
-Fasd has three matching modes: default, case-insensitive, and fuzzy.
+Fasd has three matching modes: default, case\-insensitive, and fuzzy.
 .PP
-For a given set of queries (the set of command-line arguments passed to
+For a given set of queries (the set of command\-line arguments passed to
 fasd), a path is a match if and only if:
 .IP "1." 3
 Queries match the path in order.
@@ -162,7 +162,7 @@ fasd to automatically track your commands and files.
 This feature is not specified by the POSIX standard, but it\[aq]s
 nonetheless present in many POSIX compliant shells.
 In shells without prompt command or prompt command substitution (tcsh
-for instance), you can add entries manually with "fasd -A".
+for instance), you can add entries manually with "fasd \-A".
 You are very welcomed to contribute shell initialization code for not
 yet supported shells.
 .SH TAB COMPLETION
@@ -194,30 +194,42 @@ $\ mv\ index.html\ /var/www/
 \f[]
 .fi
 .PP
-There are also three zle widgets: "fasd-complete", "fasd-complete-f",
-"fasd-complete-d".
+There are also three zle widgets: "fasd\-complete", "fasd\-complete\-f",
+"fasd\-complete\-d".
 You can bind them to keybindings you like:
 .IP
 .nf
 \f[C]
-bindkey\ \[aq]^X^A\[aq]\ fasd-complete\ \ \ \ #\ C-x\ C-a\ to\ do\ fasd-complete\ (fils\ and\ directories)
-bindkey\ \[aq]^X^F\[aq]\ fasd-complete-f\ \ #\ C-x\ C-f\ to\ do\ fasd-complete-f\ (only\ files)
-bindkey\ \[aq]^X^D\[aq]\ fasd-complete-d\ \ #\ C-x\ C-d\ to\ do\ fasd-complete-d\ (only\ directories)
+bindkey\ \[aq]^X^A\[aq]\ fasd\-complete\ \ \ \ #\ C\-x\ C\-a\ to\ do\ fasd\-complete\ (fils\ and\ directories)
+bindkey\ \[aq]^X^F\[aq]\ fasd\-complete\-f\ \ #\ C\-x\ C\-f\ to\ do\ fasd\-complete\-f\ (only\ files)
+bindkey\ \[aq]^X^D\[aq]\ fasd\-complete\-d\ \ #\ C\-x\ C\-d\ to\ do\ fasd\-complete\-d\ (only\ directories)
 \f[]
 .fi
 .SH BACKENDS
 .PP
 Fasd can take advantage of different sources of recent / frequent files.
-Most desktop environments (like Gtk) and some editors (like Vim) keep a
-list of accessed files.
+Most desktop environments (such as OS X and Gtk) and some editors (such
+as Vim) keep a list of accessed files.
 Fasd can use them as additional backends if the data can be converted
 into fasd\[aq]s native format.
-As of now, fasd supports Gtk\[aq]s \f[C]recently-used.xbel\f[] and
-Vim\[aq]s \f[C]viminfo\f[] backends.
+Below is a list of available backends.
+.IP \[bu] 2
+spotlight: OSX spotlight, provides entries that are changed today or
+opened within the past month
+.IP \[bu] 2
+recently\-used: GTK\[aq]s recently\-used file (Usually available on
+Linux)
+.IP \[bu] 2
+current: Provides everything in $PWD (whereever you are executing
+\f[C]fasd\f[])
+.IP \[bu] 2
+viminfo: Vim\[aq]s editing history, useful if you want to define an
+alias just for editing things in vim
+.PP
 You can define your own backend by declaring a function by that name in
-your \f[C].fasdrc\f[].
-You set default backend with \f[C]_FASD_BACKENDS\f[] variable in our
-\f[C].fasdrc\f[].
+your \f[C]\&.fasdrc\f[].
+You can set default backend with \f[C]_FASD_BACKENDS\f[] variable in our
+\f[C]\&.fasdrc\f[].
 .SH TWEAKS
 .PP
 Upon every execution, fasd will source "/etc/fasdrc" and "$HOME/.fasdrc"
@@ -231,7 +243,7 @@ Path\ to\ the\ fasd\ data\ file,\ default\ "$HOME/.fasd".
 
 $_FASD_BLACKLIST
 List\ of\ blacklisted\ strings.\ Commands\ matching\ them\ will\ not\ be\ processed.
-Default\ is\ "--help".
+Default\ is\ "\-\-help".
 
 $_FASD_SHIFT
 List\ of\ all\ commands\ that\ needs\ to\ be\ shifted,\ defaults\ to\ "sudo\ busybox".
@@ -259,7 +271,7 @@ $_FASD_BACKENDS
 Default\ backends.
 
 $_FASD_RO
-If\ set\ to\ any\ non-empty\ string,\ fasd\ will\ not\ add\ or\ delete\ entries\ from
+If\ set\ to\ any\ non\-empty\ string,\ fasd\ will\ not\ add\ or\ delete\ entries\ from
 database.\ You\ can\ set\ and\ export\ this\ variable\ from\ command\ line.
 
 $_FASD_FUZZY
@@ -271,8 +283,8 @@ $_FASD_VIMINFO
 Path\ to\ .viminfo\ file\ for\ viminfo\ backend,\ defaults\ to\ "$HOME/.viminfo"
 
 $_FASD_RECENTLY_USED_XBEL
-Path\ to\ XDG\ recently-used.xbel\ file\ for\ recently-used\ backend,\ defaults\ to
-"$HOME/.local/share/recently-used.xbel"
+Path\ to\ XDG\ recently\-used.xbel\ file\ for\ recently\-used\ backend,\ defaults\ to
+"$HOME/.local/share/recently\-used.xbel"
 \f[]
 .fi
 .SH DEBUGGING
@@ -283,7 +295,7 @@ If fasd does not work as expected, please file a bug report on GitHub
 describing the unexpected behavior along with your OS version, shell
 version, awk version, sed version, and a log file.
 .PP
-You can set \f[C]_FASD_SINK\f[] in your \f[C].fasdrc\f[] to obtain a
+You can set \f[C]_FASD_SINK\f[] in your \f[C]\&.fasdrc\f[] to obtain a
 log.
 .IP
 .nf

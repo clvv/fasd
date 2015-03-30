@@ -499,6 +499,18 @@ $(fasd --backend $each)"
             print $1 "|" sum
           }'
         ;;
+      current)
+        for path in *; do
+          printf "$PWD/%s|1\\n" "$path"
+        done
+        ;;
+      spotlight)
+        mdfind '(kMDItemFSContentChangeDate >= $time.today) ||
+          kMDItemLastUsedDate >= $time.this_month' \
+          | sed '/Library\//d
+            /\.app$/d
+            s/$/|2/'
+        ;;
       *) eval "$2";;
     esac
     ;;
