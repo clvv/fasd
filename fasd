@@ -117,7 +117,7 @@ EOS
       zsh-hook) cat <<EOS
 # add zsh hook
 _fasd_preexec() {
-  { eval "fasd --proc \$(fasd --sanitize \$1)"; } >> "$_FASD_SINK" 2>&1
+  { eval "fasd --proc \$(fasd --sanitize \$2)"; } >> "$_FASD_SINK" 2>&1
 }
 autoload -Uz add-zsh-hook
 add-zsh-hook preexec _fasd_preexec
@@ -500,6 +500,18 @@ $(fasd --backend $each)"
             for( i=2; i<=NF; i++ ) sum += $i
             print $1 "|" sum
           }'
+        ;;
+      current)
+        for path in *; do
+          printf "$PWD/%s|1\\n" "$path"
+        done
+        ;;
+      spotlight)
+        mdfind '(kMDItemFSContentChangeDate >= $time.today) ||
+          kMDItemLastUsedDate >= $time.this_month' \
+          | sed '/Library\//d
+            /\.app$/d
+            s/$/|2/'
         ;;
       *) eval "$2";;
     esac
