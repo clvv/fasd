@@ -64,18 +64,16 @@ fasd() {
         } >> "${_FASD_SINK:-/dev/null}" 2>&1
         ;;
 
-      auto) cat <<EOS
-{ if [ "\$ZSH_VERSION" ] && compctl; then # zsh
-    eval "\$(fasd --init posix-alias zsh-hook zsh-ccomp zsh-ccomp-install \\
-      zsh-wcomp zsh-wcomp-install)"
-  elif [ "\$BASH_VERSION" ] && complete; then # bash
-    eval "\$(fasd --init posix-alias bash-hook bash-ccomp bash-ccomp-install)"
-  else # posix shell
-    eval "\$(fasd --init posix-alias posix-hook)"
-  fi
-} >> "$_FASD_SINK" 2>&1
-
-EOS
+      auto) 
+        { if [ "\$ZSH_VERSION" ] && compctl > /dev/null; then # zsh
+            fasd --init posix-alias zsh-hook zsh-ccomp zsh-ccomp-install \\
+              zsh-wcomp zsh-wcomp-install
+          elif [ "\$BASH_VERSION" ] && complete > /dev/null; then # bash
+            fasd --init posix-alias bash-hook bash-ccomp bash-ccomp-install
+          else # posix shell
+            fasd --init posix-alias posix-hook
+          fi
+        } 2>> "$_FASD_SINK" 
         ;;
 
       posix-alias) cat <<EOS
