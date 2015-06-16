@@ -8,8 +8,8 @@ inspired by tools like [autojump](https://github.com/joelthelion/autojump),
 track of files and directories you have accessed, so that you can quickly
 reference them in the command line.
 
-The name fad can be simply interpreted as "**F**iles **A**nd **D**irectories",
-to which fad enables you to quickly access. The original name `fasd` comes
+The name `fad` can be simply interpreted as **F**iles **A**nd **D**irectories,
+that are **F**recently **A**ccesse**D**. The original name `fasd` comes
 from the default suggested aliases `f`(files), `a`(files/directories),
 `s`(show/search/select), `d`(directories).
 
