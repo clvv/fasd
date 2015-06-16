@@ -1,14 +1,14 @@
-.TH "FASD" "1" "Jul 16, 2012" "fasd user manual" ""
+.TH "FASD" "1" "Jul 16, 2012" "fad user manual" ""
 .SH NAME
 .PP
-fasd \- quick access to files and directories
+fad \- quick access to files and directories
 .SH SYNOPSIS
 .PP
-fasd [options] [query ...]
+fad [options] [query ...]
 .PP
 [f|a|s|d|z] [options] [query ...]
 .PP
-fasd [\-A|\-D] [paths ...]
+fad [\-A|\-D] [paths ...]
 .SH OPTIONS
 .IP
 .nf
@@ -33,14 +33,14 @@ fasd [\-A|\-D] [paths ...]
 .PP
 Fasd keeps track of files and directories you access in your shell and
 gives you quick access to them.
-You can use fasd to reference files or directories by just a few key
+You can use fad to reference files or directories by just a few key
 identifying characters.
-You can use fasd to boost your command line productivity by defining
+You can use fad to boost your command line productivity by defining
 your own aliases to launch programs on files or directories.
 Fasd, by default, provides some basic aliases, including a shell
 function "z" that resembles the functionality of "z" and "autojump."
 .PP
-The name "fasd" comes from the default suggested aliases
+The name "fad" comes from the default suggested aliases
 \f[C]f\f[](files), \f[C]a\f[](files/directories),
 \f[C]s\f[](show/search/select), \f[C]d\f[](directories).
 .PP
@@ -61,12 +61,12 @@ open\ `sf\ pdf`
 .fi
 .SH SHELL INITIALIZATION
 .PP
-To get fasd working in a shell, some initialization code must be run.
+To get fad working in a shell, some initialization code must be run.
 Put lines below in your POSIX compatible shell rc.
 .IP
 .nf
 \f[C]
-eval\ "$(fasd\ \-\-init\ auto)"
+eval\ "$(fad\ \-\-init\ auto)"
 \f[]
 .fi
 .PP
@@ -74,11 +74,11 @@ This will setup a command hook that executes on every command and
 advanced tab completion for zsh and bash.
 .PP
 If you want more control over what gets into your shell environment, you
-can pass customized set of arguments to \f[C]fasd\ \-\-init\f[].
+can pass customized set of arguments to \f[C]fad\ \-\-init\f[].
 .IP
 .nf
 \f[C]
-zsh\-hook\ \ \ \ \ \ \ \ \ \ \ \ \ #\ define\ _fasd_preexec\ and\ add\ it\ to\ zsh\ preexec\ array
+zsh\-hook\ \ \ \ \ \ \ \ \ \ \ \ \ #\ define\ _fad_preexec\ and\ add\ it\ to\ zsh\ preexec\ array
 zsh\-ccomp\ \ \ \ \ \ \ \ \ \ \ \ #\ zsh\ command\ mode\ completion\ definitions
 zsh\-ccomp\-install\ \ \ \ #\ setup\ command\ mode\ completion\ for\ zsh
 zsh\-wcomp\ \ \ \ \ \ \ \ \ \ \ \ #\ zsh\ word\ mode\ completion\ definitions
@@ -97,28 +97,28 @@ Example for a minimal zsh setup (no tab completion):
 .IP
 .nf
 \f[C]
-eval\ "$(fasd\ \-\-init\ posix\-alias\ zsh\-hook)"
+eval\ "$(fad\ \-\-init\ posix\-alias\ zsh\-hook)"
 \f[]
 .fi
 .PP
 Note that this method will slightly increase your shell start\-up time,
 since calling binaries has overhead.
-You can cache fasd init code if you want minimal overhead.
+You can cache fad init code if you want minimal overhead.
 Example code for bash (to be put into .bashrc):
 .IP
 .nf
 \f[C]
-fasd_cache="$HOME/.fasd\-init\-bash"
-if\ [\ "$(command\ \-v\ fasd)"\ \-nt\ "$fasd_cache"\ \-o\ !\ \-s\ "$fasd_cache"\ ];\ then
-\ \ fasd\ \-\-init\ posix\-alias\ bash\-hook\ bash\-ccomp\ bash\-ccomp\-install\ >|\ "$fasd_cache"
+fad_cache="$HOME/.fad\-init\-bash"
+if\ [\ "$(command\ \-v\ fad)"\ \-nt\ "$fad_cache"\ \-o\ !\ \-s\ "$fad_cache"\ ];\ then
+\ \ fad\ \-\-init\ posix\-alias\ bash\-hook\ bash\-ccomp\ bash\-ccomp\-install\ >|\ "$fad_cache"
 fi
-source\ "$fasd_cache"
-unset\ fasd_cache
+source\ "$fad_cache"
+unset\ fad_cache
 \f[]
 .fi
 .PP
-Optionally, if you can also source \f[C]fasd\f[] if you want
-\f[C]fasd\f[] to be a shell function instead of an executable.
+Optionally, if you can also source \f[C]fad\f[] if you want
+\f[C]fad\f[] to be a shell function instead of an executable.
 .PP
 You can tweak initialization code.
 For instance, if you want to use "c" instead of "z" to do directory
@@ -126,9 +126,9 @@ jumping, you can use the alias below:
 .IP
 .nf
 \f[C]
-alias\ c=\[aq]fasd_cd\ \-d\[aq]
+alias\ c=\[aq]fad_cd\ \-d\[aq]
 #\ `\-d\[aq]\ option\ present\ for\ bash\ completion
-#\ function\ fasd_cd\ is\ defined\ in\ posix\-alias
+#\ function\ fad_cd\ is\ defined\ in\ posix\-alias
 \f[]
 .fi
 .SH MATCHING
@@ -136,14 +136,14 @@ alias\ c=\[aq]fasd_cd\ \-d\[aq]
 Fasd has three matching modes: default, case\-insensitive, and fuzzy.
 .PP
 For a given set of queries (the set of command\-line arguments passed to
-fasd), a path is a match if and only if:
+fad), a path is a match if and only if:
 .IP "1." 3
 Queries match the path in order.
 .IP "2." 3
 The last query matches the last segment of the path.
 .PP
-If no match is found, fasd will try the same process ignoring case.
-If still no match is found, fasd will allow extra characters to be
+If no match is found, fad will try the same process ignoring case.
+If still no match is found, fad will allow extra characters to be
 placed between query characters for fuzzy matching.
 .PP
 Tips:
@@ -156,13 +156,13 @@ If you want your last query to match the end of the filename, append
 .SH COMPATIBILITY
 .PP
 Fasd\[aq]s basic functionalities are POSIX compliant, meaning that you
-should be able to use fasd in all POSIX compliant shells.
+should be able to use fad in all POSIX compliant shells.
 Your shell need to support command substitution in $PS1 in order for
-fasd to automatically track your commands and files.
+fad to automatically track your commands and files.
 This feature is not specified by the POSIX standard, but it\[aq]s
 nonetheless present in many POSIX compliant shells.
 In shells without prompt command or prompt command substitution (tcsh
-for instance), you can add entries manually with "fasd \-A".
+for instance), you can add entries manually with "fad \-A".
 You are very welcomed to contribute shell initialization code for not
 yet supported shells.
 .SH TAB COMPLETION
@@ -173,7 +173,7 @@ Command mode completion works in bash and zsh.
 Word mode completion only works in zsh.
 .PP
 Command mode completion is just like completion for any other commands.
-It is triggered when you hit tab on a fasd command or its aliases.
+It is triggered when you hit tab on a fad command or its aliases.
 Under this mode your queries can be separated by a space.
 Tip: if you find that the completion result overwrites your queries,
 type an extra space before you hit tab.
@@ -194,15 +194,15 @@ $\ mv\ index.html\ /var/www/
 \f[]
 .fi
 .PP
-There are also three zle widgets: "fasd\-complete", "fasd\-complete\-f",
-"fasd\-complete\-d".
+There are also three zle widgets: "fad\-complete", "fad\-complete\-f",
+"fad\-complete\-d".
 You can bind them to keybindings you like:
 .IP
 .nf
 \f[C]
-bindkey\ \[aq]^X^A\[aq]\ fasd\-complete\ \ \ \ #\ C\-x\ C\-a\ to\ do\ fasd\-complete\ (fils\ and\ directories)
-bindkey\ \[aq]^X^F\[aq]\ fasd\-complete\-f\ \ #\ C\-x\ C\-f\ to\ do\ fasd\-complete\-f\ (only\ files)
-bindkey\ \[aq]^X^D\[aq]\ fasd\-complete\-d\ \ #\ C\-x\ C\-d\ to\ do\ fasd\-complete\-d\ (only\ directories)
+bindkey\ \[aq]^X^A\[aq]\ fad\-complete\ \ \ \ #\ C\-x\ C\-a\ to\ do\ fad\-complete\ (fils\ and\ directories)
+bindkey\ \[aq]^X^F\[aq]\ fad\-complete\-f\ \ #\ C\-x\ C\-f\ to\ do\ fad\-complete\-f\ (only\ files)
+bindkey\ \[aq]^X^D\[aq]\ fad\-complete\-d\ \ #\ C\-x\ C\-d\ to\ do\ fad\-complete\-d\ (only\ directories)
 \f[]
 .fi
 .SH BACKENDS
@@ -211,7 +211,7 @@ Fasd can take advantage of different sources of recent / frequent files.
 Most desktop environments (such as OS X and Gtk) and some editors (such
 as Vim) keep a list of accessed files.
 Fasd can use them as additional backends if the data can be converted
-into fasd\[aq]s native format.
+into fad\[aq]s native format.
 Below is a list of available backends.
 .IP \[bu] 2
 spotlight: OSX spotlight, provides entries that are changed today or
@@ -221,25 +221,25 @@ recently\-used: GTK\[aq]s recently\-used file (Usually available on
 Linux)
 .IP \[bu] 2
 current: Provides everything in $PWD (whereever you are executing
-\f[C]fasd\f[])
+\f[C]fad\f[])
 .IP \[bu] 2
 viminfo: Vim\[aq]s editing history, useful if you want to define an
 alias just for editing things in vim
 .PP
 You can define your own backend by declaring a function by that name in
-your \f[C]\&.fasdrc\f[].
+your \f[C]\&.fadrc\f[].
 You can set default backend with \f[C]_FASD_BACKENDS\f[] variable in our
-\f[C]\&.fasdrc\f[].
+\f[C]\&.fadrc\f[].
 .SH TWEAKS
 .PP
-Upon every execution, fasd will source "/etc/fasdrc" and "$HOME/.fasdrc"
+Upon every execution, fad will source "/etc/fadrc" and "$HOME/.fadrc"
 if they are present.
 Below are some variables you can set:
 .IP
 .nf
 \f[C]
 $_FASD_DATA
-Path\ to\ the\ fasd\ data\ file,\ default\ "$HOME/.fasd".
+Path\ to\ the\ fad\ data\ file,\ default\ "$HOME/.fad".
 
 $_FASD_BLACKLIST
 List\ of\ blacklisted\ strings.\ Commands\ matching\ them\ will\ not\ be\ processed.
@@ -249,13 +249,13 @@ $_FASD_SHIFT
 List\ of\ all\ commands\ that\ needs\ to\ be\ shifted,\ defaults\ to\ "sudo\ busybox".
 
 $_FASD_IGNORE
-List\ of\ all\ commands\ that\ will\ be\ ignored,\ defaults\ to\ "fasd\ ls\ echo".
+List\ of\ all\ commands\ that\ will\ be\ ignored,\ defaults\ to\ "fad\ ls\ echo".
 
 $_FASD_TRACK_PWD
 Fasd\ defaults\ to\ track\ your\ "$PWD".\ Set\ this\ to\ 0\ to\ disable\ this\ behavior.
 
 $_FASD_AWK
-Which\ awk\ to\ use.\ fasd\ can\ detect\ and\ use\ a\ compatible\ awk.
+Which\ awk\ to\ use.\ fad\ can\ detect\ and\ use\ a\ compatible\ awk.
 
 $_FASD_SINK
 File\ to\ log\ all\ STDERR\ to,\ defaults\ to\ "/dev/null".
@@ -264,14 +264,14 @@ $_FASD_MAX
 Max\ total\ score\ /\ weight,\ defaults\ to\ 2000.
 
 $_FASD_SHELL
-Which\ shell\ to\ execute.\ Some\ shells\ will\ run\ faster\ than\ others.\ fasd
+Which\ shell\ to\ execute.\ Some\ shells\ will\ run\ faster\ than\ others.\ fad
 runs\ faster\ with\ dash\ and\ ksh\ variants.
 
 $_FASD_BACKENDS
 Default\ backends.
 
 $_FASD_RO
-If\ set\ to\ any\ non\-empty\ string,\ fasd\ will\ not\ add\ or\ delete\ entries\ from
+If\ set\ to\ any\ non\-empty\ string,\ fad\ will\ not\ add\ or\ delete\ entries\ from
 database.\ You\ can\ set\ and\ export\ this\ variable\ from\ command\ line.
 
 $_FASD_FUZZY
@@ -289,18 +289,18 @@ Path\ to\ XDG\ recently\-used.xbel\ file\ for\ recently\-used\ backend,\ default
 .fi
 .SH DEBUGGING
 .PP
-Fasd is hosted on GitHub: https://github.com/clvv/fasd
+Fasd is hosted on GitHub: https://github.com/clvv/fad
 .PP
-If fasd does not work as expected, please file a bug report on GitHub
+If fad does not work as expected, please file a bug report on GitHub
 describing the unexpected behavior along with your OS version, shell
 version, awk version, sed version, and a log file.
 .PP
-You can set \f[C]_FASD_SINK\f[] in your \f[C]\&.fasdrc\f[] to obtain a
+You can set \f[C]_FASD_SINK\f[] in your \f[C]\&.fadrc\f[] to obtain a
 log.
 .IP
 .nf
 \f[C]
-_FASD_SINK="$HOME/.fasd.log"
+_FASD_SINK="$HOME/.fad.log"
 \f[]
 .fi
 .SH COPYING

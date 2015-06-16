@@ -7,7 +7,7 @@ inspired by tools like [autojump](https://github.com/joelthelion/autojump),
 track of files and directories you have accessed, so that you can quickly
 reference them in the command line.
 
-The name fasd comes from the default suggested aliases `f`(files),
+The name fad comes from the default suggested aliases `f`(files),
 `a`(files/directories), `s`(show/search/select), `d`(directories).
 
 Fasd ranks files and directories by "frecency," that is, by both "frequency" and
@@ -16,11 +16,11 @@ Fasd ranks files and directories by "frecency," that is, by both "frequency" and
 
 # Introduction
 
-If you use your shell to navigate and launch applications, fasd can help you do
-it more efficiently. With fasd, you can open files regardless of which
-directory you are in. Just with a few key strings, fasd can find a "frecent"
+If you use your shell to navigate and launch applications, fad can help you do
+it more efficiently. With fad, you can open files regardless of which
+directory you are in. Just with a few key strings, fad can find a "frecent"
 file or directory and open it with command you specify. Below are some
-hypothetical situations, where you can type in the command on the left and fasd
+hypothetical situations, where you can type in the command on the left and fad
 will "expand" your command into the right side. Pretty magic, huh?
 
 ```
@@ -35,19 +35,19 @@ will "expand" your command into the right side. Pretty magic, huh?
 Fasd comes with some useful aliases by default:
 
 ```sh
-alias a='fasd -a'        # any
-alias s='fasd -si'       # show / search / select
-alias d='fasd -d'        # directory
-alias f='fasd -f'        # file
-alias sd='fasd -sid'     # interactive directory selection
-alias sf='fasd -sif'     # interactive file selection
-alias z='fasd_cd -d'     # cd, same functionality as j in autojump
-alias zz='fasd_cd -d -i' # cd with interactive selection
+alias a='fad -a'        # any
+alias s='fad -si'       # show / search / select
+alias d='fad -d'        # directory
+alias f='fad -f'        # file
+alias sd='fad -sid'     # interactive directory selection
+alias sf='fad -sif'     # interactive file selection
+alias z='fad_cd -d'     # cd, same functionality as j in autojump
+alias zz='fad_cd -d -i' # cd with interactive selection
 ```
 
 Fasd will smartly detect when to display a list of files or just the best
-match. For instance, when you call fasd in a subshell with some search
-parameters, fasd will only return the best match. This enables you to do:
+match. For instance, when you call fad in a subshell with some search
+parameters, fad will only return the best match. This enables you to do:
 
 ```sh
 mv update.html `d www`
@@ -57,17 +57,17 @@ cp `f mov` .
 # Install
 
 Fasd is available in various package managers. Please check
-[the wiki page](https://github.com/clvv/fasd/wiki/Installing-via-Package-Managers)
+[the wiki page](https://github.com/clvv/fad/wiki/Installing-via-Package-Managers)
 for an up-to-date list.
 
-You can also manually obtain a copy of fasd.
+You can also manually obtain a copy of fad.
 
-Download fasd 1.0.1 from GitHub:
-[zip](https://github.com/clvv/fasd/zipball/1.0.1),
-[tar.gz](https://github.com/clvv/fasd/tarball/1.0.1).
+Download fad 1.0.1 from GitHub:
+[zip](https://github.com/clvv/fad/zipball/1.0.1),
+[tar.gz](https://github.com/clvv/fad/tarball/1.0.1).
 
 Fasd is a self-contained POSIX shell script that can be either sourced or
-executed. A Makefile is provided to install `fasd` and `fasd.1` to desired
+executed. A Makefile is provided to install `fad` and `fad.1` to desired
 places.
 
 System-wide install:
@@ -78,24 +78,24 @@ Install to $HOME:
 
     PREFIX=$HOME make install
 
-Or alternatively you can just copy `fasd` to anywhere you like (preferably
+Or alternatively you can just copy `fad` to anywhere you like (preferably
 under some directory in `$PATH`).
 
-To get fasd working in a shell, some initialization code must be run. Put the
+To get fad working in a shell, some initialization code must be run. Put the
 line below in your shell rc.
 
 ```sh
-eval "$(fasd --init auto)"
+eval "$(fad --init auto)"
 ```
 
 This will setup a command hook that executes on every command and advanced tab
 completion for zsh and bash.
 
 If you want more control over what gets into your shell environment, you can
-pass customized set of arguments to `fasd --init`.
+pass customized set of arguments to `fad --init`.
 
 ```
-zsh-hook             # define _fasd_preexec and add it to zsh preexec array
+zsh-hook             # define _fad_preexec and add it to zsh preexec array
 zsh-ccomp            # zsh command mode completion definitions
 zsh-ccomp-install    # setup command mode completion for zsh
 zsh-wcomp            # zsh word mode completion definitions
@@ -112,35 +112,35 @@ tcsh-hook            # setup tcsh precmd alias
 Example for a minimal zsh setup (no tab completion):
 
 ```sh
-eval "$(fasd --init posix-alias zsh-hook)"
+eval "$(fad --init posix-alias zsh-hook)"
 ```
 
 Note that this method will slightly increase your shell start-up time, since
-calling binaries has overhead. You can cache fasd init code if you want minimal
+calling binaries has overhead. You can cache fad init code if you want minimal
 overhead. Example code for bash (to be put into .bashrc):
 
 ```sh
-fasd_cache="$HOME/.fasd-init-bash"
-if [ "$(command -v fasd)" -nt "$fasd_cache" -o ! -s "$fasd_cache" ]; then
-  fasd --init posix-alias bash-hook bash-ccomp bash-ccomp-install >| "$fasd_cache"
+fad_cache="$HOME/.fad-init-bash"
+if [ "$(command -v fad)" -nt "$fad_cache" -o ! -s "$fad_cache" ]; then
+  fad --init posix-alias bash-hook bash-ccomp bash-ccomp-install >| "$fad_cache"
 fi
-source "$fasd_cache"
-unset fasd_cache
+source "$fad_cache"
+unset fad_cache
 ```
 
-Optionally, if you can also source `fasd` if you want `fasd` to be a shell
+Optionally, if you can also source `fad` if you want `fad` to be a shell
 function instead of an executable.
 
 You can tweak initialization code. For instance, if you want to use "c"
 instead of "z" to do directory jumping, you can use the alias below:
 
 ```sh
-alias c='fasd_cd -d'
+alias c='fad_cd -d'
 # `-d` option present for bash completion
-# function fasd_cd is defined in posix-alias
+# function fad_cd is defined in posix-alias
 ```
 
-After you first installed fasd, open some files (with any program) or `cd`
+After you first installed fad, open some files (with any program) or `cd`
 around in your shell. Then try some examples below.
 
 # Examples
@@ -155,7 +155,7 @@ z foo           # cd into the most frecent directory matching foo
 open `sf pdf`   # interactively select a file matching pdf and launch `open`
 ```
 
-You should add your own aliases to fully utilize the power of fasd. Here are
+You should add your own aliases to fully utilize the power of fad. Here are
 some examples to get you started:
 
 ```sh
@@ -164,10 +164,10 @@ alias m='f -e mplayer' # quick opening files with mplayer
 alias o='a -e xdg-open' # quick opening files with xdg-open
 ```
 
-If you're using bash, you have to call `_fasd_bash_hook_cmd_complete` to make
+If you're using bash, you have to call `_fad_bash_hook_cmd_complete` to make
 completion work. For instance:
 
-    _fasd_bash_hook_cmd_complete v m j o
+    _fad_bash_hook_cmd_complete v m j o
 
 You could select an entry in the list of matching files.
 
@@ -175,14 +175,14 @@ You could select an entry in the list of matching files.
 
 Fasd has three matching modes: default, case-insensitive, and fuzzy.
 
-For a given set of queries (the set of command-line arguments passed to fasd),
+For a given set of queries (the set of command-line arguments passed to fad),
 a path is a match if and only if:
 
 1. Queries match the path *in order*.
 2. The last query matches the *last segment* of the path.
 
-If no match is found, fasd will try the same process ignoring case. If still no
-match is found, fasd will allow extra characters to be placed between query
+If no match is found, fad will try the same process ignoring case. If still no
+match is found, fad will allow extra characters to be placed between query
 characters for fuzzy matching.
 
 Tips:
@@ -194,20 +194,20 @@ Tips:
 
 # How It Works
 
-When you run fasd init code or source `fasd`, fasd adds a hook which will be
+When you run fad init code or source `fad`, fad adds a hook which will be
 executed whenever you execute a command. The hook will scan your commands'
 arguments and determine if any of them refer to existing files or directories.
-If yes, fasd will add them to the database.
+If yes, fad will add them to the database.
 
 # Compatibility
 
 Fasd's basic functionalities are POSIX compliant, meaning that you should be
-able to use fasd in all POSIX compliant shells. Your shell need to support
-command substitution in `$PS1` in order for fasd to automatically track your
+able to use fad in all POSIX compliant shells. Your shell need to support
+command substitution in `$PS1` in order for fad to automatically track your
 commands and files. This feature is not specified by the POSIX standard, but
 it's nonetheless present in many POSIX compliant shells. In shells without
 prompt command or prompt command substitution (csh for instance), you can add
-entries manually with `fasd -A`. You are very welcomed to contribute shell
+entries manually with `fad -A`. You are very welcomed to contribute shell
 initialization code for not yet supported shells.
 
 Fasd has been tested on the following shells: bash, zsh, mksh, pdksh, dash,
@@ -215,7 +215,7 @@ busybox ash, FreeBSD 9 /bin/sh and OpenBSD /bin/sh.
 
 # Synopsis
 
-    fasd [options] [query ...]
+    fad [options] [query ...]
     [f|a|s|d|z] [options] [query ...]
       options:
         -s         list paths with scores
@@ -233,7 +233,7 @@ busybox ash, FreeBSD 9 /bin/sh and OpenBSD /bin/sh.
         -h         show a brief help message
         -[0-9]     select the nth entry
 
-    fasd [-A|-D] [paths ...]
+    fad [-A|-D] [paths ...]
         -A    add paths
         -D    delete paths
 
@@ -244,7 +244,7 @@ completion. Command mode completion works in bash and zsh. Word mode
 completion only works in zsh.
 
 Command mode completion is just like completion for any other commands. It is
-triggered when you hit tab on a `fasd` command or its aliases. Under this mode
+triggered when you hit tab on a `fad` command or its aliases. Under this mode
 your queries can be separated by a space. Tip: if you find that the completion
 result overwrites your queries, type an extra space before you hit tab.
 
@@ -259,13 +259,13 @@ triggered by any command line argument that starts with `,` (all), `f,`
     $ mv index.html d,www<Tab>
     $ mv index.html /var/www/
 
-There are also three zle widgets: `fasd-complete`, `fasd-complete-f`,
-`fasd-complete-d`. You can bind them to keybindings you like:
+There are also three zle widgets: `fad-complete`, `fad-complete-f`,
+`fad-complete-d`. You can bind them to keybindings you like:
 
 ```sh
-bindkey '^X^A' fasd-complete    # C-x C-a to do fasd-complete (fils and directories)
-bindkey '^X^F' fasd-complete-f  # C-x C-f to do fasd-complete-f (only files)
-bindkey '^X^D' fasd-complete-d  # C-x C-d to do fasd-complete-d (only directories)
+bindkey '^X^A' fad-complete    # C-x C-a to do fad-complete (fils and directories)
+bindkey '^X^F' fad-complete-f  # C-x C-f to do fad-complete-f (only files)
+bindkey '^X^D' fad-complete-d  # C-x C-d to do fad-complete-d (only directories)
 ```
 
 # Backends
@@ -273,7 +273,7 @@ bindkey '^X^D' fasd-complete-d  # C-x C-d to do fasd-complete-d (only directorie
 Fasd can take advantage of different sources of recent / frequent files. Most
 desktop environments (such as OS X and Gtk) and some editors (such as Vim) keep
 a list of accessed files. Fasd can use them as additional backends if the data
-can be converted into fasd's native format. Below is a list of available
+can be converted into fad's native format. Below is a list of available
 backends.
 
 ```
@@ -285,7 +285,7 @@ past month
 GTK's recently-used file (Usually available on Linux)
 
 `current`
-Provides everything in $PWD (whereever you are executing `fasd`)
+Provides everything in $PWD (whereever you are executing `fad`)
 
 `viminfo`
 Vim's editing history, useful if you want to define an alias just for editing
@@ -293,8 +293,8 @@ things in vim
 ```
 
 You can define your own backend by declaring a function by that name in your
-`.fasdrc`. You can set default backend with `_FASD_BACKENDS` variable in our
-`.fasdrc`.
+`.fadrc`. You can set default backend with `_FASD_BACKENDS` variable in our
+`.fadrc`.
 
 Fasd can mimic [v](http://github.com/rupa/v)'s behavior by this alias:
 
@@ -304,12 +304,12 @@ alias v='f -t -e vim -b viminfo'
 
 # Tweaks
 
-Some shell variables that you can set before sourcing `fasd`. You can set them
-in `$HOME/.fasdrc`
+Some shell variables that you can set before sourcing `fad`. You can set them
+in `$HOME/.fadrc`
 
 ```
 $_FASD_DATA
-Path to the fasd data file, default "$HOME/.fasd".
+Path to the fad data file, default "$HOME/.fad".
 
 $_FASD_BLACKLIST
 List of blacklisted strings. Commands matching them will not be processed.
@@ -319,7 +319,7 @@ $_FASD_SHIFT
 List of all commands that needs to be shifted, defaults to "sudo busybox".
 
 $_FASD_IGNORE
-List of all commands that will be ignored, defaults to "fasd ls echo".
+List of all commands that will be ignored, defaults to "fad ls echo".
 
 $_FASD_TRACK_PWD
 Fasd defaults to track your "$PWD". Set this to 0 to disable this behavior.
@@ -334,14 +334,14 @@ $_FASD_MAX
 Max total score / weight, defaults to 2000.
 
 $_FASD_SHELL
-Which shell to execute. Some shells will run faster than others. fasd
+Which shell to execute. Some shells will run faster than others. fad
 runs faster with dash and ksh variants.
 
 $_FASD_BACKENDS
 Default backends.
 
 $_FASD_RO
-If set to any non-empty string, fasd will not add or delete entries from
+If set to any non-empty string, fad will not add or delete entries from
 database. You can set and export this variable from command line.
 
 $_FASD_FUZZY
@@ -360,14 +360,14 @@ Path to XDG recently-used.xbel file for recently-used backend, defaults to
 
 # Debugging
 
-If fasd does not work as expected, please file a bug report describing the
+If fad does not work as expected, please file a bug report describing the
 unexpected behavior along with your OS version, shell version, awk version, sed
 version, and a log file.
 
-You can set `_FASD_SINK` in your `.fasdrc` to obtain a log.
+You can set `_FASD_SINK` in your `.fadrc` to obtain a log.
 
 ```sh
-_FASD_SINK="$HOME/.fasd.log"
+_FASD_SINK="$HOME/.fad.log"
 ```
 
 # COPYING
