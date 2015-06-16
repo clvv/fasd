@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
 
-# Fasd (this file) can be sourced or executed by any POSIX compatible shell.
+# Fad (this file) can be sourced or executed by any POSIX compatible shell.
 
-# Fasd is originally written based on code from z (https://github.com/rupa/z)
+# Fad is originally written based on code from z (https://github.com/rupa/z)
 # by rupa deadwyler under the WTFPL license. Most if not all of the code has
 # been rewritten.
 

@@ -1,16 +1,16 @@
-# Fasd
+# Fad
 
-Fasd (pronounced similar to "fast") is a command-line productivity booster.
-Fasd offers quick access to files and directories for POSIX shells. It is
+Fad (pronounced similar to "fast") is a command-line productivity booster.
+Fad offers quick access to files and directories for POSIX shells. It is
 inspired by tools like [autojump](https://github.com/joelthelion/autojump),
-[z](http://github.com/rupa/z) and [v](https://github.com/rupa/v). Fasd keeps
+[z](http://github.com/rupa/z) and [v](https://github.com/rupa/v). Fad keeps
 track of files and directories you have accessed, so that you can quickly
 reference them in the command line.
 
 The name fad comes from the default suggested aliases `f`(files),
 `a`(files/directories), `s`(show/search/select), `d`(directories).
 
-Fasd ranks files and directories by "frecency," that is, by both "frequency" and
+Fad ranks files and directories by "frecency," that is, by both "frequency" and
 "recency." The term "frecency" was first coined by Mozilla and used in Firefox
 ([link](https://developer.mozilla.org/en/The_Places_frecency_algorithm)).
 
@@ -32,7 +32,7 @@ will "expand" your command into the right side. Pretty magic, huh?
   vim `f rc conf`  =>     vim /etc/rc.conf
 ```
 
-Fasd comes with some useful aliases by default:
+Fad comes with some useful aliases by default:
 
 ```sh
 alias a='fad -a'        # any
@@ -45,7 +45,7 @@ alias z='fad_cd -d'     # cd, same functionality as j in autojump
 alias zz='fad_cd -d -i' # cd with interactive selection
 ```
 
-Fasd will smartly detect when to display a list of files or just the best
+Fad will smartly detect when to display a list of files or just the best
 match. For instance, when you call fad in a subshell with some search
 parameters, fad will only return the best match. This enables you to do:
 
@@ -56,7 +56,7 @@ cp `f mov` .
 
 # Install
 
-Fasd is available in various package managers. Please check
+Fad is available in various package managers. Please check
 [the wiki page](https://github.com/clvv/fad/wiki/Installing-via-Package-Managers)
 for an up-to-date list.
 
@@ -66,7 +66,7 @@ Download fad 1.0.1 from GitHub:
 [zip](https://github.com/clvv/fad/zipball/1.0.1),
 [tar.gz](https://github.com/clvv/fad/tarball/1.0.1).
 
-Fasd is a self-contained POSIX shell script that can be either sourced or
+Fad is a self-contained POSIX shell script that can be either sourced or
 executed. A Makefile is provided to install `fad` and `fad.1` to desired
 places.
 
@@ -173,7 +173,7 @@ You could select an entry in the list of matching files.
 
 # Matching
 
-Fasd has three matching modes: default, case-insensitive, and fuzzy.
+Fad has three matching modes: default, case-insensitive, and fuzzy.
 
 For a given set of queries (the set of command-line arguments passed to fad),
 a path is a match if and only if:
@@ -201,7 +201,7 @@ If yes, fad will add them to the database.
 
 # Compatibility
 
-Fasd's basic functionalities are POSIX compliant, meaning that you should be
+Fad's basic functionalities are POSIX compliant, meaning that you should be
 able to use fad in all POSIX compliant shells. Your shell need to support
 command substitution in `$PS1` in order for fad to automatically track your
 commands and files. This feature is not specified by the POSIX standard, but
@@ -210,7 +210,7 @@ prompt command or prompt command substitution (csh for instance), you can add
 entries manually with `fad -A`. You are very welcomed to contribute shell
 initialization code for not yet supported shells.
 
-Fasd has been tested on the following shells: bash, zsh, mksh, pdksh, dash,
+Fad has been tested on the following shells: bash, zsh, mksh, pdksh, dash,
 busybox ash, FreeBSD 9 /bin/sh and OpenBSD /bin/sh.
 
 # Synopsis
@@ -239,7 +239,7 @@ busybox ash, FreeBSD 9 /bin/sh and OpenBSD /bin/sh.
 
 # Tab Completion
 
-Fasd offers two completion modes, command mode completion and word mode
+Fad offers two completion modes, command mode completion and word mode
 completion. Command mode completion works in bash and zsh. Word mode
 completion only works in zsh.
 
@@ -270,9 +270,9 @@ bindkey '^X^D' fad-complete-d  # C-x C-d to do fad-complete-d (only directories)
 
 # Backends
 
-Fasd can take advantage of different sources of recent / frequent files. Most
+Fad can take advantage of different sources of recent / frequent files. Most
 desktop environments (such as OS X and Gtk) and some editors (such as Vim) keep
-a list of accessed files. Fasd can use them as additional backends if the data
+a list of accessed files. Fad can use them as additional backends if the data
 can be converted into fad's native format. Below is a list of available
 backends.
 
@@ -296,7 +296,7 @@ You can define your own backend by declaring a function by that name in your
 `.fadrc`. You can set default backend with `_FASD_BACKENDS` variable in our
 `.fadrc`.
 
-Fasd can mimic [v](http://github.com/rupa/v)'s behavior by this alias:
+Fad can mimic [v](http://github.com/rupa/v)'s behavior by this alias:
 
 ```sh
 alias v='f -t -e vim -b viminfo'
@@ -322,10 +322,10 @@ $_FASD_IGNORE
 List of all commands that will be ignored, defaults to "fad ls echo".
 
 $_FASD_TRACK_PWD
-Fasd defaults to track your "$PWD". Set this to 0 to disable this behavior.
+Fad defaults to track your "$PWD". Set this to 0 to disable this behavior.
 
 $_FASD_AWK
-Which awk to use. Fasd can detect and use a compatible awk.
+Which awk to use. Fad can detect and use a compatible awk.
 
 $_FASD_SINK
 File to log all STDERR to, defaults to "/dev/null".
@@ -372,7 +372,7 @@ _FASD_SINK="$HOME/.fad.log"
 
 # COPYING
 
-Fasd is originally written based on code from [z](https://github.com/rupa/z) by
+Fad is originally written based on code from [z](https://github.com/rupa/z) by
 rupa deadwyler under the WTFPL license. Most if not all of the code has been
-rewritten. Fasd is licensed under the "MIT/X11" license.
+rewritten. Fad is licensed under the "MIT/X11" license.
 

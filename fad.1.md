@@ -33,17 +33,17 @@ fad [-A|-D] [paths ...]
 
 # DESCRIPTION
 
-Fasd keeps track of files and directories you access in your shell and gives you
+Fad keeps track of files and directories you access in your shell and gives you
 quick access to them. You can use fad to reference files or directories by just
 a few key identifying characters. You can use fad to boost your command line
 productivity by defining your own aliases to launch programs on files or
-directories. Fasd, by default, provides some basic aliases, including a shell
+directories. Fad, by default, provides some basic aliases, including a shell
 function "z" that resembles the functionality of "z" and "autojump."
 
 The name "fad" comes from the default suggested aliases `f`(files),
 `a`(files/directories), `s`(show/search/select), `d`(directories).
 
-Fasd ranks files and directories by "frecency," that is, by both "frequency"
+Fad ranks files and directories by "frecency," that is, by both "frequency"
 and "recency." The term "frecency" was first coined by Mozilla and used in
 Firefox.
 
@@ -109,7 +109,7 @@ instead of "z" to do directory jumping, you can use the alias below:
 
 # MATCHING
 
-Fasd has three matching modes: default, case-insensitive, and fuzzy.
+Fad has three matching modes: default, case-insensitive, and fuzzy.
 
 For a given set of queries (the set of command-line arguments passed to fad),
 a path is a match if and only if:
@@ -130,7 +130,7 @@ Tips:
 
 # COMPATIBILITY
 
-Fasd's basic functionalities are POSIX compliant, meaning that you should be
+Fad's basic functionalities are POSIX compliant, meaning that you should be
 able to use fad in all POSIX compliant shells. Your shell need to support
 command substitution in $PS1 in order for fad to automatically track your
 commands and files. This feature is not specified by the POSIX standard, but
@@ -141,7 +141,7 @@ initialization code for not yet supported shells.
 
 # TAB COMPLETION
 
-Fasd offers two completion modes, command mode completion and word mode
+Fad offers two completion modes, command mode completion and word mode
 completion. Command mode completion works in bash and zsh. Word mode
 completion only works in zsh.
 
@@ -170,9 +170,9 @@ There are also three zle widgets: "fad-complete", "fad-complete-f",
 
 # BACKENDS
 
-Fasd can take advantage of different sources of recent / frequent files. Most
+Fad can take advantage of different sources of recent / frequent files. Most
 desktop environments (such as OS X and Gtk) and some editors (such as Vim) keep
-a list of accessed files. Fasd can use them as additional backends if the data
+a list of accessed files. Fad can use them as additional backends if the data
 can be converted into fad's native format. Below is a list of available
 backends.
 
@@ -209,7 +209,7 @@ they are present. Below are some variables you can set:
     List of all commands that will be ignored, defaults to "fad ls echo".
 
     $_FASD_TRACK_PWD
-    Fasd defaults to track your "$PWD". Set this to 0 to disable this behavior.
+    Fad defaults to track your "$PWD". Set this to 0 to disable this behavior.
 
     $_FASD_AWK
     Which awk to use. fad can detect and use a compatible awk.
@@ -245,7 +245,7 @@ they are present. Below are some variables you can set:
 
 # DEBUGGING
 
-Fasd is hosted on GitHub: https://github.com/clvv/fad
+Fad is hosted on GitHub: https://github.com/clvv/fad
 
 If fad does not work as expected, please file a bug report on GitHub describing
 the unexpected behavior along with your OS version, shell version, awk version,
@@ -257,7 +257,7 @@ You can set `_FASD_SINK` in your `.fadrc` to obtain a log.
 
 # COPYING
 
-Fasd is originally written based on code from z (https://github.com/rupa/z) by
+Fad is originally written based on code from z (https://github.com/rupa/z) by
 rupa deadwyler under the WTFPL license. Most if not all of the code has been
-rewritten. Fasd is licensed under the "MIT/X11" license.
+rewritten. Fad is licensed under the "MIT/X11" license.
 

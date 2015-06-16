@@ -1,4 +1,4 @@
-Fasd is a self-contained posix shell script that can be either sourced or
+Fad is a self-contained posix shell script that can be either sourced or
 executed. A Makefile is provided to install `fad` and `fad.1` to desired
 places.
 

@@ -31,20 +31,20 @@ fad [\-A|\-D] [paths ...]
 .fi
 .SH DESCRIPTION
 .PP
-Fasd keeps track of files and directories you access in your shell and
+Fad keeps track of files and directories you access in your shell and
 gives you quick access to them.
 You can use fad to reference files or directories by just a few key
 identifying characters.
 You can use fad to boost your command line productivity by defining
 your own aliases to launch programs on files or directories.
-Fasd, by default, provides some basic aliases, including a shell
+Fad, by default, provides some basic aliases, including a shell
 function "z" that resembles the functionality of "z" and "autojump."
 .PP
 The name "fad" comes from the default suggested aliases
 \f[C]f\f[](files), \f[C]a\f[](files/directories),
 \f[C]s\f[](show/search/select), \f[C]d\f[](directories).
 .PP
-Fasd ranks files and directories by "frecency," that is, by both
+Fad ranks files and directories by "frecency," that is, by both
 "frequency" and "recency." The term "frecency" was first coined by
 Mozilla and used in Firefox.
 .SH EXAMPLES
@@ -133,7 +133,7 @@ alias\ c=\[aq]fad_cd\ \-d\[aq]
 .fi
 .SH MATCHING
 .PP
-Fasd has three matching modes: default, case\-insensitive, and fuzzy.
+Fad has three matching modes: default, case\-insensitive, and fuzzy.
 .PP
 For a given set of queries (the set of command\-line arguments passed to
 fad), a path is a match if and only if:
@@ -155,7 +155,7 @@ If you want your last query to match the end of the filename, append
 `$\[aq] to the last query.
 .SH COMPATIBILITY
 .PP
-Fasd\[aq]s basic functionalities are POSIX compliant, meaning that you
+Fad\[aq]s basic functionalities are POSIX compliant, meaning that you
 should be able to use fad in all POSIX compliant shells.
 Your shell need to support command substitution in $PS1 in order for
 fad to automatically track your commands and files.
@@ -167,7 +167,7 @@ You are very welcomed to contribute shell initialization code for not
 yet supported shells.
 .SH TAB COMPLETION
 .PP
-Fasd offers two completion modes, command mode completion and word mode
+Fad offers two completion modes, command mode completion and word mode
 completion.
 Command mode completion works in bash and zsh.
 Word mode completion only works in zsh.
@@ -207,10 +207,10 @@ bindkey\ \[aq]^X^D\[aq]\ fad\-complete\-d\ \ #\ C\-x\ C\-d\ to\ do\ fad\-complet
 .fi
 .SH BACKENDS
 .PP
-Fasd can take advantage of different sources of recent / frequent files.
+Fad can take advantage of different sources of recent / frequent files.
 Most desktop environments (such as OS X and Gtk) and some editors (such
 as Vim) keep a list of accessed files.
-Fasd can use them as additional backends if the data can be converted
+Fad can use them as additional backends if the data can be converted
 into fad\[aq]s native format.
 Below is a list of available backends.
 .IP \[bu] 2
@@ -252,7 +252,7 @@ $_FASD_IGNORE
 List\ of\ all\ commands\ that\ will\ be\ ignored,\ defaults\ to\ "fad\ ls\ echo".
 
 $_FASD_TRACK_PWD
-Fasd\ defaults\ to\ track\ your\ "$PWD".\ Set\ this\ to\ 0\ to\ disable\ this\ behavior.
+Fad\ defaults\ to\ track\ your\ "$PWD".\ Set\ this\ to\ 0\ to\ disable\ this\ behavior.
 
 $_FASD_AWK
 Which\ awk\ to\ use.\ fad\ can\ detect\ and\ use\ a\ compatible\ awk.
@@ -289,7 +289,7 @@ Path\ to\ XDG\ recently\-used.xbel\ file\ for\ recently\-used\ backend,\ default
 .fi
 .SH DEBUGGING
 .PP
-Fasd is hosted on GitHub: https://github.com/clvv/fad
+Fad is hosted on GitHub: https://github.com/clvv/fad
 .PP
 If fad does not work as expected, please file a bug report on GitHub
 describing the unexpected behavior along with your OS version, shell
@@ -305,9 +305,9 @@ _FASD_SINK="$HOME/.fad.log"
 .fi
 .SH COPYING
 .PP
-Fasd is originally written based on code from z
+Fad is originally written based on code from z
 (https://github.com/rupa/z) by rupa deadwyler under the WTFPL license.
 Most if not all of the code has been rewritten.
-Fasd is licensed under the "MIT/X11" license.
+Fad is licensed under the "MIT/X11" license.
 .SH AUTHORS
 Wei Dai <x@wei23.net>.
