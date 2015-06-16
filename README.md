@@ -1,14 +1,17 @@
 # Fad
 
-Fad (pronounced similar to "fast") is a command-line productivity booster.
+Fad is a command-line productivity booster.
+
 Fad offers quick access to files and directories for POSIX shells. It is
 inspired by tools like [autojump](https://github.com/joelthelion/autojump),
 [z](http://github.com/rupa/z) and [v](https://github.com/rupa/v). Fad keeps
 track of files and directories you have accessed, so that you can quickly
 reference them in the command line.
 
-The name fad comes from the default suggested aliases `f`(files),
-`a`(files/directories), `s`(show/search/select), `d`(directories).
+The name fad can be simply interpreted as "**F**iles **A**nd **D**irectories",
+to which fad enables you to quickly access. The original name `fasd` comes
+from the default suggested aliases `f`(files), `a`(files/directories),
+`s`(show/search/select), `d`(directories).
 
 Fad ranks files and directories by "frecency," that is, by both "frequency" and
 "recency." The term "frecency" was first coined by Mozilla and used in Firefox
