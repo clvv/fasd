@@ -42,26 +42,26 @@ fad() {
           [ -s "$HOME/.fadrc" ] && . "$HOME/.fadrc"
 
           # set default options
-          [ -z "$_FASD_DATA" ] && _FASD_DATA="$HOME/.fad"
-          [ -z "$_FASD_BLACKLIST" ] && _FASD_BLACKLIST="--help"
-          [ -z "$_FASD_SHIFT" ] && _FASD_SHIFT="sudo busybox"
-          [ -z "$_FASD_IGNORE" ] && _FASD_IGNORE="fad ls echo"
-          [ -z "$_FASD_SINK" ] && _FASD_SINK=/dev/null
-          [ -z "$_FASD_TRACK_PWD" ] && _FASD_TRACK_PWD=1
-          [ -z "$_FASD_MAX" ] && _FASD_MAX=2000
-          [ -z "$_FASD_BACKENDS" ] && _FASD_BACKENDS=native
-          [ -z "$_FASD_FUZZY" ] && _FASD_FUZZY=2
-          [ -z "$_FASD_VIMINFO" ] && _FASD_VIMINFO="$HOME/.viminfo"
-          [ -z "$_FASD_RECENTLY_USED_XBEL" ] && \
-            _FASD_RECENTLY_USED_XBEL="$HOME/.local/share/recently-used.xbel"
+          [ -z "$_FAD_DATA" ] && _FAD_DATA="$HOME/.fad"
+          [ -z "$_FAD_BLACKLIST" ] && _FAD_BLACKLIST="--help"
+          [ -z "$_FAD_SHIFT" ] && _FAD_SHIFT="sudo busybox"
+          [ -z "$_FAD_IGNORE" ] && _FAD_IGNORE="fad ls echo"
+          [ -z "$_FAD_SINK" ] && _FAD_SINK=/dev/null
+          [ -z "$_FAD_TRACK_PWD" ] && _FAD_TRACK_PWD=1
+          [ -z "$_FAD_MAX" ] && _FAD_MAX=2000
+          [ -z "$_FAD_BACKENDS" ] && _FAD_BACKENDS=native
+          [ -z "$_FAD_FUZZY" ] && _FAD_FUZZY=2
+          [ -z "$_FAD_VIMINFO" ] && _FAD_VIMINFO="$HOME/.viminfo"
+          [ -z "$_FAD_RECENTLY_USED_XBEL" ] && \
+            _FAD_RECENTLY_USED_XBEL="$HOME/.local/share/recently-used.xbel"
 
-          if [ -z "$_FASD_AWK" ]; then
+          if [ -z "$_FAD_AWK" ]; then
             # awk preferences
             local awk; for awk in mawk gawk original-awk nawk awk; do
-              $awk "" && _FASD_AWK=$awk && break
+              $awk "" && _FAD_AWK=$awk && break
             done
           fi
-        } >> "${_FASD_SINK:-/dev/null}" 2>&1
+        } >> "${_FAD_SINK:-/dev/null}" 2>&1
         ;;
 
       auto) cat <<EOS
@@ -73,7 +73,7 @@ fad() {
   else # posix shell
     eval "\$(fad --init posix-alias posix-hook)"
   fi
-} >> "$_FASD_SINK" 2>&1
+} >> "$_FAD_SINK" 2>&1
 
 EOS
         ;;
@@ -115,7 +115,7 @@ EOS
       zsh-hook) cat <<EOS
 # add zsh hook
 _fad_preexec() {
-  { eval "fad --proc \$(fad --sanitize \$2)"; } >> "$_FASD_SINK" 2>&1
+  { eval "fad --proc \$(fad --sanitize \$2)"; } >> "$_FAD_SINK" 2>&1
 }
 autoload -Uz add-zsh-hook
 add-zsh-hook preexec _fad_preexec
@@ -126,7 +126,7 @@ EOS
       bash-hook) cat <<EOS
 _fad_prompt_func() {
   eval "fad --proc \$(fad --sanitize \$(history 1 | \\
-    sed "s/^[ ]*[0-9]*[ ]*//"))" >> "$_FASD_SINK" 2>&1
+    sed "s/^[ ]*[0-9]*[ ]*//"))" >> "$_FAD_SINK" 2>&1
 }
 
 # add bash hook
@@ -141,7 +141,7 @@ EOS
       posix-hook) cat <<EOS
 _fad_ps1_func() {
   { eval "fad --proc \$(fad --sanitize \$(fc -nl -1))"; } \\
-    >> "$_FASD_SINK" 2>&1
+    >> "$_FAD_SINK" 2>&1
 }
 case \$PS1 in
   *_fad_ps1_func*) ;;
@@ -179,7 +179,7 @@ EOS
     [ -z "\$_fad_cur" ] && local _fad_cur="\${words[CURRENT]}"
     local fnd="\${_fad_cur//,/ }"
     local typ=\${1:-e}
-    fad --query \$typ "\$fnd" 2>> "$_FASD_SINK" | \\
+    fad --query \$typ "\$fnd" 2>> "$_FAD_SINK" | \\
       sort -nr | sed 's/^[^ ]*[ ]*//' | while read -r line; do
         compadd -U -V fad "\$line"
       done
@@ -219,7 +219,7 @@ EOS
       zsh-wcomp-install) cat <<EOS
 (( \$+functions[compdef] )) && {
   # enable word mode completion
-  orig_comp="\$(zstyle -L ':completion:\\*' completer 2>> "$_FASD_SINK")"
+  orig_comp="\$(zstyle -L ':completion:\\*' completer 2>> "$_FAD_SINK")"
   if [ "\$orig_comp" ]; then
     case \$orig_comp in
       *_fad_zsh_word_complete_trigger*);;
@@ -247,7 +247,7 @@ _fad_bash_cmd_complete() {
   esac
   # get completion results using expanded aliases
   local RESULT=\$( fad --complete "\$(alias -p \$COMP_WORDS \\
-    2>> "$_FASD_SINK" | sed -n "\\\$s/^.*'\\\\(.*\\\\)'/\\\\1/p")
+    2>> "$_FAD_SINK" | sed -n "\\\$s/^.*'\\\\(.*\\\\)'/\\\\1/p")
     \${COMP_LINE#* }" | while read -r line; do
       quote_readline "\$line" 2>/dev/null || \\
         printf %q "\$line" 2>/dev/null  && \\
@@ -293,24 +293,24 @@ EOS
     ;;
 
   --proc) shift # process commands
-    # stop if we don't own $_FASD_DATA or $_FASD_RO is set
-    [ -f "$_FASD_DATA" -a ! -O "$_FASD_DATA" ] || [ "$_FASD_RO" ] && return
+    # stop if we don't own $_FAD_DATA or $_FAD_RO is set
+    [ -f "$_FAD_DATA" -a ! -O "$_FAD_DATA" ] || [ "$_FAD_RO" ] && return
 
     # blacklists
-    local each; for each in $_FASD_BLACKLIST; do
+    local each; for each in $_FAD_BLACKLIST; do
       case " $* " in *\ $each\ *) return;; esac
     done
 
     # shifts
     while true; do
-      case " $_FASD_SHIFT " in
+      case " $_FAD_SHIFT " in
         *\ $1\ *) shift;;
         *) break;;
       esac
     done
 
     # ignores
-    case " $_FASD_IGNORE " in
+    case " $_FAD_IGNORE " in
       *\ $1\ *) return;;
     esac
 
@@ -318,8 +318,8 @@ EOS
     ;;
 
   --add|-A) shift # add entries
-    # stop if we don't own $_FASD_DATA or $_FASD_RO is set
-    [ -f "$_FASD_DATA" -a ! -O "$_FASD_DATA" ] || [ "$_FASD_RO" ] && return
+    # stop if we don't own $_FAD_DATA or $_FAD_RO is set
+    [ -f "$_FAD_DATA" -a ! -O "$_FAD_DATA" ] || [ "$_FAD_RO" ] && return
 
     # find all valid path arguments, convert them to simplest absolute form
     local paths="$(while [ "$1" ]; do
@@ -327,18 +327,18 @@ EOS
     done | sed '/^[^/]/s@^@'"$PWD"'/@
       s@/\.\.$@/../@;s@/\(\./\)\{1,\}@/@g;:0
       s@[^/][^/]*//*\.\./@/@;t 0
-      s@^/*\.\./@/@;s@//*@/@g;s@/\.\{0,1\}$@@;s@^$@/@' 2>> "$_FASD_SINK" \
+      s@^/*\.\./@/@;s@//*@/@g;s@/\.\{0,1\}$@@;s@^$@/@' 2>> "$_FAD_SINK" \
       | tr '\n' '|')"
 
     # add current pwd if the option is set
-    [ "$_FASD_TRACK_PWD" = "1" -a "$PWD" != "$HOME" ] && paths="$paths|$PWD"
+    [ "$_FAD_TRACK_PWD" = "1" -a "$PWD" != "$HOME" ] && paths="$paths|$PWD"
 
     [ -z "${paths##\|}" ] && return # stop if we have nothing to add
 
     # maintain the file
     local tempfile
-    tempfile="$(mktemp "$_FASD_DATA".XXXXXX)" || return
-    $_FASD_AWK -v list="$paths" -v now="$(date +%s)" -v max="$_FASD_MAX" -F"|" '
+    tempfile="$(mktemp "$_FAD_DATA".XXXXXX)" || return
+    $_FAD_AWK -v list="$paths" -v now="$(date +%s)" -v max="$_FAD_MAX" -F"|" '
       BEGIN {
         split(list, files, "|")
         for(i in files) {
@@ -364,50 +364,50 @@ EOS
           for(i in rank) print i "|" 0.9*rank[i] "|" time[i] # aging
         else
           for(i in rank) print i "|" rank[i] "|" time[i]
-      }' "$_FASD_DATA" 2>> "$_FASD_SINK" >| "$tempfile"
-    if [ $? -ne 0 -a -f "$_FASD_DATA" ]; then
+      }' "$_FAD_DATA" 2>> "$_FAD_SINK" >| "$tempfile"
+    if [ $? -ne 0 -a -f "$_FAD_DATA" ]; then
       env rm -f "$tempfile"
     else
-      env mv -f "$tempfile" "$_FASD_DATA"
+      env mv -f "$tempfile" "$_FAD_DATA"
     fi
     ;;
 
   --delete|-D) shift # delete entries
-    # stop if we don't own $_FASD_DATA or $_FASD_RO is set
-    [ -f "$_FASD_DATA" -a ! -O "$_FASD_DATA" ] || [ "$_FASD_RO" ] && return
+    # stop if we don't own $_FAD_DATA or $_FAD_RO is set
+    [ -f "$_FAD_DATA" -a ! -O "$_FAD_DATA" ] || [ "$_FAD_RO" ] && return
 
     # turn valid arguments into entry-deleting sed commands
     local sed_cmd="$(while [ "$1" ]; do printf %s\\n "$1"; shift; done | \
       sed '/^[^/]/s@^@'"$PWD"'/@;s@/\.\.$@/../@;s@/\(\./\)\{1,\}@/@g;:0
         s@[^/][^/]*//*\.\./@/@;t 0
         s@^/*\.\./@/@;s@//*@/@g;s@/\.\{0,1\}$@@
-        s@^$@/@;s@\([.[\/*^$]\)@\\\1@g;s@^\(.*\)$@/^\1|/d@' 2>> "$_FASD_SINK")"
+        s@^$@/@;s@\([.[\/*^$]\)@\\\1@g;s@^\(.*\)$@/^\1|/d@' 2>> "$_FAD_SINK")"
 
     # maintain the file
     local tempfile
-    tempfile="$(mktemp "$_FASD_DATA".XXXXXX)" || return
+    tempfile="$(mktemp "$_FAD_DATA".XXXXXX)" || return
 
-    sed "$sed_cmd" "$_FASD_DATA" 2>> "$_FASD_SINK" >| "$tempfile"
+    sed "$sed_cmd" "$_FAD_DATA" 2>> "$_FAD_SINK" >| "$tempfile"
 
-    if [ $? -ne 0 -a -f "$_FASD_DATA" ]; then
+    if [ $? -ne 0 -a -f "$_FAD_DATA" ]; then
       env rm -f "$tempfile"
     else
-      env mv -f "$tempfile" "$_FASD_DATA"
+      env mv -f "$tempfile" "$_FAD_DATA"
     fi
     ;;
 
   --query) shift # query the db, --query [$typ ["$fnd" [$mode]]]
-    [ -f "$_FASD_DATA" ] || return # no db yet
+    [ -f "$_FAD_DATA" ] || return # no db yet
     [ "$1" ] && local typ="$1"
     [ "$2" ] && local fnd="$2"
     [ "$3" ] && local mode="$3"
 
     # cat all backends
-    local each _fad_data; for each in $_FASD_BACKENDS; do
+    local each _fad_data; for each in $_FAD_BACKENDS; do
       _fad_data="$_fad_data
 $(fad --backend $each)"
     done
-    [ "$_fad_data" ] || _fad_data="$(cat "$_FASD_DATA")"
+    [ "$_fad_data" ] || _fad_data="$(cat "$_FAD_DATA")"
 
     # set mode specific code for calculating the prior
     case $mode in
@@ -433,10 +433,10 @@ $(fad --backend $each)"
         done)"
         if [ "$_ret" ]; then
           _fad_data="$_ret"
-        elif [ "${_FASD_FUZZY:-0}" -gt 0 ]; then # fuzzy matching
+        elif [ "${_FAD_FUZZY:-0}" -gt 0 ]; then # fuzzy matching
           local fuzzy_bre="$(printf %s\\n "$fnd" | \
             sed 's/\([*\.\\\[]\)/\\\1/g;s/\$$/|/
-              s@\(\\\{0,1\}[^ ]\)@\1[^|/]\\{0,'"$_FASD_FUZZY"'\\}@g
+              s@\(\\\{0,1\}[^ ]\)@\1[^|/]\\{0,'"$_FAD_FUZZY"'\\}@g
               s@ @[^|]*@g')"
           fuzzy_bre='^[^|]*'"$fuzzy_bre"'[^|/]*|'
           _ret="$(printf %s\\n "$_fad_data" | grep -i "$fuzzy_bre")"
@@ -454,7 +454,7 @@ $(fad --backend $each)"
 
     # query the database
     [ "$_fad_data" ] && printf %s\\n "$_fad_data" | \
-      $_FASD_AWK -v t="$(date +%s)" -F"|" '
+      $_FAD_AWK -v t="$(date +%s)" -F"|" '
       function frecent(time) {
         dx = t-time
         if( dx < 3600 ) return 6
@@ -474,26 +474,26 @@ $(fad --backend $each)"
       }
       END {
         for(i in paths) printf "%-10s %s\n", '"$prior"', i
-      }' - 2>> "$_FASD_SINK"
+      }' - 2>> "$_FAD_SINK"
     ;;
 
   --backend)
     case $2 in
-      native) cat "$_FASD_DATA";;
+      native) cat "$_FAD_DATA";;
       viminfo)
-        < "$_FASD_VIMINFO" sed -n '/^>/{s@~@'"$HOME"'@
+        < "$_FAD_VIMINFO" sed -n '/^>/{s@~@'"$HOME"'@
           s/^..//
           p
-          }' | $_FASD_AWK -v t="$(date +%s)" '{
+          }' | $_FAD_AWK -v t="$(date +%s)" '{
             t -= 60
             print $0 "|1|" t
           }'
         ;;
       recently-used)
         local nl="$(printf '\\\nX')"; nl="${nl%X}" # slash newline for sed
-        tr -d '\n' < "$_FASD_RECENTLY_USED_XBEL" | \
+        tr -d '\n' < "$_FAD_RECENTLY_USED_XBEL" | \
           sed 's@file:/@'"$nl"'@g;s@count="@'"$nl"'@g' | sed '1d;s/".*$//' | \
-          tr '\n' '|' | sed 's@|/@'"$nl"'@g' | $_FASD_AWK -F'|' '{
+          tr '\n' '|' | sed 's@|/@'"$nl"'@g' | $_FAD_AWK -F'|' '{
             sum = 0
             for( i=2; i<=NF; i++ ) sum += $i
             print $1 "|" sum
@@ -516,7 +516,7 @@ $(fad --backend $each)"
     ;;
 
   *) # parsing logic and processing
-    local fnd= last= _FASD_BACKENDS="$_FASD_BACKENDS" _fad_data= comp= exec=
+    local fnd= last= _FAD_BACKENDS="$_FAD_BACKENDS" _fad_data= comp= exec=
     while [ "$1" ]; do case $1 in
       --complete) [ "$2" = "--" ] && shift; set -- $2; local lst=1 r=r comp=1;;
       --query|--add|--delete|-A|-D) fad "$@"; return $?;;
@@ -535,15 +535,15 @@ $(fad --backend $each)"
                 shift
               fi; break;;
           b*) o="${o#?}"; if [ "$o" ]; then
-                _FASD_BACKENDS="$o"
+                _FAD_BACKENDS="$o"
               else
-                _FASD_BACKENDS="${2:?"-b: Argument needed"}"
+                _FAD_BACKENDS="${2:?"-b: Argument needed"}"
                 shift
               fi; break;;
           B*) o="${o#?}"; if [ "$o" ]; then
-                _FASD_BACKENDS="$_FASD_BACKENDS $o"
+                _FAD_BACKENDS="$_FAD_BACKENDS $o"
               else
-                _FASD_BACKENDS="$_FASD_BACKENDS ${2:?"-B: Argument needed"}"
+                _FAD_BACKENDS="$_FAD_BACKENDS ${2:?"-B: Argument needed"}"
                 shift
               fi; break;;
           a*) local typ=e;;
@@ -588,9 +588,9 @@ fad [-A|-D] [paths ...]
     fnd="${fnd# }"
 
     local res
-    res="$(fad --query 2>> "$_FASD_SINK")" # query the database
+    res="$(fad --query 2>> "$_FAD_SINK")" # query the database
     [ $? -gt 0 ] && return
-    if [ 0 -lt ${_fad_i:-0} ] 2>> "$_FASD_SINK"; then
+    if [ 0 -lt ${_fad_i:-0} ] 2>> "$_FAD_SINK"; then
       res="$(printf %s\\n "$res" | sort -n${R} | \
         sed -n "$_fad_i"'s/^[^ ]*[ ]*//p')"
     elif [ "$interactive" ] || [ "$exec" -a -z "$fnd$lst$show" -a -t 1 ]; then
@@ -598,7 +598,7 @@ fad [-A|-D] [paths ...]
         res="$(printf %s\\n "$res" | sort -n${R})"
         printf %s\\n "$res" | sed = | sed 'N;s/\n/	/' | sort -nr >&2
         printf "> " >&2
-        local i; read i; [ 0 -lt "${i:-0}" ] 2>> "$_FASD_SINK" || return 1
+        local i; read i; [ 0 -lt "${i:-0}" ] 2>> "$_FAD_SINK" || return 1
       fi
       res="$(printf %s\\n "$res" | sed -n "${i:-1}"'s/^[^ ]*[ ]*//p')"
     elif [ "$lst" ]; then
@@ -627,8 +627,8 @@ fad --init env
 case $- in
   *i*) ;; # assume being sourced, do nothing
   *) # assume being executed as an executable
-    if [ -x "$_FASD_SHELL" -a -z "$_FASD_SET" ]; then
-      _FASD_SET=1 exec $_FASD_SHELL "$0" "$@"
+    if [ -x "$_FAD_SHELL" -a -z "$_FAD_SET" ]; then
+      _FAD_SET=1 exec $_FAD_SHELL "$0" "$@"
     else
       fad "$@"
     fi;;

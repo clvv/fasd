@@ -293,7 +293,7 @@ things in vim
 ```
 
 You can define your own backend by declaring a function by that name in your
-`.fadrc`. You can set default backend with `_FASD_BACKENDS` variable in our
+`.fadrc`. You can set default backend with `_FAD_BACKENDS` variable in our
 `.fadrc`.
 
 Fad can mimic [v](http://github.com/rupa/v)'s behavior by this alias:
@@ -308,51 +308,51 @@ Some shell variables that you can set before sourcing `fad`. You can set them
 in `$HOME/.fadrc`
 
 ```
-$_FASD_DATA
+$_FAD_DATA
 Path to the fad data file, default "$HOME/.fad".
 
-$_FASD_BLACKLIST
+$_FAD_BLACKLIST
 List of blacklisted strings. Commands matching them will not be processed.
 Default is "--help".
 
-$_FASD_SHIFT
+$_FAD_SHIFT
 List of all commands that needs to be shifted, defaults to "sudo busybox".
 
-$_FASD_IGNORE
+$_FAD_IGNORE
 List of all commands that will be ignored, defaults to "fad ls echo".
 
-$_FASD_TRACK_PWD
+$_FAD_TRACK_PWD
 Fad defaults to track your "$PWD". Set this to 0 to disable this behavior.
 
-$_FASD_AWK
+$_FAD_AWK
 Which awk to use. Fad can detect and use a compatible awk.
 
-$_FASD_SINK
+$_FAD_SINK
 File to log all STDERR to, defaults to "/dev/null".
 
-$_FASD_MAX
+$_FAD_MAX
 Max total score / weight, defaults to 2000.
 
-$_FASD_SHELL
+$_FAD_SHELL
 Which shell to execute. Some shells will run faster than others. fad
 runs faster with dash and ksh variants.
 
-$_FASD_BACKENDS
+$_FAD_BACKENDS
 Default backends.
 
-$_FASD_RO
+$_FAD_RO
 If set to any non-empty string, fad will not add or delete entries from
 database. You can set and export this variable from command line.
 
-$_FASD_FUZZY
+$_FAD_FUZZY
 Level of "fuzziness" when doing fuzzy matching. More precisely, the number of
 characters that can be skipped to generate a match. Set to empty or 0 to
 disable fuzzy matching. Default value is 2.
 
-$_FASD_VIMINFO
+$_FAD_VIMINFO
 Path to .viminfo file for viminfo backend, defaults to "$HOME/.viminfo"
 
-$_FASD_RECENTLY_USED_XBEL
+$_FAD_RECENTLY_USED_XBEL
 Path to XDG recently-used.xbel file for recently-used backend, defaults to
 "$HOME/.local/share/recently-used.xbel"
 
@@ -364,10 +364,10 @@ If fad does not work as expected, please file a bug report describing the
 unexpected behavior along with your OS version, shell version, awk version, sed
 version, and a log file.
 
-You can set `_FASD_SINK` in your `.fadrc` to obtain a log.
+You can set `_FAD_SINK` in your `.fadrc` to obtain a log.
 
 ```sh
-_FASD_SINK="$HOME/.fad.log"
+_FAD_SINK="$HOME/.fad.log"
 ```
 
 # COPYING
