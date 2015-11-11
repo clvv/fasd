@@ -589,7 +589,8 @@ fasd [-A|-D] [paths ...]
 
     local res
     res="$(fasd --query 2>> "$_FASD_SINK")" # query the database
-    [ $? -gt 0 ] && return
+    exitCode=$?
+    [ $exitCode -gt 0 ] && return $exitCode
     if [ 0 -lt ${_fasd_i:-0} ] 2>> "$_FASD_SINK"; then
       res="$(printf %s\\n "$res" | sort -n${R} | \
         sed -n "$_fasd_i"'s/^[^ ]*[ ]*//p')"
