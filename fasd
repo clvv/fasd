@@ -125,8 +125,11 @@ EOS
 
       bash-hook) cat <<EOS
 _fasd_prompt_func() {
+  local _exit_code="\$?"
   eval "fasd --proc \$(fasd --sanitize \$(history 1 | \\
     sed "s/^[ ]*[0-9]*[ ]*//"))" >> "$_FASD_SINK" 2>&1
+  # preserve exit code
+  return \$_exit_code
 }
 
 # add bash hook
