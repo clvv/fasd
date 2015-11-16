@@ -52,6 +52,7 @@ fasd() {
           [ -z "$_FASD_BACKENDS" ] && _FASD_BACKENDS=native
           [ -z "$_FASD_FUZZY" ] && _FASD_FUZZY=2
           [ -z "$_FASD_VIMINFO" ] && _FASD_VIMINFO="$HOME/.viminfo"
+          [ -z "$_FASD_RESOLVE_SYMLINKS" ] && _FASD_RESOLVE_SYMLINKS=0
           [ -z "$_FASD_RECENTLY_USED_XBEL" ] && \
             _FASD_RECENTLY_USED_XBEL="$HOME/.local/share/recently-used.xbel"
 
@@ -328,10 +329,13 @@ EOS
       s@/\.\.$@/../@;s@/\(\./\)\{1,\}@/@g;:0
       s@[^/][^/]*//*\.\./@/@;t 0
       s@^/*\.\./@/@;s@//*@/@g;s@/\.\{0,1\}$@@;s@^$@/@' 2>> "$_FASD_SINK" \
+      | ( [ $_FASD_RESOLVE_SYMLINKS = 1 ] && xargs -I {} readlink -f {} || cat ) \
       | tr '\n' '|')"
 
     # add current pwd if the option is set
-    [ "$_FASD_TRACK_PWD" = "1" -a "$PWD" != "$HOME" ] && paths="$paths|$PWD"
+    local pwd="$PWD"
+    [ $_FASD_RESOLVE_SYMLINKS = 1 ] && pwd="$(readlink -f "$pwd")"
+    [ "$_FASD_TRACK_PWD" = 1 -a "$PWD" != "$HOME" ] && paths="$paths|$pwd"
 
     [ -z "${paths##\|}" ] && return # stop if we have nothing to add
 
