@@ -204,7 +204,7 @@ order:
 Below are the available variables you can set:
 
     $_FASD_DATA
-    Path to the fasd data file, default "$HOME/.fasd".
+    Path to the fasd data file, default "$XDG_CACHE_HOME/fasd" or "$HOME/.cache/fasd" if $XDG_CACHE_HOME is not set.
 
     $_FASD_BLACKLIST
     List of blacklisted strings. Commands matching them will not be processed.
