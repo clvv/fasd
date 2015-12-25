@@ -37,12 +37,32 @@ fasd() {
     while [ "$1" ]; do
       case $1 in
         env)
-          { # source rc files if present
-          [ -s "/etc/fasdrc" ] && . "/etc/fasdrc"
-          [ -s "$HOME/.fasdrc" ] && . "$HOME/.fasdrc"
+          { # Load configuration file based on XDG Base Directory Spec.
+
+          if [ -s "$XDG_CONFIG_HOME/fasd/config" ]; then
+            . "$XDG_CONFIG_HOME/fasd/config"
+          # Fallback for when $XDG_CONFIG_HOME is unset
+          elif [ -s "$HOME/.config/fasd/config" ]; then
+            . "$HOME/.config/fasd/config"
+          elif [ -s "$XDG_CONFIG_DIRS/fasd/config" ]; then
+            . "$XDG_CONFIG_DIRS/fasd/config"
+          # Fallback for when $XDG_CONFIG_DIRS is unset
+          elif [ -s "/etc/xdg/fasd/config" ]; then
+            . "/etc/xdg/fasd/config"
+          # Fallback to old rc for backward compatibility
+          else
+            [ -s "/etc/fasdrc" ] && . "/etc/fasdrc"
+            [ -s "$HOME/.fasdrc" ] && . "$HOME/.fasdrc"
+          fi
 
           # set default options
-          [ -z "$_FASD_DATA" ] && _FASD_DATA="$HOME/.fasd"
+          if [ -z "$_FASD_DATA" ]; then
+            if [ -n "$XDG_CACHE_HOME" ]; then
+              _FASD_DATA="$XDG_CACHE_HOME/fasd"
+            else
+              _FASD_DATA="$HOME/.cache/fasd"
+            fi
+          fi
           [ -z "$_FASD_BLACKLIST" ] && _FASD_BLACKLIST="--help"
           [ -z "$_FASD_SHIFT" ] && _FASD_SHIFT="sudo busybox"
           [ -z "$_FASD_IGNORE" ] && _FASD_IGNORE="fasd ls echo"
