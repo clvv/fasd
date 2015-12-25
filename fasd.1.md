@@ -1,5 +1,5 @@
 % FASD(1) fasd user manual
-% Wei Dai <x@wei23.net>
+% Wei Dai <x@wei23.net> and contributors
 % Jul 16, 2012
 
 # NAME
@@ -187,13 +187,21 @@ backends.
   for editing things in vim
 
 You can define your own backend by declaring a function by that name in your
-`.fasdrc`. You can set default backend with `_FASD_BACKENDS` variable in our
-`.fasdrc`.
+[configuration file](#configuration). You can set default backend with `_FASD_BACKENDS` variable.
 
-# TWEAKS
 
-Upon every execution, fasd will source "/etc/fasdrc" and "$HOME/.fasdrc" if
-they are present. Below are some variables you can set:
+# CONFIGURATION
+
+Upon every execution, fasd will look for a configuration file in the following
+order:
+
+1. `$XDG_CONFIG_HOME/fasd/config`
+2. `$HOME/.config/fasd/config`
+3. `$XDG_CONFIG_DIRS/fasd/config`
+4. `/etc/xdg/fasd/config`
+5. `/etc/fasdrc` and `$HOME/.fasdrc` (for backward compatibility)
+
+Below are the available variables you can set:
 
     $_FASD_DATA
     Path to the fasd data file, default "$HOME/.fasd".
@@ -251,9 +259,9 @@ If fasd does not work as expected, please file a bug report on GitHub describing
 the unexpected behavior along with your OS version, shell version, awk version,
 sed version, and a log file.
 
-You can set `_FASD_SINK` in your `.fasdrc` to obtain a log.
+You can set `_FASD_SINK` in your [configuration file](#configuration) to obtain a log.
 
-    _FASD_SINK="$HOME/.fasd.log"
+    _FASD_SINK="$HOME/fasd.log"
 
 # COPYING
 
