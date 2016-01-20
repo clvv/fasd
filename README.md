@@ -25,7 +25,7 @@ will "expand" your command into the right side. Pretty magic, huh?
 
 ```
   v def conf       =>     vim /some/awkward/path/to/type/default.conf
-  j abc            =>     cd /hell/of/a/awkward/path/to/get/to/abcdef
+  j abc            =>     cd /hell/of/an/awkward/path/to/get/to/abcdef
   m movie          =>     mplayer /whatever/whatever/whatever/awesome_movie.mp4
   o eng paper      =>     xdg-open /you/dont/remember/where/english_paper.pdf
   vim `f rc lo`    =>     vim /etc/rc.local
