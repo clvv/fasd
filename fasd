@@ -125,8 +125,9 @@ EOS
 
       bash-hook) cat <<EOS
 _fasd_prompt_func() {
-  eval "fasd --proc \$(fasd --sanitize \$(history 1 | \\
-    sed "s/^[ ]*[0-9]*[ ]*//"))" >> "$_FASD_SINK" 2>&1
+    local cmd=\$(history 1)
+    [[ "\$cmd" =~ ^[\ ]*[0-9]*[\ ]*(.*) ]] && cmd=\${BASH_REMATCH[1]}
+  eval "fasd --proc \$(fasd --sanitize \$cmd)" >> "$_FASD_SINK" 2>&1
 }
 
 # add bash hook
@@ -287,9 +288,14 @@ EOS
     esac
     ;;
 
-  --sanitize) shift; printf %s\\n "$*" | \
-      sed 's/\([^\]\)$( *[^ ]* *\([^)]*\)))*/\1\2/g
-        s/\([^\]\)[|&;<>$`{}]\{1,\}/\1 /g'
+  # sanitize: it seems this is meant to remove most shell operators,
+  # leaving only word-like arguments
+  --sanitize) shift; local y="$*"$'\n'
+      if [[ "$y" =~ [^\][|\&\;\<\>$\`{}$'\n'] ]]; then
+          sed 's/\([^\]\)$( *[^ ]* *\([^)]*\)))*/\1\2/g
+               s/\([^\]\)[|&;<>$`{}]\{1,\}/\1 /g' <<< "$y"
+      else echo "$y"
+      fi
     ;;
 
   --proc) shift # process commands
@@ -322,24 +328,31 @@ EOS
     [ -f "$_FASD_DATA" -a ! -O "$_FASD_DATA" ] || [ "$_FASD_RO" ] && return
 
     # find all valid path arguments, convert them to simplest absolute form
-    local paths="$(while [ "$1" ]; do
-      [ -e "$1" ] && printf %s\\n "$1"; shift
-    done | sed '/^[^/]/s@^@'"$PWD"'/@
+    local paths=""
+    while [ "$1" ]; do
+        [ -e "$1" ] && paths+="$1"$'\n'; shift
+    done
+    paths="$(sed '/^[^/]/s@^@'"$PWD"'/@
       s@/\.\.$@/../@;s@/\(\./\)\{1,\}@/@g;:0
       s@[^/][^/]*//*\.\./@/@;t 0
-      s@^/*\.\./@/@;s@//*@/@g;s@/\.\{0,1\}$@@;s@^$@/@' 2>> "$_FASD_SINK" \
-      | tr '\n' '|')"
+      s@^/*\.\./@/@;s@//*@/@g;s@/\.\{0,1\}$@@;s@^$@/@' 2>> "$_FASD_SINK" <<< "$paths")"
+    paths=${paths//$'\n'/|}
 
     # add current pwd if the option is set
     [ "$_FASD_TRACK_PWD" = "1" -a "$PWD" != "$HOME" ] && paths="$paths|$PWD"
 
     [ -z "${paths##\|}" ] && return # stop if we have nothing to add
 
-    # maintain the file
-    local tempfile
-    tempfile="$(mktemp "$_FASD_DATA".XXXXXX)" || return
-    $_FASD_AWK -v list="$paths" -v now="$(date +%s)" -v max="$_FASD_MAX" -F"|" '
+    # backup the data file and write a new file in place
+    local backupFile
+    backupFile="$_FASD_DATA".??????
+    if [ ! -e $backupFile ]; then
+        backupFile="$(mktemp "$_FASD_DATA".XXXXXX)" || return
+    fi
+    env mv -f "$_FASD_DATA" "$backupFile"
+    $_FASD_AWK -v list="$paths" -v max="$_FASD_MAX" -F"|" '
       BEGIN {
+        now = systime()
         split(list, files, "|")
         for(i in files) {
           path = files[i]
@@ -364,11 +377,11 @@ EOS
           for(i in rank) print i "|" 0.9*rank[i] "|" time[i] # aging
         else
           for(i in rank) print i "|" rank[i] "|" time[i]
-      }' "$_FASD_DATA" 2>> "$_FASD_SINK" >| "$tempfile"
-    if [ $? -ne 0 -a -f "$_FASD_DATA" ]; then
-      env rm -f "$tempfile"
-    else
-      env mv -f "$tempfile" "$_FASD_DATA"
+      }' "$backupFile" 2>> "$_FASD_SINK" >| "$_FASD_DATA"
+    # in case of failure, restore the backed-up file
+    if [ $? -ne 0 -a -f "$backupFile" ]; then
+      env mv -f "$backupFile" "$_FASD_DATA"
+      touch "$backupFile"
     fi
     ;;
 
