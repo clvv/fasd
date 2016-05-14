@@ -115,7 +115,7 @@ EOS
       zsh-hook) cat <<EOS
 # add zsh hook
 _fasd_preexec() {
-  { eval "fasd --proc \$(fasd --sanitize \$2)"; } >> "$_FASD_SINK" 2>&1
+  { eval "fasd --proc \$(fasd --sanitize \$1)"; } >> "$_FASD_SINK" 2>&1
 }
 autoload -Uz add-zsh-hook
 add-zsh-hook preexec _fasd_preexec
@@ -210,7 +210,7 @@ EOS
         ;;
 
       zsh-ccomp-install) cat <<EOS
-# enable command mode completion
+# enbale command mode completion
 compctl -U -K _fasd_zsh_cmd_complete -V fasd -x 'C[-1,-*e],s[-]n[1,e]' -c - \\
   'c[-1,-A][-1,-D]' -f -- fasd fasd_cd
 
@@ -332,11 +332,13 @@ EOS
     while [ "$1" ]; do
         [ -e "$1" ] && paths+="$1"$'\n'; shift
     done
+time {
     paths="$(sed '/^[^/]/s@^@'"$PWD"'/@
       s@/\.\.$@/../@;s@/\(\./\)\{1,\}@/@g;:0
       s@[^/][^/]*//*\.\./@/@;t 0
       s@^/*\.\./@/@;s@//*@/@g;s@/\.\{0,1\}$@@;s@^$@/@' 2>> "$_FASD_SINK" <<< "$paths")"
     paths=${paths//$'\n'/|}
+}
 
     # add current pwd if the option is set
     [ "$_FASD_TRACK_PWD" = "1" -a "$PWD" != "$HOME" ] && paths="$paths|$PWD"
@@ -344,40 +346,125 @@ EOS
     [ -z "${paths##\|}" ] && return # stop if we have nothing to add
 
     # backup the data file and write a new file in place
-    local backupFile
-    backupFile="$_FASD_DATA".??????
-    if [ ! -e $backupFile ]; then
+    local backupFile="$_FASD_DATA".??????
+    if [ ! -f $backupFile ]; then
         backupFile="$(mktemp "$_FASD_DATA".XXXXXX)" || return
     fi
+time {
     env mv -f "$_FASD_DATA" "$backupFile"
-    $_FASD_AWK -v list="$paths" -v max="$_FASD_MAX" -F"|" '
-      BEGIN {
-        now = systime()
-        split(list, files, "|")
-        for(i in files) {
-          path = files[i]
-          if(path == "") continue
-          paths[path] = path # array for checking
-          rank[path] = 1
-          time[path] = now
-        }
-      }
-      $2 >= 1 {
-        if($1 in paths) {
-          rank[$1] = $2 + 1 / $2
-          time[$1] = now
-        } else {
-          rank[$1] = $2
-          time[$1] = $3
-        }
-        count += $2
-      }
-      END {
-        if(count > max)
-          for(i in rank) print i "|" 0.9*rank[i] "|" time[i] # aging
-        else
-          for(i in rank) print i "|" rank[i] "|" time[i]
-      }' "$backupFile" 2>> "$_FASD_SINK" >| "$_FASD_DATA"
+}
+
+    declare -A ranks times
+	local max="$_FASD_MAX"
+    local now=$(date +%s)
+    local iCount fCount
+    OLDFS="$IFS"; IFS='|'
+    for fname in $paths; do
+        [[ -z "$fname" ]] && continue
+        ranks[$fname]=1
+        times[$fname]=$now
+    done
+    IFS="$OLDFS"
+
+	declare -r scale=6
+    ((fCount=10**scale)); fCount=${fCount:1}  # "scale" zeros
+
+    populate_ranks_and_times() {
+		# Parse the current line from the input file
+		[[ $2 =~ (.*)\|(([0-9]+)(\.([0-9]*))?)\|(.*) ]]
+		fname=${BASH_REMATCH[1]}
+		#rank=${BASH_REMATCH[2]}
+		iRank=${BASH_REMATCH[3]}
+		fRank=${BASH_REMATCH[5]}
+		time=${BASH_REMATCH[6]}
+
+		local d=0
+
+        if ((iRank>=1)); then
+		  if [[ -n "${ranks[${fname}]}" ]]; then
+
+			((top = 10**${#fRank}))         # to int
+			bot=$iRank$fRank              # to int
+            # Divide top/bot with integer round:    quotient = (a/b) + (a%b > b/2)
+            ((prelim = (top*10**scale)/bot + ((top*10**scale)%bot > bot/2)))
+
+			# Prepare to shift the decimal left. If the preliminary quotient has too few
+			# digits, then left-pad it out to "scale" digits
+			((d=scale-${#prelim}))
+			if ((d>0)); then
+				prelim=$((10**d))$prelim
+				prelim=${prelim:1}
+			fi
+
+			# Break the preliminary quotient at the decimal point
+			iPart=${prelim:0:-$scale}
+			fPart=${prelim:${#prelim}-$scale}   # the last "scale" digits
+
+			# Add, compensating for precision and overflow
+            ((total_fRank=fRank*10**(scale-${#fRank})))   # rescale fRank to have "scale" digits
+			((total_iRank=iRank+iPart))
+			((total_fRank+=fPart))     # This sum might overflow, hence the following "if".
+			if ((${#total_fRank} > scale)); then
+			  total_fRank=${total_fRank:1}
+			  ((total_iRank+=1))
+			fi
+
+			# Populate the data arrays.
+			rank=$total_iRank
+			[[ -n $total_fRank ]] && rank+=.$total_fRank
+            ranks[$fname]=$rank
+            times[$fname]=$now
+
+          else
+            # Populate the data arrays.
+            rank=$iRank
+            [[ -n $fRank ]] && rank+=.$fRank
+            ranks[$fname]=$rank
+            times[$fname]=$time
+          fi
+
+		  # Increase the count. Be careful about precision and overflow.
+		  ((d=scale-${#fRank}))
+		  if ((d>0)); then ((fRank*=10**d)); fi
+		  ((iCount+=iRank))
+		  ((fCount+=fRank))
+		  if ((${#fCount} > scale)); then
+			fCount=${fCount:1}
+			((iCount++))
+		  fi
+		fi
+    }
+
+    mapfile -t -c 1 -C populate_ranks_and_times < "$backupFile"
+
+	if ((iCount > max)); then
+		for fname in "${!ranks[@]}"; do
+            [[ "${ranks[$fname]}" =~ ([0-9]*)\.([0-9]*) ]]
+            iRank=${BASH_REMATCH[1]}
+            fRank=${BASH_REMATCH[2]}
+            
+			# Multiply the rank by 0.9: first divide by 10, then multiply by 9.
+            fRank=$((iRank%10))$((fRank/10 + 2*fRank%10))  # Divide by 10 and round.
+            ((iRank/=10))
+            
+            d=${#fRank}
+            ((fRank*=9)); ((iRank*=9))
+            if ((${#fRank}>d)); then
+                ((iRank+=${fRank:0:1}))
+                fRank=${fRank:1}
+            fi
+
+            # Represent the rank as a decimal value
+            rank=$iRank; if ((fRank>0)); then rank+=.${fRank}; fi
+
+			echo $fname"|"$rank"|"${times[$fname]} 2>> "$_FASD_SINK" >> "$_FASD_DATA"   # >| "$_FASD_DATA"
+		done
+	else
+		for fname in "${!ranks[@]}"; do
+			echo $fname"|"${ranks[$fname]}"|"${times[$fname]} 2>> "$_FASD_SINK" >> "$_FASD_DATA"   #  >| "$_FASD_DATA"
+		done
+    fi
+
     # in case of failure, restore the backed-up file
     if [ $? -ne 0 -a -f "$backupFile" ]; then
       env mv -f "$backupFile" "$_FASD_DATA"
@@ -512,18 +599,6 @@ $(fasd --backend $each)"
             print $1 "|" sum
           }'
         ;;
-      current)
-        for path in *; do
-          printf "$PWD/%s|1\\n" "$path"
-        done
-        ;;
-      spotlight)
-        mdfind '(kMDItemFSContentChangeDate >= $time.today) ||
-          kMDItemLastUsedDate >= $time.this_month' \
-          | sed '/Library\//d
-            /\.app$/d
-            s/$/|2/'
-        ;;
       *) eval "$2";;
     esac
     ;;
@@ -565,7 +640,7 @@ $(fasd --backend $each)"
           R*) local r=r;;
       [0-9]*) local _fasd_i="$o"; break;;
           h*) [ -z "$comp" ] && echo "fasd [options] [query ...]
-[f|a|s|d|z] [options] [query ...]
+[f|a|s|d|z] [opions] [query ...]
   options:
     -s         list paths with scores
     -l         list paths without scores
