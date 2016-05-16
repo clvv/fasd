@@ -332,13 +332,12 @@ EOS
     while [ "$1" ]; do
         [ -e "$1" ] && paths+="$1"$'\n'; shift
     done
-time {
     paths="$(sed '/^[^/]/s@^@'"$PWD"'/@
       s@/\.\.$@/../@;s@/\(\./\)\{1,\}@/@g;:0
       s@[^/][^/]*//*\.\./@/@;t 0
-      s@^/*\.\./@/@;s@//*@/@g;s@/\.\{0,1\}$@@;s@^$@/@' 2>> "$_FASD_SINK" <<< "$paths")"
+      s@^/*\.\./@/@;s@//*@/@g;s@/\.\{0,1\}$@@;s@^$@/@' \
+          2>> "$_FASD_SINK" <<< "$paths")"
     paths=${paths//$'\n'/|}
-}
 
     # add current pwd if the option is set
     [ "$_FASD_TRACK_PWD" = "1" -a "$PWD" != "$HOME" ] && paths="$paths|$PWD"
@@ -350,119 +349,119 @@ time {
     if [ ! -f $backupFile ]; then
         backupFile="$(mktemp "$_FASD_DATA".XXXXXX)" || return
     fi
-time {
     env mv -f "$_FASD_DATA" "$backupFile"
-}
 
     declare -A ranks times
-	local max="$_FASD_MAX"
+    local max="$_FASD_MAX"
     local now=$(date +%s)
     local iCount fCount
     OLDFS="$IFS"; IFS='|'
     for fname in $paths; do
-        [[ -z "$fname" ]] && continue
-        ranks[$fname]=1
-        times[$fname]=$now
+      [[ -z "$fname" ]] && continue
+      ranks[$fname]=1
+      times[$fname]=$now
     done
     IFS="$OLDFS"
 
-	declare -r scale=6
+    declare -r scale=6
     ((fCount=10**scale)); fCount=${fCount:1}  # "scale" zeros
 
     populate_ranks_and_times() {
-		# Parse the current line from the input file
-		[[ $2 =~ (.*)\|(([0-9]+)(\.([0-9]*))?)\|(.*) ]]
-		fname=${BASH_REMATCH[1]}
-		#rank=${BASH_REMATCH[2]}
-		iRank=${BASH_REMATCH[3]}
-		fRank=${BASH_REMATCH[5]}
-		time=${BASH_REMATCH[6]}
+      # Parse a line from the fasd input file
+      [[ $2 =~ (.*)\|(([0-9]+)(\.([0-9]*))?)\|(.*) ]]
+      fname=${BASH_REMATCH[1]}
+      #rank=${BASH_REMATCH[2]}
+      iRank=${BASH_REMATCH[3]}
+      fRank=${BASH_REMATCH[5]}
+      time=${BASH_REMATCH[6]}
+  
+      local d=0
+  
+      if ((iRank>=1)); then
+        if [[ -n "${ranks[${fname}]}" ]]; then
+  
+          # Compute 1/rank in several steps
 
-		local d=0
-
-        if ((iRank>=1)); then
-		  if [[ -n "${ranks[${fname}]}" ]]; then
-
-			((top = 10**${#fRank}))         # to int
-			bot=$iRank$fRank              # to int
-            # Divide top/bot with integer round:    quotient = (a/b) + (a%b > b/2)
-            ((prelim = (top*10**scale)/bot + ((top*10**scale)%bot > bot/2)))
-
-			# Prepare to shift the decimal left. If the preliminary quotient has too few
-			# digits, then left-pad it out to "scale" digits
-			((d=scale-${#prelim}))
-			if ((d>0)); then
-				prelim=$((10**d))$prelim
-				prelim=${prelim:1}
-			fi
-
-			# Break the preliminary quotient at the decimal point
-			iPart=${prelim:0:-$scale}
-			fPart=${prelim:${#prelim}-$scale}   # the last "scale" digits
-
-			# Add, compensating for precision and overflow
-            ((total_fRank=fRank*10**(scale-${#fRank})))   # rescale fRank to have "scale" digits
-			((total_iRank=iRank+iPart))
-			((total_fRank+=fPart))     # This sum might overflow, hence the following "if".
-			if ((${#total_fRank} > scale)); then
-			  total_fRank=${total_fRank:1}
-			  ((total_iRank+=1))
-			fi
-
-			# Populate the data arrays.
-			rank=$total_iRank
-			[[ -n $total_fRank ]] && rank+=.$total_fRank
-            ranks[$fname]=$rank
-            times[$fname]=$now
-
-          else
-            # Populate the data arrays.
-            rank=$iRank
-            [[ -n $fRank ]] && rank+=.$fRank
-            ranks[$fname]=$rank
-            times[$fname]=$time
+          # Convert decimals to integers
+          ((top = 10**${#fRank}))
+          bottom=$iRank$fRank
+          # Divide and round the quotient
+          ((quot = (top*10**scale)/bottom
+                 + ((top*10**scale)%bottom > bottom/2)))
+          # Left-pad the quotient with zeros
+          ((d=scale-${#quot}))
+          if ((d>0)); then
+            quot=$((10**d))$quot
+            quot=${quot:1}
           fi
-
-		  # Increase the count. Be careful about precision and overflow.
-		  ((d=scale-${#fRank}))
-		  if ((d>0)); then ((fRank*=10**d)); fi
-		  ((iCount+=iRank))
-		  ((fCount+=fRank))
-		  if ((${#fCount} > scale)); then
-			fCount=${fCount:1}
-			((iCount++))
-		  fi
-		fi
+          # Break the quotient into integer and fractional parts
+          iPart=${quot:0:-$scale}
+          fPart=${quot:${#quot}-$scale}
+ 
+          # Add rank to 1/rank
+          ((total_fRank=fPart+fRank*10**(scale-${#fRank})))   # right-pad
+          ((total_iRank=iPart+iRank))
+          if ((${#total_fRank} > scale)); then      # adjust for overflow
+            total_fRank=${total_fRank:1}
+            ((total_iRank++))
+          fi
+  
+          # Populate the data arrays
+          rank=$total_iRank
+          [[ -n $total_fRank ]] && rank+=.$total_fRank
+          ranks[$fname]=$rank
+          times[$fname]=$now
+  
+        else
+          # Populate the data arrays
+          rank=$iRank
+          [[ -n $fRank ]] && rank+=.$fRank
+          ranks[$fname]=$rank
+          times[$fname]=$time
+        fi
+  
+        # Increase the count. Be careful about precision and overflow
+        ((d=scale-${#fRank}))
+        if ((d>0)); then ((fRank*=10**d)); fi
+        ((iCount=10#$iCount+10#$iRank))   # force base-10 arithmetic
+        ((fCount=10#$fCount+10#$fRank))
+        if ((${#fCount} > scale)); then
+          fCount=${fCount:1}
+          ((iCount++))
+        fi
+      fi
     }
 
     mapfile -t -c 1 -C populate_ranks_and_times < "$backupFile"
 
-	if ((iCount > max)); then
-		for fname in "${!ranks[@]}"; do
-            [[ "${ranks[$fname]}" =~ ([0-9]*)\.([0-9]*) ]]
-            iRank=${BASH_REMATCH[1]}
-            fRank=${BASH_REMATCH[2]}
-            
-			# Multiply the rank by 0.9: first divide by 10, then multiply by 9.
-            fRank=$((iRank%10))$((fRank/10 + 2*fRank%10))  # Divide by 10 and round.
-            ((iRank/=10))
-            
-            d=${#fRank}
-            ((fRank*=9)); ((iRank*=9))
-            if ((${#fRank}>d)); then
-                ((iRank+=${fRank:0:1}))
-                fRank=${fRank:1}
-            fi
+    if ((iCount > max)); then
+      for fname in "${!ranks[@]}"; do
+        [[ "${ranks[$fname]}" =~ ([0-9]*)\.([0-9]*) ]]
+        iRank=${BASH_REMATCH[1]}
+        fRank=${BASH_REMATCH[2]}
+             
+        # Divide the rank by 10
+        fRank=$((iRank%10))$((fRank/10 + 2*fRank%10))  # Round. Grab a digit.
+        ((iRank/=10))  # Give up a digit.
+        d=${#fRank}
+        # Multiply the rank by 9
+        ((fRank*=9)); ((iRank*=9))
+        if ((${#fRank}>d)); then
+          ((iRank+=${fRank:0:1}))
+          fRank=${fRank:1}
+        fi
+ 
+        # Represent the rank as a decimal value
+        rank=$iRank; if ((fRank>0)); then rank+=.${fRank}; fi
 
-            # Represent the rank as a decimal value
-            rank=$iRank; if ((fRank>0)); then rank+=.${fRank}; fi
-
-			echo $fname"|"$rank"|"${times[$fname]} 2>> "$_FASD_SINK" >> "$_FASD_DATA"   # >| "$_FASD_DATA"
-		done
-	else
-		for fname in "${!ranks[@]}"; do
-			echo $fname"|"${ranks[$fname]}"|"${times[$fname]} 2>> "$_FASD_SINK" >> "$_FASD_DATA"   #  >| "$_FASD_DATA"
-		done
+        echo $fname"|"$rank"|"${times[$fname]} \
+            2>> "$_FASD_SINK" >> "$_FASD_DATA"   # >| "$_FASD_DATA"
+      done
+    else
+      for fname in "${!ranks[@]}"; do
+        echo $fname"|"${ranks[$fname]}"|"${times[$fname]} \
+            2>> "$_FASD_SINK" >> "$_FASD_DATA"   #  >| "$_FASD_DATA"
+      done
     fi
 
     # in case of failure, restore the backed-up file
