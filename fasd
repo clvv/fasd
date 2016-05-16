@@ -330,14 +330,24 @@ EOS
     # find all valid path arguments, convert them to simplest absolute form
     local paths=""
     while [ "$1" ]; do
-        [ -e "$1" ] && paths+="$1"$'\n'; shift
+      [ ! -e "$1" ] && { shift; continue; }
+      p=$1
+      [[ "$p" =~ ^/ ]] || p="$PWD"/$p                  # make paths absolute
+      while [[ "$p" =~ (.*)/\./(.*) ]]; do             # clean up "./"
+        p=${BASH_REMATCH[1]}/${BASH_REMATCH[2]}
+      done
+      [[ "$p" =~ /\.\.$ ]] && p+=/                     # clean up final ".."
+      while [[ "$p" =~ (.*)[^/]+[/]+\.\./(.*) ]]; do   # clean up "../"
+        p=${BASH_REMATCH[1]}/${BASH_REMATCH[2]}
+      done
+      [[ "$p" =~ ^[/]?\.\.(/.*) ]] && p=${BASH_REMATCH[1]} # clean initial /../
+      while [[ "$p" =~ (.*)//(.*) ]]; do               # delete redundant /s
+        p=${BASH_REMATCH[1]}/${BASH_REMATCH[2]}
+      done
+      [[ "$p" =~ (.*)/[.]?$ ]] && p=${BASH_REMATCH[1]} # delete final / or /.
+      paths+=$p"|"
+      shift
     done
-    paths="$(sed '/^[^/]/s@^@'"$PWD"'/@
-      s@/\.\.$@/../@;s@/\(\./\)\{1,\}@/@g;:0
-      s@[^/][^/]*//*\.\./@/@;t 0
-      s@^/*\.\./@/@;s@//*@/@g;s@/\.\{0,1\}$@@;s@^$@/@' \
-          2>> "$_FASD_SINK" <<< "$paths")"
-    paths=${paths//$'\n'/|}
 
     # add current pwd if the option is set
     [ "$_FASD_TRACK_PWD" = "1" -a "$PWD" != "$HOME" ] && paths="$paths|$PWD"
