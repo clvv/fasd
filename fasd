@@ -74,7 +74,6 @@ fasd() {
     eval "\$(fasd --init posix-alias posix-hook)"
   fi
 } >> "$_FASD_SINK" 2>&1
-
 EOS
         ;;
 
@@ -97,7 +96,6 @@ fasd_cd() {
 }
 alias z='fasd_cd -d'
 alias zz='fasd_cd -d -i'
-
 EOS
         ;;
 
@@ -115,11 +113,10 @@ EOS
       zsh-hook) cat <<EOS
 # add zsh hook
 _fasd_preexec() {
-  { eval "fasd --proc \$(fasd --sanitize \$1)"; } >> "$_FASD_SINK" 2>&1
+  { eval "fasd --proc \$(fasd --sanitize \$2)"; } >> "$_FASD_SINK" 2>&1
 }
 autoload -Uz add-zsh-hook
 add-zsh-hook preexec _fasd_preexec
-
 EOS
         ;;
 
@@ -129,13 +126,11 @@ _fasd_prompt_func() {
     [[ "\$cmd" =~ ^[\ ]*[0-9]*[\ ]*(.*) ]] && cmd=\${BASH_REMATCH[1]}
   eval "fasd --proc \$(fasd --sanitize \$cmd)" >> "$_FASD_SINK" 2>&1
 }
-
 # add bash hook
 case \$PROMPT_COMMAND in
   *_fasd_prompt_func*) ;;
   *) PROMPT_COMMAND="_fasd_prompt_func;\$PROMPT_COMMAND";;
 esac
-
 EOS
         ;;
 
@@ -148,7 +143,6 @@ case \$PS1 in
   *_fasd_ps1_func*) ;;
   *) export PS1="\\\$(_fasd_ps1_func)\$PS1";;
 esac
-
 EOS
         ;;
 
@@ -168,7 +162,6 @@ _fasd_zsh_cmd_complete() {
   (( \$+compstate )) && compstate[insert]=menu # no expand if compsys loaded
   reply=(\${(f)"\$(fasd --complete "\$compl")"})
 }
-
 EOS
         ;;
 
@@ -196,24 +189,20 @@ EOS
   zle -C fasd-complete complete-word _generic
   zstyle ':completion:fasd-complete:*' completer _fasd_zsh_word_complete
   zstyle ':completion:fasd-complete:*' menu-select
-
   zle -C fasd-complete-f complete-word _generic
   zstyle ':completion:fasd-complete-f:*' completer _fasd_zsh_word_complete_f
   zstyle ':completion:fasd-complete-f:*' menu-select
-
   zle -C fasd-complete-d complete-word _generic
   zstyle ':completion:fasd-complete-d:*' completer _fasd_zsh_word_complete_d
   zstyle ':completion:fasd-complete-d:*' menu-select
 }
-
 EOS
         ;;
 
       zsh-ccomp-install) cat <<EOS
-# enbale command mode completion
+# enable command mode completion
 compctl -U -K _fasd_zsh_cmd_complete -V fasd -x 'C[-1,-*e],s[-]n[1,e]' -c - \\
   'c[-1,-A][-1,-D]' -f -- fasd fasd_cd
-
 EOS
         ;;
 
@@ -231,7 +220,6 @@ EOS
   fi
   unset orig_comp
 }
-
 EOS
         ;;
 
@@ -261,14 +249,12 @@ _fasd_bash_hook_cmd_complete() {
     complete -F _fasd_bash_cmd_complete \$cmd
   done
 }
-
 EOS
         ;;
 
       bash-ccomp-install) cat <<EOS
 # enable bash command mode completion
 _fasd_bash_hook_cmd_complete fasd a s d f sd sf z zz
-
 EOS
         ;;
       esac; shift
@@ -608,6 +594,18 @@ $(fasd --backend $each)"
             print $1 "|" sum
           }'
         ;;
+      current)
+        for path in *; do
+          printf "$PWD/%s|1\\n" "$path"
+        done
+        ;;
+      spotlight)
+        mdfind '(kMDItemFSContentChangeDate >= $time.today) ||
+          kMDItemLastUsedDate >= $time.this_month' \
+          | sed '/Library\//d
+            /\.app$/d
+            s/$/|2/'
+        ;;
       *) eval "$2";;
     esac
     ;;
@@ -649,7 +647,7 @@ $(fasd --backend $each)"
           R*) local r=r;;
       [0-9]*) local _fasd_i="$o"; break;;
           h*) [ -z "$comp" ] && echo "fasd [options] [query ...]
-[f|a|s|d|z] [opions] [query ...]
+[f|a|s|d|z] [options] [query ...]
   options:
     -s         list paths with scores
     -l         list paths without scores
@@ -665,7 +663,6 @@ $(fasd --backend $each)"
     -R         reverse listing order
     -h         show a brief help message
     -[0-9]     select the nth entry
-
 fasd [-A|-D] [paths ...]
     -A    add paths
     -D    delete paths" >&2 && return;;
@@ -693,7 +690,7 @@ fasd [-A|-D] [paths ...]
     elif [ "$interactive" ] || [ "$exec" -a -z "$fnd$lst$show" -a -t 1 ]; then
       if [ "$(printf %s "$res" | sed -n '$=')" -gt 1 ]; then
         res="$(printf %s\\n "$res" | sort -n${R})"
-        printf %s\\n "$res" | sed = | sed 'N;s/\n/	/' | sort -nr >&2
+        printf %s\\n "$res" | sed = | sed 'N;s/\n/  /' | sort -nr >&2
         printf "> " >&2
         local i; read i; [ 0 -lt "${i:-0}" ] 2>> "$_FASD_SINK" || return 1
       fi
@@ -730,4 +727,3 @@ case $- in
       fasd "$@"
     fi;;
 esac
-
