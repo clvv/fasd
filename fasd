@@ -61,6 +61,24 @@ fasd() {
               $awk "" && _FASD_AWK=$awk && break
             done
           fi
+
+          # set up a rotating pair of _FASD_DATA files as an alternative
+          # to issuing mktemp/mv/rm/cp commands in various places
+          if [ -f $_FASD_DATA.1 -a -f $_FASD_DATA.2 ]; then
+            if [ $_FASD_DATA.1 -nt $_FASD_DATA.2 ]; then
+              dataFile=$_FASD_DATA.1
+              newDataFile=$_FASD_DATA.2
+            else
+              dataFile=$_FASD_DATA.2
+              newDataFile=$_FASD_DATA.1
+            fi
+          elif [ -f $_FASD_DATA.1 ]; then
+            dataFile=$_FASD_DATA.1
+            newDataFile=$_FASD_DATA.2
+          else   # look for an unpaired data file; we will pair it up
+            dataFile=$_FASD_DATA
+            newDataFile=$_FASD_DATA.1
+          fi
         } >> "${_FASD_SINK:-/dev/null}" 2>&1
         ;;
 
@@ -285,8 +303,8 @@ EOS
     ;;
 
   --proc) shift # process commands
-    # stop if we don't own $_FASD_DATA or $_FASD_RO is set
-    [ -f "$_FASD_DATA" -a ! -O "$_FASD_DATA" ] || [ "$_FASD_RO" ] && return
+    # stop if we don't own the current data file or $_FASD_RO is set
+    [ -f "$dataFile" -a ! -O "$dataFile" ] || [ "$_FASD_RO" ] && return
 
     # blacklists
     local each; for each in $_FASD_BLACKLIST; do
@@ -310,8 +328,8 @@ EOS
     ;;
 
   --add|-A) shift # add entries
-    # stop if we don't own $_FASD_DATA or $_FASD_RO is set
-    [ -f "$_FASD_DATA" -a ! -O "$_FASD_DATA" ] || [ "$_FASD_RO" ] && return
+    # stop if we don't own the current data file or $_FASD_RO is set
+    [ -f "$dataFile" -a ! -O "$dataFile" ] || [ "$_FASD_RO" ] && return
 
     # find all valid path arguments, convert them to simplest absolute form
     local paths=""
@@ -340,13 +358,7 @@ EOS
 
     [ -z "${paths##\|}" ] && return # stop if we have nothing to add
 
-    # backup the data file and write a new file in place
-    local backupFile="$_FASD_DATA".??????
-    if [ ! -f $backupFile ]; then
-        backupFile="$(mktemp "$_FASD_DATA".XXXXXX)" || return
-    fi
-    env mv -f "$_FASD_DATA" "$backupFile"
-
+    # prepare to calculate the new fasd data from the current data
     declare -A ranks times
     local max="$_FASD_MAX"
     local now=$(date +%s)
@@ -362,8 +374,9 @@ EOS
     declare -r scale=6
     ((fCount=10**scale)); fCount=${fCount:1}  # "scale" zeros
 
+    # calculation function that acts on every line of the data file
     populate_ranks_and_times() {
-      # Parse a line from the fasd input file
+      # Parse a line of fasd data
       [[ $2 =~ (.*)\|(([0-9]+)(\.([0-9]*))?)\|(.*) ]]
       fname=${BASH_REMATCH[1]}
       #rank=${BASH_REMATCH[2]}
@@ -428,8 +441,9 @@ EOS
       fi
     }
 
-    mapfile -t -c 1 -C populate_ranks_and_times < "$backupFile"
+    mapfile -t -c 1 -C populate_ranks_and_times < "$dataFile"
 
+    # Shrink the rankings if they exceed the threshold. Write the new file. 
     if ((iCount > max)); then
       for fname in "${!ranks[@]}"; do
         [[ "${ranks[$fname]}" =~ ([0-9]*)\.([0-9]*) ]]
@@ -450,26 +464,39 @@ EOS
         # Represent the rank as a decimal value
         rank=$iRank; if ((fRank>0)); then rank+=.${fRank}; fi
 
-        echo $fname"|"$rank"|"${times[$fname]} \
-            2>> "$_FASD_SINK" >> "$_FASD_DATA"   # >| "$_FASD_DATA"
+        # append to or write the new file as appropriate
+        if ((written>0)); then
+          echo $fname"|"$rank"|"${times[$fname]} \
+            2>> "$_FASD_SINK" >> "$newDataFile"
+        else
+          echo $fname"|"$rank"|"${times[$fname]} \
+            2>> "$_FASD_SINK" >| "$newDataFile"
+          written=1
+        fi
       done
     else
       for fname in "${!ranks[@]}"; do
-        echo $fname"|"${ranks[$fname]}"|"${times[$fname]} \
-            2>> "$_FASD_SINK" >> "$_FASD_DATA"   #  >| "$_FASD_DATA"
+        if ((written>0)); then
+          echo $fname"|"${ranks[$fname]}"|"${times[$fname]} \
+            2>> "$_FASD_SINK" >> "$newDataFile"
+        else
+          echo $fname"|"${ranks[$fname]}"|"${times[$fname]} \
+            2>> "$_FASD_SINK" >| "$newDataFile"
+          written=1
+        fi
       done
     fi
 
-    # in case of failure, restore the backed-up file
-    if [ $? -ne 0 -a -f "$backupFile" ]; then
-      env mv -f "$backupFile" "$_FASD_DATA"
-      touch "$backupFile"
+    # in case of failure, fall back on the preexisting data
+    # TODO: replace $? with a cumulative error counter
+    if [ $? -ne 0 -a -f "$dataFile" ]; then
+      touch "$dataFile"    # make this file "newer" for next time
     fi
     ;;
 
   --delete|-D) shift # delete entries
-    # stop if we don't own $_FASD_DATA or $_FASD_RO is set
-    [ -f "$_FASD_DATA" -a ! -O "$_FASD_DATA" ] || [ "$_FASD_RO" ] && return
+    # stop if we don't own the current data file or $_FASD_RO is set
+    [ -f "$dataFile" -a ! -O "$dataFile" ] || [ "$_FASD_RO" ] && return
 
     # turn valid arguments into entry-deleting sed commands
     local sed_cmd="$(while [ "$1" ]; do printf %s\\n "$1"; shift; done | \
@@ -478,21 +505,16 @@ EOS
         s@^/*\.\./@/@;s@//*@/@g;s@/\.\{0,1\}$@@
         s@^$@/@;s@\([.[\/*^$]\)@\\\1@g;s@^\(.*\)$@/^\1|/d@' 2>> "$_FASD_SINK")"
 
-    # maintain the file
-    local tempfile
-    tempfile="$(mktemp "$_FASD_DATA".XXXXXX)" || return
+    sed "$sed_cmd" "$dataFile" 2>> "$_FASD_SINK" >| "$newDataFile"
 
-    sed "$sed_cmd" "$_FASD_DATA" 2>> "$_FASD_SINK" >| "$tempfile"
-
-    if [ $? -ne 0 -a -f "$_FASD_DATA" ]; then
-      env rm -f "$tempfile"
-    else
-      env mv -f "$tempfile" "$_FASD_DATA"
+    # in case of failure, fall back on the preexisting data
+    if [ $? -ne 0 -a -f "$dataFile" ]; then
+      touch "$dataFile"
     fi
     ;;
 
   --query) shift # query the db, --query [$typ ["$fnd" [$mode]]]
-    [ -f "$_FASD_DATA" ] || return # no db yet
+    [ -f "$dataFile" ] || return # no db yet
     [ "$1" ] && local typ="$1"
     [ "$2" ] && local fnd="$2"
     [ "$3" ] && local mode="$3"
@@ -502,7 +524,7 @@ EOS
       _fasd_data="$_fasd_data
 $(fasd --backend $each)"
     done
-    [ "$_fasd_data" ] || _fasd_data="$(cat "$_FASD_DATA")"
+    [ "$_fasd_data" ] || _fasd_data="$(cat "$dataFile")"
 
     # set mode specific code for calculating the prior
     case $mode in
@@ -574,7 +596,7 @@ $(fasd --backend $each)"
 
   --backend)
     case $2 in
-      native) cat "$_FASD_DATA";;
+      native) cat "$dataFile";;
       viminfo)
         < "$_FASD_VIMINFO" sed -n '/^>/{s@~@'"$HOME"'@
           s/^..//
@@ -690,7 +712,7 @@ fasd [-A|-D] [paths ...]
     elif [ "$interactive" ] || [ "$exec" -a -z "$fnd$lst$show" -a -t 1 ]; then
       if [ "$(printf %s "$res" | sed -n '$=')" -gt 1 ]; then
         res="$(printf %s\\n "$res" | sort -n${R})"
-        printf %s\\n "$res" | sed = | sed 'N;s/\n/  /' | sort -nr >&2
+        printf %s\\n "$res" | sed = | sed 'N;s/\n/	/' | sort -nr >&2
         printf "> " >&2
         local i; read i; [ 0 -lt "${i:-0}" ] 2>> "$_FASD_SINK" || return 1
       fi
