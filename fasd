@@ -55,6 +55,10 @@ fasd() {
           [ -z "$_FASD_RECENTLY_USED_XBEL" ] && \
             _FASD_RECENTLY_USED_XBEL="$HOME/.local/share/recently-used.xbel"
 
+          # get real path of files that may be overwritten
+          # (in case symlinks are used)
+          _FASD_DATA=$(env readlink -f $_FASD_DATA)
+
           if [ -z "$_FASD_AWK" ]; then
             # awk preferences
             local awk; for awk in mawk gawk original-awk nawk awk; do
