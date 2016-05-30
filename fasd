@@ -62,8 +62,8 @@ fasd() {
             done
           fi
 
-          # set up a rotating pair of _FASD_DATA files as an alternative
-          # to issuing mktemp/mv/rm/cp commands in various places
+          # set up a rotating pair of _FASD_DATA files
+          # so we can avoid issuing mktemp/mv/rm/cp commands
           if [ -f $_FASD_DATA.1 -a -f $_FASD_DATA.2 ]; then
             if [ $_FASD_DATA.1 -nt $_FASD_DATA.2 ]; then
               dataFile=$_FASD_DATA.1
@@ -631,12 +631,14 @@ $(fasd --backend $each)"
 
   *) # parsing logic and processing
     local fnd= last= _FASD_BACKENDS="$_FASD_BACKENDS" _fasd_data= comp= exec=
-    while [ "$1" ]; do case $1 in
+    while [ "$1" ]; do
+      case $1 in
       --complete) [ "$2" = "--" ] && shift; set -- $2; local lst=1 r=r comp=1;;
       --query|--add|--delete|-A|-D) fasd "$@"; return $?;;
       --version) [ -z "$comp" ] && echo "1.0.1" && return;;
       --) while [ "$2" ]; do shift; fnd="$fnd $1"; last="$1"; done;;
-      -*) local o="${1#-}"; while [ "$o" ]; do case $o in
+      -*) local o="${1#-}"; while [ "$o" ]; do 
+          case $o in
           s*) local show=1;;
           l*) local lst=1;;
           i*) [ -z "$comp" ] && local interactive=1 show=1;;
@@ -682,6 +684,7 @@ $(fasd --backend $each)"
     -R         reverse listing order
     -h         show a brief help message
     -[0-9]     select the nth entry
+
 fasd [-A|-D] [paths ...]
     -A    add paths
     -D    delete paths" >&2 && return;;
@@ -746,3 +749,4 @@ case $- in
       fasd "$@"
     fi;;
 esac
+
