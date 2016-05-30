@@ -131,7 +131,7 @@ EOS
       zsh-hook) cat <<EOS
 # add zsh hook
 _fasd_preexec() {
-  { eval "fasd --proc \$(fasd --sanitize \$2)"; } >> "$_FASD_SINK" 2>&1
+  { eval "fasd --proc \$2"; } >> "$_FASD_SINK" 2>&1
 }
 autoload -Uz add-zsh-hook
 add-zsh-hook preexec _fasd_preexec
@@ -142,7 +142,7 @@ EOS
 _fasd_prompt_func() {
     local cmd=\$(history 1)
     [[ "\$cmd" =~ ^[\ ]*[0-9]*[\ ]*(.*) ]] && cmd=\${BASH_REMATCH[1]}
-  eval "fasd --proc \$(fasd --sanitize \$cmd)" >> "$_FASD_SINK" 2>&1
+    eval "fasd --proc \$cmd" >> "$_FASD_SINK" 2>&1
 }
 # add bash hook
 case \$PROMPT_COMMAND in
@@ -154,7 +154,7 @@ EOS
 
       posix-hook) cat <<EOS
 _fasd_ps1_func() {
-  { eval "fasd --proc \$(fasd --sanitize \$(fc -nl -1))"; } \\
+  { eval "fasd --proc \$(fc -nl -1)"; } \\
     >> "$_FASD_SINK" 2>&1
 }
 case \$PS1 in
@@ -165,9 +165,8 @@ EOS
         ;;
 
       tcsh-hook) cat <<EOS
-;alias fasd-prev-cmd 'fasd --sanitize \`history -h 1\`';
 set pprecmd="\`alias precmd\`";
-alias precmd '\$pprecmd; eval "fasd --proc \`fasd-prev-cmd\`" >& /dev/null';
+alias precmd '\$pprecmd; eval "fasd --proc \`history -h 1\`" >& /dev/null';
 EOS
 
         ;;
@@ -292,18 +291,16 @@ EOS
     esac
     ;;
 
-  # sanitize: it seems this is meant to remove most shell operators,
-  # leaving only word-like arguments
-  --sanitize) shift; local y="$*"$'\n'
-      if [[ "$y" =~ [^\][|\&\;\<\>$\`{}$'\n'] ]]; then
-          sed 's/\([^\]\)$( *[^ ]* *\([^)]*\)))*/\1\2/g
-               s/\([^\]\)[|&;<>$`{}]\{1,\}/\1 /g' <<< "$y"
-      else echo "$y"
-      fi
-    ;;
-
   --proc) shift # process commands
-    # stop if we don't own the current data file or $_FASD_RO is set
+
+    # "sanitize" the command, removing shell operators and metacharacters
+    local y="$*"$'\n'
+    while [[ "$y" =~ (.*[^\])[|\&\;\<\>$\`{}]+(.*) ]]; do
+      y=${BASH_REMATCH[1]}${BASH_REMATCH[2]}
+    done
+    eval set "-- "$y
+
+    # stop if we don't own $dataFile or $_FASD_RO is set
     [ -f "$dataFile" -a ! -O "$dataFile" ] || [ "$_FASD_RO" ] && return
 
     # blacklists
