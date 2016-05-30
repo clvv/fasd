@@ -561,9 +561,12 @@ $(fasd --backend $each)"
         fi
       fi
     else # no query arugments
-      _fasd_data="$(printf %s\\n "$_fasd_data" | while read -r line; do
-        [ -${typ:-e} "${line%%\|*}" ] && printf %s\\n "$line"
-      done)"
+      local _tmp_data=$_fasd_data$'\n'; _fasd_data=""
+      while [[ "$_tmp_data" =~ ^(([^|]*)\|[^$'\n']*$'\n')(.*) ]]; do
+        [ -${typ:-e} "${BASH_REMATCH[2]}" ] && _fasd_data+=${BASH_REMATCH[1]}
+        _tmp_data=${BASH_REMATCH[3]}
+      done
+      _fasd_data=${_fasd_data%$'\n'}
     fi
 
     # query the database
