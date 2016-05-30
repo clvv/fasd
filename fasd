@@ -405,7 +405,7 @@ EOS
           fPart=${quot:${#quot}-$scale}
  
           # Add rank to 1/rank
-          ((total_fRank=fPart+fRank*10**(scale-${#fRank})))   # right-pad
+          ((total_fRank=10#$fPart+(10#$fRank)*10**(scale-${#fRank})))   # right-pad
           ((total_iRank=iPart+iRank))
           if ((${#total_fRank} > scale)); then      # adjust for overflow
             total_fRank=${total_fRank:1}
@@ -428,7 +428,7 @@ EOS
   
         # Increase the count. Be careful about precision and overflow
         ((d=scale-${#fRank}))
-        if ((d>0)); then ((fRank*=10**d)); fi
+        if ((d>0)); then ((fRank=(10#$fRank)*10**d)); fi
         ((iCount=10#$iCount+10#$iRank))   # force base-10 arithmetic
         ((fCount=10#$fCount+10#$fRank))
         if ((${#fCount} > scale)); then
