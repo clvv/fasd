@@ -518,8 +518,8 @@ EOS
 
     # cat all backends
     local each _fasd_data; for each in $_FASD_BACKENDS; do
-      _fasd_data="$_fasd_data
-$(fasd --backend $each)"
+      fasd --backend $each
+      _fasd_data+=$'\n'$backendBuffer
     done
     [ "$_fasd_data" ] || _fasd_data="$(cat "$dataFile")"
 
@@ -596,37 +596,42 @@ $(fasd --backend $each)"
 
   --backend)
     case $2 in
-      native) cat "$dataFile";;
+      native)
+        backendBuffer="$(<"$dataFile")"
+        ;;
       viminfo)
-        < "$_FASD_VIMINFO" sed -n '/^>/{s@~@'"$HOME"'@
+        backendBuffer="$(sed -n '/^>/{s@~@'"$HOME"'@
           s/^..//
           p
-          }' | $_FASD_AWK -v t="$(date +%s)" '{
-            t -= 60
-            print $0 "|1|" t
-          }'
+          }' "$_FASD_VIMINFO" | $_FASD_AWK ' BEGIN {
+             t = systime() - 60 }
+            { print $0 "|1|" t
+        }')"
         ;;
       recently-used)
-        local nl="$(printf '\\\nX')"; nl="${nl%X}" # slash newline for sed
+        backendBuffer="$(
+        local nl="\\"$'\n' # slash newline for sed
         tr -d '\n' < "$_FASD_RECENTLY_USED_XBEL" | \
           sed 's@file:/@'"$nl"'@g;s@count="@'"$nl"'@g' | sed '1d;s/".*$//' | \
           tr '\n' '|' | sed 's@|/@'"$nl"'@g' | $_FASD_AWK -F'|' '{
             sum = 0
             for( i=2; i<=NF; i++ ) sum += $i
             print $1 "|" sum
-          }'
+        }')"
         ;;
       current)
+        backendBuffer=""
         for path in *; do
-          printf "$PWD/%s|1\\n" "$path"
+          backendBuffer+="$PWD/$path|1"$'\n'
         done
         ;;
       spotlight)
-        mdfind '(kMDItemFSContentChangeDate >= $time.today) ||
+          backendBuffer="$(
+          mdfind '(kMDItemFSContentChangeDate >= $time.today) ||
           kMDItemLastUsedDate >= $time.this_month' \
           | sed '/Library\//d
             /\.app$/d
-            s/$/|2/'
+            s/$/|2/')"
         ;;
       *) eval "$2";;
     esac
