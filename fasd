@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 # Fasd (this file) can be sourced or executed by any POSIX compatible shell.
 
