@@ -29,6 +29,9 @@
 
 fasd() {
 
+  # On Cygwin, opt for the sped-up bash version
+  [ "$OSTYPE" = cygwin ] & exec fasd.bash "@"
+
   # make zsh do word splitting inside this function
   [ "$ZSH_VERSION" ] && emulate sh && setopt localoptions
 
