@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 # Fasd (this file) can be sourced or executed by any POSIX compatible shell.
 
@@ -7,6 +7,7 @@
 # been rewritten.
 
 # Copyright (C) 2011, 2012 by Wei Dai. All rights reserved.
+# Copyright (C) 2016 by Michael Wood. All rights reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -29,11 +30,10 @@
 
 fasd() {
 
-  # On Cygwin, opt for the sped-up bash version
-  [ "$OSTYPE" = cygwin ] & exec fasd.bash "@"
-
   # make zsh do word splitting inside this function
   [ "$ZSH_VERSION" ] && emulate sh && setopt localoptions
+
+  shopt -s extglob
 
   case $1 in
   --init) shift
@@ -64,6 +64,24 @@ fasd() {
               $awk "" && _FASD_AWK=$awk && break
             done
           fi
+
+          # set up a rotating pair of _FASD_DATA files
+          # so we can avoid issuing mktemp/mv/rm/cp commands
+          if [ -f $_FASD_DATA.1 -a -f $_FASD_DATA.2 ]; then
+            if [ $_FASD_DATA.1 -nt $_FASD_DATA.2 ]; then
+              dataFile=$_FASD_DATA.1
+              newDataFile=$_FASD_DATA.2
+            else
+              dataFile=$_FASD_DATA.2
+              newDataFile=$_FASD_DATA.1
+            fi
+          elif [ -f $_FASD_DATA.1 ]; then
+            dataFile=$_FASD_DATA.1
+            newDataFile=$_FASD_DATA.2
+          else   # look for an unpaired data file; we will pair it up
+            dataFile=$_FASD_DATA
+            newDataFile=$_FASD_DATA.1
+          fi
         } >> "${_FASD_SINK:-/dev/null}" 2>&1
         ;;
 
@@ -77,7 +95,6 @@ fasd() {
     eval "\$(fasd --init posix-alias posix-hook)"
   fi
 } >> "$_FASD_SINK" 2>&1
-
 EOS
         ;;
 
@@ -100,7 +117,6 @@ fasd_cd() {
 }
 alias z='fasd_cd -d'
 alias zz='fasd_cd -d -i'
-
 EOS
         ;;
 
@@ -118,46 +134,42 @@ EOS
       zsh-hook) cat <<EOS
 # add zsh hook
 _fasd_preexec() {
-  { eval "fasd --proc \$(fasd --sanitize \$2)"; } >> "$_FASD_SINK" 2>&1
+  { eval "fasd --proc \$2"; } >> "$_FASD_SINK" 2>&1
 }
 autoload -Uz add-zsh-hook
 add-zsh-hook preexec _fasd_preexec
-
 EOS
         ;;
 
       bash-hook) cat <<EOS
 _fasd_prompt_func() {
-  eval "fasd --proc \$(fasd --sanitize \$(history 1 | \\
-    sed "s/^[ ]*[0-9]*[ ]*//"))" >> "$_FASD_SINK" 2>&1
+    local cmd=\$(history 1)
+    [[ "\$cmd" =~ ^[\ ]*[0-9]*[\ ]*(.*) ]] && cmd=\${BASH_REMATCH[1]}
+    eval "fasd --proc \$cmd" >> "$_FASD_SINK" 2>&1
 }
-
 # add bash hook
 case \$PROMPT_COMMAND in
   *_fasd_prompt_func*) ;;
   *) PROMPT_COMMAND="_fasd_prompt_func;\$PROMPT_COMMAND";;
 esac
-
 EOS
         ;;
 
       posix-hook) cat <<EOS
 _fasd_ps1_func() {
-  { eval "fasd --proc \$(fasd --sanitize \$(fc -nl -1))"; } \\
+  { eval "fasd --proc \$(fc -nl -1)"; } \\
     >> "$_FASD_SINK" 2>&1
 }
 case \$PS1 in
   *_fasd_ps1_func*) ;;
   *) export PS1="\\\$(_fasd_ps1_func)\$PS1";;
 esac
-
 EOS
         ;;
 
       tcsh-hook) cat <<EOS
-;alias fasd-prev-cmd 'fasd --sanitize \`history -h 1\`';
 set pprecmd="\`alias precmd\`";
-alias precmd '\$pprecmd; eval "fasd --proc \`fasd-prev-cmd\`" >& /dev/null';
+alias precmd '\$pprecmd; eval "fasd --proc \`history -h 1\`" >& /dev/null';
 EOS
 
         ;;
@@ -170,7 +182,6 @@ _fasd_zsh_cmd_complete() {
   (( \$+compstate )) && compstate[insert]=menu # no expand if compsys loaded
   reply=(\${(f)"\$(fasd --complete "\$compl")"})
 }
-
 EOS
         ;;
 
@@ -198,16 +209,13 @@ EOS
   zle -C fasd-complete complete-word _generic
   zstyle ':completion:fasd-complete:*' completer _fasd_zsh_word_complete
   zstyle ':completion:fasd-complete:*' menu-select
-
   zle -C fasd-complete-f complete-word _generic
   zstyle ':completion:fasd-complete-f:*' completer _fasd_zsh_word_complete_f
   zstyle ':completion:fasd-complete-f:*' menu-select
-
   zle -C fasd-complete-d complete-word _generic
   zstyle ':completion:fasd-complete-d:*' completer _fasd_zsh_word_complete_d
   zstyle ':completion:fasd-complete-d:*' menu-select
 }
-
 EOS
         ;;
 
@@ -215,7 +223,6 @@ EOS
 # enable command mode completion
 compctl -U -K _fasd_zsh_cmd_complete -V fasd -x 'C[-1,-*e],s[-]n[1,e]' -c - \\
   'c[-1,-A][-1,-D]' -f -- fasd fasd_cd
-
 EOS
         ;;
 
@@ -233,7 +240,6 @@ EOS
   fi
   unset orig_comp
 }
-
 EOS
         ;;
 
@@ -263,14 +269,12 @@ _fasd_bash_hook_cmd_complete() {
     complete -F _fasd_bash_cmd_complete \$cmd
   done
 }
-
 EOS
         ;;
 
       bash-ccomp-install) cat <<EOS
 # enable bash command mode completion
 _fasd_bash_hook_cmd_complete fasd a s d f sd sf z zz
-
 EOS
         ;;
       esac; shift
@@ -290,14 +294,17 @@ EOS
     esac
     ;;
 
-  --sanitize) shift; printf %s\\n "$*" | \
-      sed 's/\([^\]\)$( *[^ ]* *\([^)]*\)))*/\1\2/g
-        s/\([^\]\)[|&;<>$`{}]\{1,\}/\1 /g'
-    ;;
-
   --proc) shift # process commands
-    # stop if we don't own $_FASD_DATA or $_FASD_RO is set
-    [ -f "$_FASD_DATA" -a ! -O "$_FASD_DATA" ] || [ "$_FASD_RO" ] && return
+
+    # "sanitize" the command, removing shell operators and metacharacters
+    local y="$*"$'\n'
+    while [[ "$y" =~ (.*[^\])[|\&\;\<\>$\`{}]+(.*) ]]; do
+      y=${BASH_REMATCH[1]}${BASH_REMATCH[2]}
+    done
+    eval set "-- "$y
+
+    # stop if we don't own $dataFile or $_FASD_RO is set
+    [ -f "$dataFile" -a ! -O "$dataFile" ] || [ "$_FASD_RO" ] && return
 
     # blacklists
     local each; for each in $_FASD_BLACKLIST; do
@@ -321,63 +328,177 @@ EOS
     ;;
 
   --add|-A) shift # add entries
-    # stop if we don't own $_FASD_DATA or $_FASD_RO is set
-    [ -f "$_FASD_DATA" -a ! -O "$_FASD_DATA" ] || [ "$_FASD_RO" ] && return
+    # stop if we don't own the current data file or $_FASD_RO is set
+    [ -f "$dataFile" -a ! -O "$dataFile" ] || [ "$_FASD_RO" ] && return
 
     # find all valid path arguments, convert them to simplest absolute form
-    local paths="$(while [ "$1" ]; do
-      [ -e "$1" ] && printf %s\\n "$1"; shift
-    done | sed '/^[^/]/s@^@'"$PWD"'/@
-      s@/\.\.$@/../@;s@/\(\./\)\{1,\}@/@g;:0
-      s@[^/][^/]*//*\.\./@/@;t 0
-      s@^/*\.\./@/@;s@//*@/@g;s@/\.\{0,1\}$@@;s@^$@/@' 2>> "$_FASD_SINK" \
-      | tr '\n' '|')"
+    local paths=""
+    while [ "$1" ]; do
+      [ ! -e "$1" ] && { shift; continue; }
+      p=$1
+      [[ "$p" =~ ^/ ]] || p="$PWD"/$p                  # make paths absolute
+      while [[ "$p" =~ (.*)/\./(.*) ]]; do             # clean up "./"
+        p=${BASH_REMATCH[1]}/${BASH_REMATCH[2]}
+      done
+      [[ "$p" =~ /\.\.$ ]] && p+=/                     # clean up final ".."
+      while [[ "$p" =~ (.*)[^/]+[/]+\.\./(.*) ]]; do   # clean up "../"
+        p=${BASH_REMATCH[1]}/${BASH_REMATCH[2]}
+      done
+      [[ "$p" =~ ^[/]?\.\.(/.*) ]] && p=${BASH_REMATCH[1]} # clean initial /../
+      while [[ "$p" =~ (.*)//(.*) ]]; do               # delete redundant /s
+        p=${BASH_REMATCH[1]}/${BASH_REMATCH[2]}
+      done
+      [[ "$p" =~ (.*)/[.]?$ ]] && p=${BASH_REMATCH[1]} # delete final / or /.
+      paths+=$p"|"
+      shift
+    done
 
     # add current pwd if the option is set
     [ "$_FASD_TRACK_PWD" = "1" -a "$PWD" != "$HOME" ] && paths="$paths|$PWD"
 
     [ -z "${paths##\|}" ] && return # stop if we have nothing to add
 
-    # maintain the file
-    local tempfile
-    tempfile="$(mktemp "$_FASD_DATA".XXXXXX)" || return
-    $_FASD_AWK -v list="$paths" -v now="$(date +%s)" -v max="$_FASD_MAX" -F"|" '
-      BEGIN {
-        split(list, files, "|")
-        for(i in files) {
-          path = files[i]
-          if(path == "") continue
-          paths[path] = path # array for checking
-          rank[path] = 1
-          time[path] = now
-        }
-      }
-      $2 >= 1 {
-        if($1 in paths) {
-          rank[$1] = $2 + 1 / $2
-          time[$1] = now
-        } else {
-          rank[$1] = $2
-          time[$1] = $3
-        }
-        count += $2
-      }
-      END {
-        if(count > max)
-          for(i in rank) print i "|" 0.9*rank[i] "|" time[i] # aging
+    # prepare to calculate the new fasd data from the current data
+    declare -A ranks times
+    local max="$_FASD_MAX"
+    local now=$(date +%s)
+    local iCount fCount
+    OLDFS="$IFS"; IFS='|'
+    for fname in $paths; do
+      [[ -z "$fname" ]] && continue
+      ranks[$fname]=1
+      times[$fname]=$now
+    done
+    IFS="$OLDFS"
+
+    declare -r scale=6
+    ((fCount=10**scale)); fCount=${fCount:1}  # "scale" zeros
+
+    # calculation function that acts on every line of the data file
+    populate_ranks_and_times() {
+      # Parse a line of fasd data
+      [[ $2 =~ (.*)\|(([0-9]+)(\.([0-9]*))?)\|(.*) ]]
+      fname=${BASH_REMATCH[1]}
+      #rank=${BASH_REMATCH[2]}
+      iRank=${BASH_REMATCH[3]}
+      fRank=${BASH_REMATCH[5]}
+      time=${BASH_REMATCH[6]}
+  
+      local d=0
+  
+      if ((iRank>=1)); then
+        if [[ -n "${ranks[${fname}]}" ]]; then
+  
+          # Compute 1/rank in several steps
+
+          # Convert decimals to integers
+          ((top = 10**${#fRank}))
+          bottom=$iRank$fRank
+          # Divide and round the quotient
+          ((quot = (top*10**scale)/bottom
+                 + ((top*10**scale)%bottom > bottom/2)))
+          # Left-pad the quotient with zeros
+          ((d=scale-${#quot}))
+          if ((d>0)); then
+            quot=$((10**d))$quot
+            quot=${quot:1}
+          fi
+          # Break the quotient into integer and fractional parts
+          iPart=${quot:0:-$scale}
+          fPart=${quot:${#quot}-$scale}
+ 
+          # Add rank to 1/rank
+          ((total_fRank=10#$fPart+(10#$fRank)*10**(scale-${#fRank})))   # right-pad
+          ((total_iRank=iPart+iRank))
+          if ((${#total_fRank} > scale)); then      # adjust for overflow
+            total_fRank=${total_fRank:1}
+            ((total_iRank++))
+          fi
+  
+          # Populate the data arrays
+          rank=$total_iRank
+          [[ -n $total_fRank ]] && rank+=.$total_fRank
+          ranks[$fname]=$rank
+          times[$fname]=$now
+  
         else
-          for(i in rank) print i "|" rank[i] "|" time[i]
-      }' "$_FASD_DATA" 2>> "$_FASD_SINK" >| "$tempfile"
-    if [ $? -ne 0 -a -f "$_FASD_DATA" ]; then
-      env rm -f "$tempfile"
+          # Populate the data arrays
+          rank=$iRank
+          [[ -n $fRank ]] && rank+=.$fRank
+          ranks[$fname]=$rank
+          times[$fname]=$time
+        fi
+  
+        # Increase the count. Be careful about precision and overflow
+        ((d=scale-${#fRank}))
+        if ((d>0)); then ((fRank=(10#$fRank)*10**d)); fi
+        ((iCount=10#$iCount+10#$iRank))   # force base-10 arithmetic
+        ((fCount=10#$fCount+10#$fRank))
+        if ((${#fCount} > scale)); then
+          fCount=${fCount:1}
+          ((iCount++))
+        fi
+      fi
+    }
+
+    mapfile -t -c 1 -C populate_ranks_and_times < "$dataFile"
+
+    # Shrink the rankings if they exceed the threshold. Write the new file. 
+    if ((iCount > max)); then
+      for fname in "${!ranks[@]}"; do
+        [[ "${ranks[$fname]}" =~ ([0-9]*)\.([0-9]*) ]]
+        iRank=${BASH_REMATCH[1]}
+        fRank=${BASH_REMATCH[2]}
+             
+        # Divide the rank by 10
+        fRank=$((iRank%10))$((fRank/10 + 2*fRank%10))  # Round. Grab a digit.
+        ((iRank/=10))  # Give up a digit.
+        d=${#fRank}
+        # Multiply the rank by 9
+        ((fRank*=9)); ((iRank*=9))
+        if ((${#fRank}>d)); then
+          ((iRank+=${fRank:0:1}))
+          fRank=${fRank:1}
+        fi
+ 
+        # Represent the rank as a decimal value
+        rank=$iRank; if ((fRank>0)); then rank+=.${fRank%%+(0)}; fi
+
+        # append to or write the new file as appropriate
+        if ((written>0)); then
+          echo $fname"|"$rank"|"${times[$fname]} \
+            2>> "$_FASD_SINK" >> "$newDataFile"
+        else
+          echo $fname"|"$rank"|"${times[$fname]} \
+            2>> "$_FASD_SINK" >| "$newDataFile"
+          written=1
+        fi
+      done
     else
-      env mv -f "$tempfile" "$_FASD_DATA"
+      for fname in "${!ranks[@]}"; do
+        if ((written>0)); then
+          echo $fname"|"${ranks[$fname]}"|"${times[$fname]} \
+            2>> "$_FASD_SINK" >> "$newDataFile"
+        else
+          echo $fname"|"${ranks[$fname]}"|"${times[$fname]} \
+            2>> "$_FASD_SINK" >| "$newDataFile"
+          written=1
+        fi
+      done
+    fi
+
+    unset ranks times
+
+    # in case of failure, fall back on the preexisting data
+    # TODO: replace $? with a cumulative error counter
+    if [ $? -ne 0 -a -f "$dataFile" ]; then
+      touch "$dataFile"    # make this file "newer" for next time
     fi
     ;;
 
   --delete|-D) shift # delete entries
-    # stop if we don't own $_FASD_DATA or $_FASD_RO is set
-    [ -f "$_FASD_DATA" -a ! -O "$_FASD_DATA" ] || [ "$_FASD_RO" ] && return
+    # stop if we don't own the current data file or $_FASD_RO is set
+    [ -f "$dataFile" -a ! -O "$dataFile" ] || [ "$_FASD_RO" ] && return
 
     # turn valid arguments into entry-deleting sed commands
     local sed_cmd="$(while [ "$1" ]; do printf %s\\n "$1"; shift; done | \
@@ -386,38 +507,27 @@ EOS
         s@^/*\.\./@/@;s@//*@/@g;s@/\.\{0,1\}$@@
         s@^$@/@;s@\([.[\/*^$]\)@\\\1@g;s@^\(.*\)$@/^\1|/d@' 2>> "$_FASD_SINK")"
 
-    # maintain the file
-    local tempfile
-    tempfile="$(mktemp "$_FASD_DATA".XXXXXX)" || return
+    sed "$sed_cmd" "$dataFile" 2>> "$_FASD_SINK" >| "$newDataFile"
 
-    sed "$sed_cmd" "$_FASD_DATA" 2>> "$_FASD_SINK" >| "$tempfile"
-
-    if [ $? -ne 0 -a -f "$_FASD_DATA" ]; then
-      env rm -f "$tempfile"
-    else
-      env mv -f "$tempfile" "$_FASD_DATA"
+    # in case of failure, fall back on the preexisting data
+    if [ $? -ne 0 -a -f "$dataFile" ]; then
+      touch "$dataFile"
     fi
     ;;
 
   --query) shift # query the db, --query [$typ ["$fnd" [$mode]]]
-    [ -f "$_FASD_DATA" ] || return # no db yet
+    [ -f "$dataFile" ] || return # no db yet
     [ "$1" ] && local typ="$1"
     [ "$2" ] && local fnd="$2"
     [ "$3" ] && local mode="$3"
 
     # cat all backends
     local each _fasd_data; for each in $_FASD_BACKENDS; do
-      _fasd_data="$_fasd_data
-$(fasd --backend $each)"
+      fasd --backend $each
+      [[ -n $_fasd_data ]] && _fasd_data+=$'\n'
+      _fasd_data+=$backendBuffer
     done
-    [ "$_fasd_data" ] || _fasd_data="$(cat "$_FASD_DATA")"
-
-    # set mode specific code for calculating the prior
-    case $mode in
-      rank) local prior='times[i]';;
-      recent) local prior='sqrt(100000/(1+t-la[i]))';;
-      *) local prior='times[i] * frecent(la[i])';;
-    esac
+    [ "$_fasd_data" ] || _fasd_data="$(cat "$dataFile")"
 
     if [ "$fnd" ]; then # dafault matching
       local bre="$(printf %s\\n "$fnd" | sed 's/\([*\.\\\[]\)/\\\1/g
@@ -450,69 +560,155 @@ $(fasd --backend $each)"
         fi
       fi
     else # no query arugments
-      _fasd_data="$(printf %s\\n "$_fasd_data" | while read -r line; do
-        [ -${typ:-e} "${line%%\|*}" ] && printf %s\\n "$line"
-      done)"
+      local _tmp_data=$_fasd_data$'\n'; _fasd_data=""
+      while [[ "$_tmp_data" =~ ^(([^|]*)\|[^$'\n']*$'\n')(.*) ]]; do
+        [ -${typ:-e} "${BASH_REMATCH[2]}" ] && _fasd_data+=${BASH_REMATCH[1]}
+        _tmp_data=${BASH_REMATCH[3]}
+      done
+      _fasd_data=${_fasd_data%$'\n'}
     fi
 
     # query the database
-    [ "$_fasd_data" ] && printf %s\\n "$_fasd_data" | \
-      $_FASD_AWK -v t="$(date +%s)" -F"|" '
-      function frecent(time) {
-        dx = t-time
-        if( dx < 3600 ) return 6
-        if( dx < 86400 ) return 4
-        if( dx < 604800 ) return 2
-        return 1
-      }
-      {
-        if(!paths[$1]) {
-          times[$1] = $2
-          la[$1] = $3
-          paths[$1] = 1
-        } else {
-          times[$1] += $2
-          if($3 > la[$1]) la[$1] = $3
-        }
-      }
-      END {
-        for(i in paths) printf "%-10s %s\n", '"$prior"', i
-      }' - 2>> "$_FASD_SINK"
+    [ "$_fasd_data" ] || return 
+    _fasd_data+=$'\n'
+    t="$(date +%s)"
+    declare -A ranks times
+    declare -r scale=6
+
+    OLDFS=$IFS; IFS=$'\n'
+    for line in $_fasd_data; do
+      # parse a single line of fasd data
+      [[ $line =~ (.*)\|(([0-9]+)(\.([0-9]*))?)\|(.*) ]]
+      fname=${BASH_REMATCH[1]}
+      rank=${BASH_REMATCH[2]}
+      iRank=${BASH_REMATCH[3]}
+      fRank=${BASH_REMATCH[5]}
+      time=${BASH_REMATCH[6]}
+
+      ((d=scale-${#fRank}))
+      if ((d>0)); then
+        ((fRank=(10#$fRank)*10**(scale-${#fRank})))
+      fi
+
+      if [[ -n "${times[$fname]}" ]]; then
+        # add current rank to cumulative rank
+        [[ ${ranks[$fname]} =~ ([0-9]+)(\.([0-9]*))? ]]
+        iRk=${BASH_REMATCH[1]}
+        fRk=${BASH_REMATCH[3]}
+        ((total_iRank=iRank+iRk))
+        ((total_fRank=10#$fRank+(10#$fRk)*10**(scale-${#fRk})))
+        if ((${#total_fRank} > scale)); then    # adjust for overflow
+          total_fRank=${total_fRank:1}
+          ((total_iRank++))
+        fi
+
+        # store the new rank and time
+        ranks[$fname]=$total_iRank"."${total_fRank%%+(0)}
+        if ((time > times[$fname])); then
+            times[$fname]=$time
+        fi
+
+      else
+        # initialize the rank and time
+        ranks[$fname]=$rank
+        times[$fname]=$time
+      fi
+    done
+    IFS=$OLDFS
+
+    case $mode in
+      rank)
+        # prior='ranks[i]';;
+        for path in "${!ranks[@]}"; do
+          printf "%-10s %s\n" ${ranks[$path]} $path
+        done
+        ;;
+      recent)
+        # prior='sqrt(100000/(1+t-times[i]))'
+        # Use awk to calculate prior because it's far too hard to calculate
+        # in bash. Invoke awk just once, and while we're at it do *all* the
+        # "real work" there
+        input=""
+        for path in "${!times[@]}"; do
+          input+=${times[$path]}" "$path$'\n'
+        done
+        input=${input%$'\n'}
+        $_FASD_AWK -v t=$t '
+        {
+          prior=sqrt(100000/(1+t-$1))
+          printf "%-10s %s\n", prior, $2
+        }' <<< "$input" 2>> "$_FASD_SINK"
+        ;;
+      *)
+        # prior='ranks[i] * frecent(times[i])';;
+        local frecent dx
+        for path in "${!times[@]}"; do
+          # Compute "frecent"
+          ((dx = t-times[$path]))
+          if ((dx < 3600)); then frecent=6
+          elif ((dx < 86400)); then frecent=4
+          elif ((dx < 604800)); then frecent=2
+          else frecent=1
+          fi
+          # Compute rank * frecent 
+          [[ ${ranks[$path]} =~ ([0-9]+)(\.([0-9]*))? ]]
+          iRk=${BASH_REMATCH[1]}
+          fRk=${BASH_REMATCH[3]}
+          d=${#fRk}
+          ((iRk*=frecent)); ((fRk*=frecent))
+          if ((${#fRk}>d)); then 
+            ((iRk+=${fRk:0:1}))
+            fRk=${fRk:1}
+          fi
+
+          ranks[$path]=$iRk
+          if ((fRk>0)); then ranks[$path]+="."${fRk%%+(0)}; fi
+          printf "%-10s %s\n" ${ranks[$path]} $path
+        done
+      ;;
+    esac
+      
+      unset ranks times
     ;;
 
   --backend)
     case $2 in
-      native) cat "$_FASD_DATA";;
+      native)
+        backendBuffer="$(<"$dataFile")"
+        ;;
       viminfo)
-        < "$_FASD_VIMINFO" sed -n '/^>/{s@~@'"$HOME"'@
+        backendBuffer="$(sed -n '/^>/{s@~@'"$HOME"'@
           s/^..//
           p
-          }' | $_FASD_AWK -v t="$(date +%s)" '{
-            t -= 60
-            print $0 "|1|" t
-          }'
+          }' "$_FASD_VIMINFO" | $_FASD_AWK ' BEGIN {
+             t = systime() - 60 }
+            { print $0 "|1|" t
+        }')"
         ;;
       recently-used)
-        local nl="$(printf '\\\nX')"; nl="${nl%X}" # slash newline for sed
+        backendBuffer="$(
+        local nl="\\"$'\n' # slash newline for sed
         tr -d '\n' < "$_FASD_RECENTLY_USED_XBEL" | \
           sed 's@file:/@'"$nl"'@g;s@count="@'"$nl"'@g' | sed '1d;s/".*$//' | \
           tr '\n' '|' | sed 's@|/@'"$nl"'@g' | $_FASD_AWK -F'|' '{
             sum = 0
             for( i=2; i<=NF; i++ ) sum += $i
             print $1 "|" sum
-          }'
+        }')"
         ;;
       current)
+        backendBuffer=""
         for path in *; do
-          printf "$PWD/%s|1\\n" "$path"
+          backendBuffer+="$PWD/$path|1"$'\n'
         done
         ;;
       spotlight)
-        mdfind '(kMDItemFSContentChangeDate >= $time.today) ||
+          backendBuffer="$(
+          mdfind '(kMDItemFSContentChangeDate >= $time.today) ||
           kMDItemLastUsedDate >= $time.this_month' \
           | sed '/Library\//d
             /\.app$/d
-            s/$/|2/'
+            s/$/|2/')"
         ;;
       *) eval "$2";;
     esac
@@ -520,12 +716,14 @@ $(fasd --backend $each)"
 
   *) # parsing logic and processing
     local fnd= last= _FASD_BACKENDS="$_FASD_BACKENDS" _fasd_data= comp= exec=
-    while [ "$1" ]; do case $1 in
+    while [ "$1" ]; do
+      case $1 in
       --complete) [ "$2" = "--" ] && shift; set -- $2; local lst=1 r=r comp=1;;
       --query|--add|--delete|-A|-D) fasd "$@"; return $?;;
       --version) [ -z "$comp" ] && echo "1.0.1" && return;;
       --) while [ "$2" ]; do shift; fnd="$fnd $1"; last="$1"; done;;
-      -*) local o="${1#-}"; while [ "$o" ]; do case $o in
+      -*) local o="${1#-}"; while [ "$o" ]; do 
+          case $o in
           s*) local show=1;;
           l*) local lst=1;;
           i*) [ -z "$comp" ] && local interactive=1 show=1;;

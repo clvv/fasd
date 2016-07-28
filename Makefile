@@ -10,11 +10,13 @@ all: fasd.1
 
 uninstall:
 	rm -f ${DESTDIR}${BINDIR}/fasd
+	rm -f ${DESTDIR}${BINDIR}/fasd.bash
 	rm -f ${DESTDIR}${MANDIR}/man1/fasd.1
 
 install:
 	${INSTALLDIR} ${DESTDIR}${BINDIR}
 	${INSTALLBIN} fasd ${DESTDIR}${BINDIR}
+	${INSTALLBIN} fasd.bash ${DESTDIR}${BINDIR}
 	${INSTALLDIR} ${DESTDIR}${MANDIR}/man1
 	${INSTALLMAN} fasd.1 ${DESTDIR}${MANDIR}/man1
 
