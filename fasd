@@ -118,7 +118,7 @@ EOS
       zsh-hook) cat <<EOS
 # add zsh hook
 _fasd_preexec() {
-  { eval "fasd --proc \$(fasd --sanitize \$1)"; } >> "$_FASD_SINK" 2>&1
+  { eval "fasd --proc \$(fasd --sanitize \$2)"; } >> "$_FASD_SINK" 2>&1
 }
 autoload -Uz add-zsh-hook
 add-zsh-hook preexec _fasd_preexec
@@ -212,7 +212,7 @@ EOS
         ;;
 
       zsh-ccomp-install) cat <<EOS
-# enbale command mode completion
+# enable command mode completion
 compctl -U -K _fasd_zsh_cmd_complete -V fasd -x 'C[-1,-*e],s[-]n[1,e]' -c - \\
   'c[-1,-A][-1,-D]' -f -- fasd fasd_cd
 
@@ -502,6 +502,18 @@ $(fasd --backend $each)"
             print $1 "|" sum
           }'
         ;;
+      current)
+        for path in *; do
+          printf "$PWD/$s|1\\n" "$path"
+        done
+        ;;
+      spotlight)
+        mdfind '(kMDItemFSContentChangeDate >= $time.today) ||
+          kMDItemLastUsedDate >= $time.this_month' \
+          | sed '/Library\//d
+            /\.app$/d
+            s/$/|2/'
+        ;;
       *) eval "$2";;
     esac
     ;;
@@ -543,7 +555,7 @@ $(fasd --backend $each)"
           R*) local r=r;;
       [0-9]*) local _fasd_i="$o"; break;;
           h*) [ -z "$comp" ] && echo "fasd [options] [query ...]
-[f|a|s|d|z] [opions] [query ...]
+[f|a|s|d|z] [options] [query ...]
   options:
     -s         list paths with scores
     -l         list paths without scores
