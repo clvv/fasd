@@ -523,13 +523,6 @@ EOS
     done
     [ "$_fasd_data" ] || _fasd_data="$(cat "$dataFile")"
 
-    # set mode specific code for calculating the prior
-    case $mode in
-      rank) local prior='times[i]';;
-      recent) local prior='sqrt(100000/(1+t-la[i]))';;
-      *) local prior='times[i] * frecent(la[i])';;
-    esac
-
     if [ "$fnd" ]; then # dafault matching
       local bre="$(printf %s\\n "$fnd" | sed 's/\([*\.\\\[]\)/\\\1/g
         s@ @[^|]*@g;s/\$$/|/')"
@@ -570,28 +563,104 @@ EOS
     fi
 
     # query the database
-    [ "$_fasd_data" ] && printf %s\\n "$_fasd_data" | \
-      $_FASD_AWK -v t="$(date +%s)" -F"|" '
-      function frecent(time) {
-        dx = t-time
-        if( dx < 3600 ) return 6
-        if( dx < 86400 ) return 4
-        if( dx < 604800 ) return 2
-        return 1
-      }
-      {
-        if(!paths[$1]) {
-          times[$1] = $2
-          la[$1] = $3
-          paths[$1] = 1
-        } else {
-          times[$1] += $2
-          if($3 > la[$1]) la[$1] = $3
-        }
-      }
-      END {
-        for(i in paths) printf "%-10s %s\n", '"$prior"', i
-      }' - 2>> "$_FASD_SINK"
+    [ "$_fasd_data" ] || return 
+    _fasd_data+=$'\n'
+    t="$(date +%s)"
+    declare -A ranks times
+    declare -r scale=6
+
+    OLDFS=$IFS; IFS=$'\n'
+    for line in $_fasd_data; do
+      # parse a single line of fasd data
+      [[ $line =~ (.*)\|(([0-9]+)(\.([0-9]*))?)\|(.*) ]]
+      fname=${BASH_REMATCH[1]}
+      rank=${BASH_REMATCH[2]}
+      iRank=${BASH_REMATCH[3]}
+      fRank=${BASH_REMATCH[5]}
+      time=${BASH_REMATCH[6]}
+
+      ((d=scale-${#fRank}))
+      if ((d>0)); then
+        ((fRank=(10#$fRank)*10**(scale-${#fRank})))
+      fi
+
+      if [[ -n "${times[$fname]}" ]]; then
+        # add current rank to cumulative rank
+        [[ ${ranks[$fname]} =~ ([0-9]+)(\.([0-9]*))? ]]
+        iRk=${BASH_REMATCH[1]}
+        fRk=${BASH_REMATCH[3]}
+        ((total_iRank=iRank+iRk))
+        ((total_fRank=10#$fRank+(10#$fRk)*10**(scale-${#fRk})))
+        if ((${#total_fRank} > scale)); then    # adjust for overflow
+          total_fRank=${total_fRank:1}
+          ((total_iRank++))
+        fi
+
+        # store the new rank and time
+        ranks[$fname]=$total_iRank"."${total_fRank%%+(0)}
+        if ((time > times[$fname])); then
+            times[$fname]=$time
+        fi
+
+      else
+        # initialize the rank and time
+        ranks[$fname]=$rank
+        times[$fname]=$time
+      fi
+    done
+    IFS=$OLDFS
+
+    case $mode in
+      rank)
+        # prior='ranks[i]';;
+        for path in "${!ranks[@]}"; do
+          printf "%-10s %s\n" ${ranks[$path]} $path
+        done
+        ;;
+      recent)
+        # prior='sqrt(100000/(1+t-times[i]))'
+        # Use awk to calculate prior because it's far too hard to calculate
+        # in bash. Invoke awk just once, and while we're at it do *all* the
+        # "real work" there
+        input=""
+        for path in "${!times[@]}"; do
+          input+=${times[$path]}" "$path$'\n'
+        done
+        $_FASD_AWK -v t=$t '
+        {
+          prior=sqrt(100000/(1+t-$1))
+          printf "%-10s %s\n", prior, $2
+        }' <<< "$input" 2>> "$_FASD_SINK"
+        ;;
+      *)
+        # prior='ranks[i] * frecent(times[i])';;
+        local frecent dx
+        for path in "${!times[@]}"; do
+          # Compute "frecent"
+          ((dx = t-times[$path]))
+          if ((dx < 3600)); then frecent=6
+          elif ((dx < 86400)); then frecent=4
+          elif ((dx < 604800)); then frecent=2
+          else frecent=1
+          fi
+          # Compute rank * frecent 
+          [[ ${ranks[$path]} =~ ([0-9]+)(\.([0-9]*))? ]]
+          iRk=${BASH_REMATCH[1]}
+          fRk=${BASH_REMATCH[3]}
+          d=${#fRk}
+          ((iRk*=frecent)); ((fRk*=frecent))
+          if ((${#fRk}>d)); then 
+            ((iRk+=${fRk:0:1}))
+            fRk=${fRk:1}
+          fi
+
+          ranks[$path]=$iRk
+          if ((fRk>0)); then ranks[$path]+="."$fRk; fi
+          printf "%-10s %s\n" ${ranks[$path]} $path
+        done
+      ;;
+    esac
+      
     ;;
 
   --backend)
