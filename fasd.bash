@@ -33,6 +33,8 @@ fasd() {
   # make zsh do word splitting inside this function
   [ "$ZSH_VERSION" ] && emulate sh && setopt localoptions
 
+  shopt -s extglob
+
   case $1 in
   --init) shift
     while [ "$1" ]; do
@@ -460,7 +462,7 @@ EOS
         fi
  
         # Represent the rank as a decimal value
-        rank=$iRank; if ((fRank>0)); then rank+=.${fRank}; fi
+        rank=$iRank; if ((fRank>0)); then rank+=.${fRank%%+(0)}; fi
 
         # append to or write the new file as appropriate
         if ((written>0)); then
@@ -656,7 +658,7 @@ EOS
           fi
 
           ranks[$path]=$iRk
-          if ((fRk>0)); then ranks[$path]+="."$fRk; fi
+          if ((fRk>0)); then ranks[$path]+="."${fRk%%+(0)}; fi
           printf "%-10s %s\n" ${ranks[$path]} $path
         done
       ;;
