@@ -504,7 +504,7 @@ $(fasd --backend $each)"
         ;;
       current)
         for path in *; do
-          printf "$PWD/$s|1\\n" "$path"
+          printf "$PWD/%s|1\\n" "$path"
         done
         ;;
       spotlight)
