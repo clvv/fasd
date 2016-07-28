@@ -487,6 +487,8 @@ EOS
       done
     fi
 
+    unset ranks times
+
     # in case of failure, fall back on the preexisting data
     # TODO: replace $? with a cumulative error counter
     if [ $? -ne 0 -a -f "$dataFile" ]; then
@@ -666,6 +668,7 @@ EOS
       ;;
     esac
       
+      unset ranks times
     ;;
 
   --backend)
