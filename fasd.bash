@@ -522,7 +522,8 @@ EOS
     # cat all backends
     local each _fasd_data; for each in $_FASD_BACKENDS; do
       fasd --backend $each
-      _fasd_data+=$'\n'$backendBuffer
+      [[ -n $_fasd_data ]] && _fasd_data+=$'\n'
+      _fasd_data+=$backendBuffer
     done
     [ "$_fasd_data" ] || _fasd_data="$(cat "$dataFile")"
 
@@ -629,6 +630,7 @@ EOS
         for path in "${!times[@]}"; do
           input+=${times[$path]}" "$path$'\n'
         done
+        input=${input%$'\n'}
         $_FASD_AWK -v t=$t '
         {
           prior=sqrt(100000/(1+t-$1))
