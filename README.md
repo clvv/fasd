@@ -104,7 +104,7 @@ bash-hook            # add hook code to bash $PROMPT_COMMAND
 bash-ccomp           # bash command mode completion definitions
 bash-ccomp-install   # setup command mode completion for bash
 posix-alias          # define aliases that applies to all posix shells
-posix-hook           # setup $PS1 hook for shells that's posix compatible
+posix-hook           # setup $PS1 hook for shells that are posix compatible
 tcsh-alias           # define aliases for tcsh
 tcsh-hook            # setup tcsh precmd alias
 ```
