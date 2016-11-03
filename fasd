@@ -422,7 +422,7 @@ $(fasd --backend $each)"
         s@ @[^|]*@g;s/\$$/|/')"
       bre='^[^|]*'"$bre"'[^|/]*|'
       local _ret="$(printf %s\\n "$_fasd_data" | grep "$bre")"
-      # force no case matching
+      # force no case matching for default matching
       [ "$_FASD_NOCASE" = 1 ] && _ret="$(printf %s\\n "$_fasd_data" | grep -i "$bre")"
       [ "$_ret" ] && _ret="$(printf %s\\n "$_ret" | while read -r line; do
         [ -${typ:-e} "${line%%\|*}" ] && printf %s\\n "$line"
