@@ -54,6 +54,7 @@ fasd() {
           [ -z "$_FASD_VIMINFO" ] && _FASD_VIMINFO="$HOME/.viminfo"
           [ -z "$_FASD_RECENTLY_USED_XBEL" ] && \
             _FASD_RECENTLY_USED_XBEL="$HOME/.local/share/recently-used.xbel"
+          [ -z "$_FASD_NOCASE" ] && _FASD_NOCASE=0
 
           if [ -z "$_FASD_AWK" ]; then
             # awk preferences
@@ -420,13 +421,15 @@ $(fasd --backend $each)"
       local bre="$(printf %s\\n "$fnd" | sed 's/\([*\.\\\[]\)/\\\1/g
         s@ @[^|]*@g;s/\$$/|/')"
       bre='^[^|]*'"$bre"'[^|/]*|'
-      local _ret="$(printf %s\\n "$_fasd_data" | grep -i "$bre")"
+      local _ret="$(printf %s\\n "$_fasd_data" | grep "$bre")"
+      # force no case matching
+      [ "$_FASD_NOCASE" = 1 ] && _ret="$(printf %s\\n "$_fasd_data" | grep -i "$bre")"
       [ "$_ret" ] && _ret="$(printf %s\\n "$_ret" | while read -r line; do
         [ -${typ:-e} "${line%%\|*}" ] && printf %s\\n "$line"
       done)"
       if [ "$_ret" ]; then
         _fasd_data="$_ret"
-      else # no case mathcing
+      else # no case matching
         _ret="$(printf %s\\n "$_fasd_data" | grep -i "$bre")"
         [ "$_ret" ] && _ret="$(printf %s\\n "$_ret" | while read -r line; do
           [ -${typ:-e} "${line%%\|*}" ] && printf %s\\n "$line"
