@@ -356,6 +356,8 @@ $_FASD_RECENTLY_USED_XBEL
 Path to XDG recently-used.xbel file for recently-used backend, defaults to
 "$HOME/.local/share/recently-used.xbel"
 
+$_FASD_NOCASE
+Force case insensitivity for default matching with value 1, defaults to 0.
 ```
 
 # Debugging
