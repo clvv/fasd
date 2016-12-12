@@ -356,6 +356,10 @@ $_FASD_RECENTLY_USED_XBEL
 Path to XDG recently-used.xbel file for recently-used backend, defaults to
 "$HOME/.local/share/recently-used.xbel"
 
+$_FASD_INTERACTIVE_FUNC
+Interactive function name used for processing lists in interactive mode,
+defaults to "_fasd_interactive_func".
+
 ```
 
 # Debugging

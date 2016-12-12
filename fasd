@@ -54,6 +54,8 @@ fasd() {
           [ -z "$_FASD_VIMINFO" ] && _FASD_VIMINFO="$HOME/.viminfo"
           [ -z "$_FASD_RECENTLY_USED_XBEL" ] && \
             _FASD_RECENTLY_USED_XBEL="$HOME/.local/share/recently-used.xbel"
+          [ -z "$_FASD_INTERACTIVE_FUNC" ] && \
+            _FASD_INTERACTIVE_FUNC=_fasd_interactive_func
 
           if [ -z "$_FASD_AWK" ]; then
             # awk preferences
@@ -594,13 +596,7 @@ fasd [-A|-D] [paths ...]
       res="$(printf %s\\n "$res" | sort -n${R} | \
         sed -n "$_fasd_i"'s/^[^ ]*[ ]*//p')"
     elif [ "$interactive" ] || [ "$exec" -a -z "$fnd$lst$show" -a -t 1 ]; then
-      if [ "$(printf %s "$res" | sed -n '$=')" -gt 1 ]; then
-        res="$(printf %s\\n "$res" | sort -n${R})"
-        printf %s\\n "$res" | sed = | sed 'N;s/\n/	/' | sort -nr >&2
-        printf "> " >&2
-        local i; read i; [ 0 -lt "${i:-0}" ] 2>> "$_FASD_SINK" || return 1
-      fi
-      res="$(printf %s\\n "$res" | sed -n "${i:-1}"'s/^[^ ]*[ ]*//p')"
+      res="$("$_FASD_INTERACTIVE_FUNC" "$res" "$R")"
     elif [ "$lst" ]; then
       [ "$res" ] && printf %s\\n "$res" | sort -n${r} | sed 's/^[^ ]*[ ]*//'
       return
@@ -620,6 +616,18 @@ fasd [-A|-D] [paths ...]
     fi
     ;;
   esac
+}
+
+_fasd_interactive_func() {
+  local res="$1"
+  local R="$2"
+  if [ "$(printf %s "$res" | sed -n '$=')" -gt 1 ]; then
+    res="$(printf %s\\n "$res" | sort -n${R})"
+    printf %s\\n "$res" | sed = | sed 'N;s/\n/  /' | sort -nr >&2
+    printf "> " >&2
+    local i; read i; [ 0 -lt "${i:-0}" ] 2>> "$_FASD_SINK" || return 1
+  fi
+  printf %s\\n "$res" | sed -n "${i:-1}"'s/^[^ ]*[ ]*//p'
 }
 
 fasd --init env
