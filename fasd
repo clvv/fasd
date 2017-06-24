@@ -42,6 +42,7 @@ fasd() {
           [ -s "$HOME/.fasdrc" ] && . "$HOME/.fasdrc"
 
           # set default options
+          [ -z "$_FASD_GREP" ] && _FASD_GREP=grep
           [ -z "$_FASD_DATA" ] && _FASD_DATA="$HOME/.fasd"
           [ -z "$_FASD_BLACKLIST" ] && _FASD_BLACKLIST="--help"
           [ -z "$_FASD_SHIFT" ] && _FASD_SHIFT="sudo busybox"
@@ -420,14 +421,14 @@ $(fasd --backend $each)"
       local bre="$(printf %s\\n "$fnd" | sed 's/\([*\.\\\[]\)/\\\1/g
         s@ @[^|]*@g;s/\$$/|/')"
       bre='^[^|]*'"$bre"'[^|/]*|'
-      local _ret="$(printf %s\\n "$_fasd_data" | grep "$bre")"
+      local _ret="$(printf %s\\n "$_fasd_data" | $_FASD_GREP "$bre")"
       [ "$_ret" ] && _ret="$(printf %s\\n "$_ret" | while read -r line; do
         [ -${typ:-e} "${line%%\|*}" ] && printf %s\\n "$line"
       done)"
       if [ "$_ret" ]; then
         _fasd_data="$_ret"
-      else # no case mathcing
-        _ret="$(printf %s\\n "$_fasd_data" | grep -i "$bre")"
+      else # no case matching
+        _ret="$(printf %s\\n "$_fasd_data" | $_FASD_GREP -i "$bre")"
         [ "$_ret" ] && _ret="$(printf %s\\n "$_ret" | while read -r line; do
           [ -${typ:-e} "${line%%\|*}" ] && printf %s\\n "$line"
         done)"
@@ -439,7 +440,7 @@ $(fasd --backend $each)"
               s@\(\\\{0,1\}[^ ]\)@\1[^|/]\\{0,'"$_FASD_FUZZY"'\\}@g
               s@ @[^|]*@g')"
           fuzzy_bre='^[^|]*'"$fuzzy_bre"'[^|/]*|'
-          _ret="$(printf %s\\n "$_fasd_data" | grep -i "$fuzzy_bre")"
+          _ret="$(printf %s\\n "$_fasd_data" | $_FASD_GREP -i "$fuzzy_bre")"
           [ "$_ret" ] && _ret="$(printf %s\\n "$_ret" | while read -r line; do
             [ -${typ:-e} "${line%%\|*}" ] && printf %s\\n "$line"
           done)"
