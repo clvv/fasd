@@ -256,6 +256,7 @@ _fasd_bash_cmd_complete() {
   local IFS=\$'\\n'; COMPREPLY=( \$RESULT )
 }
 _fasd_bash_hook_cmd_complete() {
+  local cmd
   for cmd in \$*; do
     complete -F _fasd_bash_cmd_complete \$cmd
   done
