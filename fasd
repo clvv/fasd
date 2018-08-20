@@ -49,6 +49,7 @@ fasd() {
           [ -z "$_FASD_SINK" ] && _FASD_SINK=/dev/null
           [ -z "$_FASD_TRACK_PWD" ] && _FASD_TRACK_PWD=1
           [ -z "$_FASD_MAX" ] && _FASD_MAX=2000
+          [ -z "$_FASD_ADD_MAX" ] && _FASD_ADD_MAX=2000
           [ -z "$_FASD_BACKENDS" ] && _FASD_BACKENDS=native
           [ -z "$_FASD_FUZZY" ] && _FASD_FUZZY=2
           [ -z "$_FASD_VIMINFO" ] && _FASD_VIMINFO="$HOME/.viminfo"
@@ -314,7 +315,14 @@ EOS
       *\ $1\ *) return;;
     esac
 
-    shift; fasd --add "$@" # add all arguments except command
+    shift                       # remove command itself
+
+    # possibly too many elements:
+    if [ $# -gt $_FASD_ADD_MAX ]; then
+        shift $(( $# - _FASD_ADD_MAX ))
+    fi
+
+    fasd --add "$@"
     ;;
 
   --add|-A) shift # add entries
