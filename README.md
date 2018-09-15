@@ -128,7 +128,7 @@ source "$fasd_cache"
 unset fasd_cache
 ```
 
-Optionally, if you can also source `fasd` if you want `fasd` to be a shell
+Optionally, you can also source `fasd` if you want `fasd` to be a shell
 function instead of an executable.
 
 You can tweak initialization code. For instance, if you want to use "c"
