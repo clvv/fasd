@@ -92,7 +92,10 @@ fasd_cd() {
   else
     local _fasd_ret="\$(fasd -e 'printf %s' "\$@")"
     [ -z "\$_fasd_ret" ] && return
-    [ -d "\$_fasd_ret" ] && cd "\$_fasd_ret" || printf %s\\n "\$_fasd_ret"
+    [ -d "\$_fasd_ret" ] && {
+        cd "\$_fasd_ret"
+        [ "\$_FASD_PWD" == "1" ] && pwd AA true
+    } || printf %s\\n "\$_fasd_ret"
   fi
 }
 alias z='fasd_cd -d'
