@@ -352,6 +352,11 @@ disable fuzzy matching. Default value is 2.
 $_FASD_VIMINFO
 Path to .viminfo file for viminfo backend, defaults to "$HOME/.viminfo"
 
+$_FASD_PWD
+Set to "1" will print the pwd to the terminal after a successful cd using z 
+or fasd_cd etc. Useful if your PS1 does not show the entire folder path.
+Not set, or set to any other value, will not print anything.
+
 $_FASD_RECENTLY_USED_XBEL
 Path to XDG recently-used.xbel file for recently-used backend, defaults to
 "$HOME/.local/share/recently-used.xbel"
